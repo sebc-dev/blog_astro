@@ -1,4 +1,3 @@
-import xoConfig from 'eslint-config-xo';
 import astroPlugin from 'eslint-plugin-astro';
 import tsParser from '@typescript-eslint/parser';
 import { defineConfig } from 'eslint/config';
@@ -6,9 +5,8 @@ import prettierConfig from 'eslint-config-prettier';
 import tsPlugin from '@typescript-eslint/eslint-plugin';
 
 export default defineConfig([
-  ...xoConfig,
   prettierConfig,
-
+  ...astroPlugin.configs.recommended,
   {
     languageOptions: {
       ecmaVersion: 2024,
