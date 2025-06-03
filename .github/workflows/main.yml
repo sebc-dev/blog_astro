@@ -48,8 +48,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install Cypress binary
-        run: npx cypress install
+      # - name: Install Cypress binary
+      #   run: npx cypress install
 
       - name: Run linter (check only)
         run: pnpm run lint:check
@@ -63,5 +63,5 @@ jobs:
       - name: Run unit tests
         run: pnpm run test
 
-      # - name: Run E2E tests
-      #   run: pnpm run test:e2e
+      - name: Run E2E tests
+        run: pnpm run test:e2e
