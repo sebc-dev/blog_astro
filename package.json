@@ -25,6 +25,7 @@
     "tailwindcss": "^4.1.8"
   },
   "devDependencies": {
+    "@tailwindcss/typography": "^0.5.16",
     "@types/node": "^22.10.2",
     "@typescript-eslint/eslint-plugin": "^8.33.1",
     "@typescript-eslint/parser": "^8.33.1",
@@ -36,6 +37,7 @@
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "jsdom": "^25.0.1",
     "prettier": "3.5.3",
+    "shiki": "^3.4.2",
     "vitest": "^2.1.8"
   }
 }
