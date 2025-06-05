@@ -1,69 +1,79 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
 @plugin "daisyui" {
-    themes: dark --default;
+  themes: dark --default;
 }
 
 @plugin "daisyui/theme" {
-    name: "dark-blue";
-    default: true; /* set as default */
-    prefersdark: true; /* set as default dark mode (prefers-color-scheme:dark) */
-    color-scheme: dark; /* color of browser-provided UI */
+  name: "dark-blue";
+  default: true; /* set as default */
+  prefersdark: true; /* set as default dark mode (prefers-color-scheme:dark) */
+  color-scheme: dark; /* color of browser-provided UI */
 
-    /* Base colors - dark theme */
-    --color-base-100: oklch(8% 0.02 195);    /* background */
-    --color-base-200: oklch(12% 0.02 195);   /* card */
-    --color-base-300: oklch(18% 0.03 195);   /* muted/border */
-    --color-base-content: oklch(90% 0.02 220); /* foreground text */
+  /* Base colors - dark theme */
+  --color-base-100: oklch(8% 0.02 195); /* background */
+  --color-base-200: oklch(12% 0.02 195); /* card */
+  --color-base-300: oklch(18% 0.03 195); /* muted/border */
+  --color-base-content: oklch(90% 0.02 220); /* foreground text */
 
-    /* Primary color - blue */
-    --color-primary: oklch(65% 0.25 217);
-    --color-primary-content: oklch(98% 0.01 217);
+  /* Primary color - blue */
+  --color-primary: oklch(65% 0.25 217);
+  --color-primary-content: oklch(98% 0.01 217);
 
-    /* Secondary color - green */
-    --color-secondary: oklch(0.755 0.108 180.645);
-    --color-secondary-content: oklch(98% 0.01 160);
+  /* Secondary color - green */
+  --color-secondary: oklch(0.755 0.108 180.645);
+  --color-secondary-content: oklch(98% 0.01 160);
 
-    /* Accent color - purple */
-    --color-accent: oklch(0.589 0.204 277.182);
-    --color-accent-content: oklch(98% 0.01 280);
+  /* Accent color - purple */
+  --color-accent: oklch(0.589 0.204 277.182);
+  --color-accent-content: oklch(98% 0.01 280);
 
-    /* Neutral colors */
-    --color-neutral: oklch(20% 0.03 195);
-    --color-neutral-content: oklch(85% 0.02 220);
+  /* Neutral colors */
+  --color-neutral: oklch(20% 0.03 195);
+  --color-neutral-content: oklch(85% 0.02 220);
 
-    /* Info color - light blue */
-    --color-info: oklch(70% 0.2 220);
-    --color-info-content: oklch(98% 0.01 220);
+  /* Info color - light blue */
+  --color-info: oklch(70% 0.2 220);
+  --color-info-content: oklch(98% 0.01 220);
 
-    /* Success color - green */
-    --color-success: oklch(65% 0.25 140);
-    --color-success-content: oklch(98% 0.01 140);
+  /* Success color - green */
+  --color-success: oklch(65% 0.25 140);
+  --color-success-content: oklch(98% 0.01 140);
 
-    /* Warning color - orange */
-    --color-warning: oklch(80% 0.25 80);
-    --color-warning-content: oklch(20% 0.05 80);
+  /* Warning color - orange */
+  --color-warning: oklch(80% 0.25 80);
+  --color-warning-content: oklch(20% 0.05 80);
 
-    /* Error color - red (destructive) */
-    --color-error: oklch(35% 0.15 30);
-    --color-error-content: oklch(98% 0.01 30);
+  /* Error color - red (destructive) */
+  --color-error: oklch(35% 0.15 30);
+  --color-error-content: oklch(98% 0.01 30);
 
-    /* border radius */
-    --radius-selector: 0.5rem;
-    --radius-field: 0.5rem;
-    --radius-box: 0.5rem;
+  /* border radius */
+  --radius-selector: 0.25rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.25rem;
 
-    /* base sizes */
-    --size-selector: 0.25rem;
-    --size-field: 0.25rem;
+  /* base sizes */
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
 
-    /* border size */
-    --border: 1px;
+  /* border size */
+  --border: 1px;
 
-    /* effects */
-    --depth: 1;
-    --noise: 0;
+  /* effects */
+  --depth: 1;
+  --noise: 0;
+}
+
+html {
+  padding: 64px 0 0 0;
+  margin: 0;
+  scroll-behavior: smooth;
+}
+
+body {
+  padding: 0;
+  margin: 0;
+  scroll-behavior: smooth;
 }

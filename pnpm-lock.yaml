@@ -21,6 +21,9 @@ importers:
         specifier: ^4.1.8
         version: 4.1.8
     devDependencies:
+      '@stagewise/toolbar':
+        specifier: ^0.3.0
+        version: 0.3.0
       '@tailwindcss/typography':
         specifier: ^0.5.16
         version: 0.5.16(tailwindcss@4.1.8)
@@ -772,6 +775,9 @@ packages:
 
   '@shikijs/vscode-textmate@10.0.2':
     resolution: {integrity: sha512-83yeghZ2xxin3Nj8z1NMd/NCuca+gsYXswywDy5bHvwlWL8tpTQmzGeUuHd9FC3E/SBEMvzJRwWEOz5gGes9Qg==}
+
+  '@stagewise/toolbar@0.3.0':
+    resolution: {integrity: sha512-NqbFwTAVukmxrJ6euGNZ9C/T9HTXx3/vkufsBqsjm1VC9XEo57JXrLMX4M62ZPdVJHFfe40B2nOVHAaOSKIAdw==}
 
   '@swc/helpers@0.5.17':
     resolution: {integrity: sha512-5IKx/Y13RsYd+sauPb2x+U/xZikHjolzfuDgTAl/Tdf3Q8rslRvC19NKDLgAJQ6wsqADk10ntlv08nPFw/gO/A==}
@@ -4095,6 +4101,8 @@ snapshots:
       '@types/hast': 3.0.4
 
   '@shikijs/vscode-textmate@10.0.2': {}
+
+  '@stagewise/toolbar@0.3.0': {}
 
   '@swc/helpers@0.5.17':
     dependencies:
