@@ -1,0 +1,248 @@
+---
+description: ""
+globs: ["*.astro", "*.ts", "*.tsx"]
+alwaysApply: false
+---
+
+# Principes Fondamentaux : SOLID, DRY et Callisthénie d'Objet
+
+## Règles Critiques SOLID
+
+### Single Responsibility Principle (SRP)
+- Chaque classe doit avoir une seule raison de changer, une responsabilité unique
+- Séparer la logique métier, l'accès aux données et la présentation
+- Si vous ne pouvez pas nommer une classe sans "Et" ou "Ou", elle viole probablement SRP
+
+### Open/Closed Principle (OCP)
+- Ouvert à l'extension, fermé à la modification
+- Utiliser l'abstraction, l'héritage, le polymorphisme et les design patterns
+- Préférer l'ajout de nouveaux composants plutôt que la modification de l'existant
+
+### Liskov Substitution Principle (LSP)
+- Les objets dérivés doivent être substituables aux objets parents sans altérer la logique
+- Respecter les contrats, préconditions et postconditions de la classe parent
+- Éviter de lancer des exceptions inattendues dans les classes dérivées
+
+### Interface Segregation Principle (ISP)
+- Créer plusieurs interfaces spécialisées plutôt qu'une interface générale monolithique
+- Aucune classe ne doit implémenter des méthodes qu'elle n'utilise pas
+- Favoriser la cohésion et éviter le couplage inutile
+
+### Dependency Inversion Principle (DIP)
+- Dépendre d'abstractions, jamais d'implémentations concrètes
+- Injecter les dépendances via constructeurs ou méthodes dédiées
+- Utiliser l'inversion de contrôle (IoC) et les interfaces
+
+## Principe DRY (Don't Repeat Yourself)
+
+### Règles Fondamentales
+- **"Every piece of knowledge must have a single, unambiguous, authoritative representation within a system"**
+- Éliminer la duplication de logique via l'abstraction
+- Éliminer la duplication de processus via l'automatisation
+- Distinguer vraie duplication vs coïncidence contextuelle
+
+### Applications Pratiques
+- Extraire la logique commune en fonctions/méthodes utilitaires
+- Centraliser les constantes, configurations et données de référence
+- Utiliser l'héritage ou composition pour éviter la répétition
+- Appliquer la règle des trois : dupliquer deux fois est acceptable, trois fois nécessite une refactorisation
+
+### Attention aux Sur-Abstractions
+- Préférer la duplication à la mauvaise abstraction
+- Ne pas coupler des éléments qui peuvent évoluer différemment
+- Appliquer AHA (Avoid Hasty Abstractions) : optimiser pour le changement d'abord
+
+## Callisthénie d'Objet (9 Règles)
+
+### 1. Un Seul Niveau d'Indentation par Méthode
+- Extraire les blocs imbriqués en méthodes privées
+- Utiliser les early returns pour réduire la complexité
+- Favoriser la composition de petites méthodes
+
+### 2. Bannir le Mot-clé 'else'
+- Privilégier les guard clauses et early returns
+- Utiliser le polymorphisme à la place des conditions
+- Appliquer les patterns State ou Strategy pour remplacer les if/else complexes
+
+### 3. Encapsuler Toutes les Primitives et Chaînes
+- Créer des Value Objects pour les types primitifs métier
+- Éviter les paramètres de type String, int bruts dans les signatures publiques
+- Ajouter validation et comportement métier aux Value Objects
+
+### 4. Collections de Première Classe Uniquement
+- Encapsuler les collections dans des classes dédiées
+- Ajouter des méthodes métier spécifiques à ces collections
+- Éviter l'exposition directe de listes, arrays ou maps
+
+### 5. Un Point par Ligne (Law of Demeter)
+- Éviter les chaînages excessifs (obj.getA().getB().getC())
+- "Ne parler qu'aux amis directs" - limiter les dépendances transitives
+- Créer des méthodes déléguées si nécessaire
+
+### 6. Pas d'Abréviations
+- Utiliser des noms complets et expressifs
+- Éviter les acronymes et contractions non universelles
+- Prioriser la lisibilité sur la brièveté
+
+### 7. Maintenir Toutes les Entités Petites
+- **Classes** : < 50 lignes (adaptable selon contexte : 150 max)
+- **Méthodes** : < 10-20 lignes
+- **Packages/Modules** : < 10 fichiers
+
+### 8. Maximum Deux Variables d'Instance par Classe
+- Décomposer les classes ayant trop d'état
+- Utiliser la composition pour grouper les données liées
+- Favoriser la cohésion élevée
+
+### 9. Éliminer Getters/Setters/Propriétés
+- Exposer le comportement, pas les données
+- **Tell, Don't Ask** : dire aux objets quoi faire, ne pas demander leurs données
+- Créer des méthodes métier significatives plutôt que l'accès direct aux propriétés
+
+## Exemples Intégrés
+
+<example>
+// ✅ EXCELLENT : SOLID + DRY + Callisthénie appliqués
+class OrderProcessor {
+  private readonly paymentGateway: PaymentGateway;
+  private readonly inventoryService: InventoryService;
+
+  constructor(paymentGateway: PaymentGateway, inventoryService: InventoryService) {
+    this.paymentGateway = paymentGateway;
+    this.inventoryService = inventoryService;
+  }
+
+  processOrder(order: Order): ProcessingResult {
+    if (!order.isValid()) {
+      return ProcessingResult.invalid("Commande invalide");
+    }
+
+    const reservation = this.inventoryService.reserve(order.items());
+    if (reservation.hasFailed()) {
+      return ProcessingResult.failed("Stock insuffisant");
+    }
+
+    const payment = this.paymentGateway.charge(order.amount());
+    if (payment.hasFailed()) {
+      this.inventoryService.release(reservation);
+      return ProcessingResult.failed("Paiement refusé");
+    }
+
+    return ProcessingResult.success();
+  }
+}
+
+// Value Object (Règle 3)
+class OrderAmount {
+  constructor(private readonly value: number) {
+    if (value < 0) throw new Error("Le montant ne peut être négatif");
+  }
+
+  isZero(): boolean {
+    return this.value === 0;
+  }
+
+  add(other: OrderAmount): OrderAmount {
+    return new OrderAmount(this.value + other.value);
+  }
+}
+
+// Collection First-Class (Règle 4)
+class OrderItems {
+  constructor(private readonly items: OrderItem[]) {
+    if (items.length === 0) throw new Error("Une commande doit contenir des articles");
+  }
+
+  getTotalValue(): OrderAmount {
+    return this.items
+      .map(item => item.getValue())
+      .reduce((sum, value) => sum.add(value), new OrderAmount(0));
+  }
+
+  hasItem(productId: ProductId): boolean {
+    return this.items.some(item => item.hasProductId(productId));
+  }
+}
+</example>
+
+<example type="invalid">
+// ❌ MAUVAIS : Viole tous les principes
+class OrderManager {
+  private db: Database;
+  private emailService: EmailService;
+  private paymentGateway: PaymentGateway;
+  private logger: Logger;
+  private config: Configuration;
+
+  processOrder(customerEmail: string, items: any[], paymentCard: string, address: string) {
+    // Violation SRP : trop de responsabilités
+    // Violation Callisthénie 8 : trop de variables d'instance
+
+    if (items && items.length > 0) { // Violation Callisthénie 2 : else implicite
+      for (let item of items) {
+        if (item.quantity > 0) {
+          if (this.checkStock(item.id)) { // Violation Callisthénie 1 : indentation profonde
+            if (this.validatePayment(paymentCard)) {
+              // Violation DRY : logique répétée ailleurs
+              const total = item.price * item.quantity;
+              const tax = total * 0.20;
+              const finalAmount = total + tax;
+
+              // Violation Callisthénie 9 : logique externe sur données
+              if (this.paymentGateway.charge(paymentCard, finalAmount)) {
+                this.db.updateStock(item.id, item.quantity); // Violation DIP
+                this.emailService.sendConfirmation(customerEmail); // Violation SRP
+                this.logger.log("Order processed for " + customerEmail); // Violation Callisthénie 6
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Violation DRY : même calcul répété
+  calculateShipping(items: any[]): number {
+    const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const tax = total * 0.20;
+    return total + tax;
+  }
+}
+</example>
+
+## Métriques de Qualité
+
+### Métriques de Complexité
+- **Complexité cyclomatique** : ≤ 10 par méthode
+- **Profondeur d'imbrication** : ≤ 2 niveaux (Callisthénie)
+- **Nombre de paramètres** : ≤ 4 par méthode
+- **Couplage afférent/efférent** : Équilibré et minimal
+
+### Métriques de Taille
+- **Lignes par classe** : ≤ 50-150 lignes selon contexte
+- **Lignes par méthode** : ≤ 10-20 lignes
+- **Variables d'instance** : ≤ 2 par classe (Callisthénie)
+
+### Métriques de Cohésion
+- **LCOM (Lack of Cohesion)** : Proche de 0
+- **Responsabilités par classe** : 1 (SRP)
+- **Raison de changement** : 1 par classe (SRP)
+
+## Patterns et Techniques Recommandés
+
+### Pour SOLID
+- **Strategy Pattern** : OCP, polymorphisme
+- **Dependency Injection** : DIP
+- **Interface Segregation** : ISP via composition d'interfaces
+- **Command Pattern** : SRP pour actions complexes
+
+### Pour DRY
+- **Template Method** : Factoriser algorithmes similaires
+- **Abstract Factory** : Éliminer duplication de création
+- **Configuration Centralisée** : Constantes et paramètres
+
+### Pour Callisthénie
+- **Null Object Pattern** : Éliminer les if/else
+- **State Pattern** : Remplacer conditions complexes
+- **Value Objects** : Encapsuler primitives
+- **First-Class Collections** : Encapsuler comportements de collection

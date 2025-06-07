@@ -1,0 +1,269 @@
+---
+description: "Standards et bonnes pratiques pour les tests End-to-End Cypress sur applications Astro"
+globs: 
+  - "cypress/e2e/**/*.cy.js"
+  - "cypress/e2e/**/*.cy.ts"
+  - "cypress/support/**/*.js"
+  - "cypress/support/**/*.ts"
+  - "**/cypress/**/*.spec.js"
+  - "**/cypress/**/*.spec.ts"
+alwaysApply: false
+---
+
+# Standards Tests E2E Cypress pour Applications Astro
+
+## Architecture et Organisation des Fichiers
+
+### Structure Obligatoire
+```
+cypress/
+├── e2e/
+│   ├── core/           # Tests fondamentaux (navigation, SEO, performance)
+│   ├── components/     # Tests des îles de composants interactifs
+│   ├── pages/          # Tests par page spécifique
+│   └── flows/          # Parcours utilisateurs complets
+├── fixtures/           # Données de test statiques
+├── support/            # Commands personnalisées et utilitaires
+└── config/            # Configuration spécifique
+```
+
+## Conventions de Nommage Strictes
+
+### Fichiers de Test
+- **Format** : `[type]-[nom].[category].cy.js`
+- **Core** : `navigation.core.cy.js`, `seo.core.cy.js`
+- **Components** : `header-navigation.component.cy.js`, `contact-form.component.cy.js`
+- **Pages** : `homepage.page.cy.js`, `about-page.page.cy.js`
+- **Flows** : `user-registration.flow.cy.js`, `checkout-process.flow.cy.js`
+
+### Descriptions de Tests
+```javascript
+// Format obligatoire : [Contexte] - [Action] - [Résultat attendu]
+describe('Header Component - Navigation Interaction - Should display correct pages', () => {
+  it('Click on About link - Should navigate to about page', () => {
+    // Test logic
+  });
+});
+```
+
+## Sélecteurs Astro-Optimisés (Priorité Absolue)
+
+### Hiérarchie des Sélecteurs (Ordre Strict)
+1. **data-testid** (OBLIGATOIRE pour éléments testés)
+   ```javascript
+   cy.get('[data-testid="header-nav-about"]')
+   ```
+
+2. **data-cy** (Spécifique Cypress, acceptable)
+   ```javascript
+   cy.get('[data-cy="mobile-menu-toggle"]')
+   ```
+
+3. **Sélecteurs sémantiques** (Pour accessibilité)
+   ```javascript
+   cy.get('[role="button"][aria-label="Open navigation menu"]')
+   ```
+
+4. **Classes CSS stables uniquement** (JAMAIS de classes utilitaires)
+   ```javascript
+   // ✅ Autorisé
+   cy.get('.site-header')
+   
+   // ❌ INTERDIT
+   cy.get('.flex.items-center.justify-between')
+   ```
+
+## Gestion Obligatoire de l'Hydratation Astro
+
+### Pattern Standard d'Attente
+```javascript
+// OBLIGATOIRE avant toute interaction avec composant hydraté
+beforeEach(() => {
+  cy.visit('/page-with-interactive-components');
+  
+  // Attendre que les îles Astro soient visibles
+  cy.get('[data-astro-island]').should('be.visible');
+  
+  // Délai minimal pour hydratation complète
+  cy.wait(100);
+  
+  // Vérifier que les composants sont prêts
+  cy.get('[data-testid="interactive-component"]')
+    .should('be.visible')
+    .and('not.have.class', 'loading')
+    .and('not.have.attr', 'aria-busy', 'true');
+});
+```
+
+### Vérifications d'État Post-Hydratation
+```javascript
+// Vérifier l'état d'hydratation avant interaction
+cy.get('[data-testid="counter-island"]')
+  .should('be.visible')
+  .and('have.attr', 'data-hydrated', 'true'); // Si attribut disponible
+
+// Alternative : vérifier l'absence d'indicateurs de loading
+cy.get('[data-testid="interactive-element"]')
+  .should('not.have.class', 'astro-loading')
+  .and('not.have.class', 'hydrating');
+```
+
+## Patterns de Test pour Îles de Composants
+
+### Template Standard pour Composants Interactifs
+```javascript
+describe('Component Island - [Nom du Composant]', () => {
+  beforeEach(() => {
+    cy.visit('/page-containing-component');
+    
+    // Attente hydratation spécifique
+    cy.get('[data-testid="[component-name]-island"]').should('be.visible');
+    cy.wait(100);
+  });
+
+  it('should handle user interaction correctly', () => {
+    // État initial
+    cy.get('[data-testid="component-state"]').should('contain', 'initial-value');
+    
+    // Action utilisateur
+    cy.get('[data-testid="action-trigger"]').click();
+    
+    // Vérification résultat
+    cy.get('[data-testid="component-state"]').should('contain', 'expected-value');
+    
+    // Vérification persistance état
+    cy.reload();
+    cy.get('[data-testid="component-state"]').should('contain', 'initial-value');
+  });
+});
+```
+
+### Pattern pour Formulaires Hydratés
+```javascript
+describe('Form Island - Contact Form Validation', () => {
+  beforeEach(() => {
+    cy.visit('/contact');
+    cy.get('[data-testid="contact-form-island"]').should('be.visible');
+    cy.wait(150); // Délai plus long pour formulaires complexes
+  });
+
+  it('should validate form fields on client-side', () => {
+    // Test validation côté client (post-hydratation)
+    cy.get('[data-testid="email-input"]').type('invalid-email');
+    cy.get('[data-testid="submit-button"]').click();
+    
+    cy.get('[data-testid="email-error"]')
+      .should('be.visible')
+      .and('contain', 'Email format invalid');
+  });
+});
+```
+
+## Assertions Spécifiques Astro
+
+### Vérifications Contenu Statique vs Dynamique
+```javascript
+// Test contenu statique (généré build-time)
+cy.get('[data-testid="static-content"]')
+  .should('contain', 'Expected static text')
+  .and('be.visible');
+
+// Test contenu dynamique (post-hydratation)
+cy.get('[data-testid="dynamic-content"]')
+  .should('be.visible')
+  .and('not.be.empty')
+  .and('not.contain', 'Loading...');
+```
+
+### Pattern Performance Astro
+```javascript
+// Vérifier temps de chargement optimisé
+cy.window().its('performance').then((performance) => {
+  const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
+  expect(loadTime).to.be.lessThan(2000); // 2s max pour Astro
+});
+
+// Vérifier absence JavaScript inutile
+cy.window().then((win) => {
+  const scripts = win.document.querySelectorAll('script[type="module"]');
+  expect(scripts.length).to.be.lessThan(5); // Astro optimise le JS
+});
+```
+
+## Configuration et Timeouts
+
+### Timeouts Adaptés à Astro
+```javascript
+// Dans cypress.config.js ou au début des tests
+const ASTRO_TIMEOUTS = {
+  pageLoad: 10000,        // Chargement page
+  hydration: 2000,        // Hydratation composants
+  interaction: 5000,      // Interactions utilisateur
+  navigation: 8000        // Navigation entre pages
+};
+
+// Utilisation dans les tests
+cy.get('[data-testid="component"]', { timeout: ASTRO_TIMEOUTS.hydration });
+```
+
+## Patterns Interdits
+
+### ❌ Pratiques à Éviter Absolument
+```javascript
+// INTERDIT : Sélecteurs fragiles
+cy.get('.text-blue-500.hover:text-blue-700'); // Classes utilitaires
+
+// INTERDIT : Attentes fixes sans vérification d'état
+cy.wait(3000); // Sans vérification d'hydratation
+
+// INTERDIT : Tests sans considération d'hydratation
+cy.get('[data-testid="interactive-btn"]').click(); // Direct sans attente
+
+// INTERDIT : Sélecteurs basés sur contenu textuel variable
+cy.contains('Cliquez ici'); // Peut changer selon langue/contexte
+```
+
+### ✅ Pratiques Recommandées
+```javascript
+// CORRECT : Sélecteurs stables avec vérification d'état
+cy.get('[data-testid="submit-button"]')
+  .should('be.visible')
+  .and('not.be.disabled')
+  .click();
+
+// CORRECT : Attente basée sur état plutôt que temps fixe
+cy.get('[data-testid="loader"]').should('not.exist');
+cy.get('[data-testid="content"]').should('be.visible');
+```
+
+## Commands Personnalisées Recommandées
+
+### Commandes Utilitaires Astro
+```javascript
+// Dans cypress/support/commands.js
+Cypress.Commands.add('waitForAstroHydration', (selector) => {
+  cy.get(selector).should('be.visible');
+  cy.wait(100);
+  cy.get(selector).should('not.have.class', 'astro-loading');
+});
+
+Cypress.Commands.add('testAstroIsland', (islandSelector, testCallback) => {
+  cy.get(islandSelector).should('be.visible');
+  cy.wait(100);
+  cy.get(islandSelector).within(testCallback);
+});
+
+// Utilisation
+cy.waitForAstroHydration('[data-testid="header-island"]');
+cy.testAstroIsland('[data-testid="form-island"]', () => {
+  cy.get('[data-testid="input"]').type('test');
+  cy.get('[data-testid="submit"]').click();
+});
+```
+
+## Références et Documentation
+
+- Configuration Cypress : @cypress.config.js
+- Commands personnalisées : @cypress/support/commands.js
+- Fixtures de test : @cypress/fixtures/
+- Documentation Astro : https://docs.astro.build/en/guides/testing/
