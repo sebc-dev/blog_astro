@@ -1,0 +1,75 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# Stack Technologique - Blog Astro
+
+## Framework Principal et Langage
+
+### Astro v5.8+
+- Framework web moderne pour sites statiques et SSR
+- Configuration dans [astro.config.mjs](mdc:astro.config.mjs)
+- Support TypeScript natif avec config strict dans [tsconfig.json](mdc:tsconfig.json)
+
+### TypeScript
+- Configuration stricte via `astro/tsconfigs/strict`
+- Types automatiques pour Astro (`.astro/types.d.ts`)
+- Support complet dans tous les composants `.astro`, `.ts`, `.js`
+
+## Styling et UI
+
+### Tailwind CSS v4.1+
+- Framework CSS utility-first moderne
+- Intégration via plugin Vite `@tailwindcss/vite`
+- Plugin typography pour le contenu textuel
+
+### DaisyUI v5.0+
+- Bibliothèque de composants basée sur Tailwind
+- Design system cohérent et accessible
+- Composants pré-stylés pour le prototypage rapide
+
+## Outillage et Qualité
+
+### Linting et Formatage
+- **ESLint v9.28+** : Analyse statique avec rules TypeScript
+- **Prettier v3.5+** : Formatage automatique du code
+- Plugins spécialisés : `eslint-plugin-astro`, `eslint-plugin-jsx-a11y`
+- Configuration prettier compatible ESLint
+
+### Testing
+- **Vitest v2.1+** : Framework de test moderne (alternative Jest)
+- **JSDOM v25+** : Simulation DOM pour tests unitaires
+- **Cypress v14.4+** : Tests end-to-end
+- Interface UI Vitest pour debugging interactif
+- Support coverage natif
+
+## Développement et Build
+
+### Gestionnaire de Paquets
+- **PNPM** : Gestionnaire rapide avec lock file (`pnpm-lock.yaml`)
+- Workspace optimisé et cache efficace
+
+### Outillage de Développement
+- **Vite** : Bundler rapide intégré à Astro
+- **Shiki v3.4+** : Coloration syntaxique pour code blocks
+- **Stagewise Toolbar** : Outils de debugging spécialisés
+
+## Environnement Système
+
+### Système d'Exploitation
+- **Windows 11** (version 10.0.26120)
+- Support natif des outils modernes de développement
+- Compatibilité WSL2 disponible si nécessaire
+
+### Terminal et Shell
+- **PowerShell** : Shell principal (`C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe`)
+- Support des commandes Windows natives et cross-platform
+- Alias PowerShell disponibles pour commandes Unix-like
+
+### Commandes et Outils Système
+- **Gestionnaire de paquets** : `pnpm` (préféré), `npm` disponible
+- **Git** : Contrôle de version intégré
+- **Node.js** : Runtime JavaScript moderne
+- **Commandes PowerShell** : `Get-ChildItem`, `Set-Location`, `Copy-Item`, etc.
+- **Commandes cross-platform** : `ls`, `cd`, `mkdir` via alias PowerShell

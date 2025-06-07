@@ -1,0 +1,122 @@
+---
+description: Cette règle guide l'agent dans l'application des meilleures pratiques pour Cursor. Elle s'applique lors de la création, modification ou optimisation de règles Cursor, l'organisation du contexte, la gestion des workflows de développement avec Cursor, et toute discussion sur l'efficacité de l'utilisation de Cursor. Critique pour maintenir un écosystème de règles cohérent et performant.
+globs: 
+alwaysApply: false
+---
+
+# Bonnes Pratiques Cursor - Guide Agent
+
+## Architecture et Organisation des Règles
+
+### Structure Hiérarchique Standard
+- Organiser les règles dans `.cursor/rules/` avec une hiérarchie thématique claire
+- Utiliser la structure : `{domaine}-rules/{nom-règle}-{type}.mdc`
+- Privilégier la modularité : une règle = un concept bien défini
+- Exploiter les règles imbriquées pour les monorepos et projets multi-composants
+
+### Types de Déploiement par Métadonnées
+- **Always Rules** (`-always.mdc`) : Standards universels, preferences système (usage limité)
+- **Auto Rules** (`-auto.mdc`) : Conventions spécifiques aux types de fichiers avec `globs`
+- **Agent Rules** (`-agent.mdc`) : Processus complexes nécessitant une décision contextuelle
+- **Manual Rules** (`-manual.mdc`) : Cas exceptionnels activés sur mention explicite
+
+## Principes de Rédaction Efficace
+
+### Règles Fondamentales
+- **Concision Optimale** : Rester sous 500 lignes par règle, idéalement 100-200 lignes
+- **Précision Technique** : Utiliser un langage précis, éviter les directives vagues
+- **Actionnabilité** : Chaque instruction doit être directement applicable par l'IA
+- **Exemples Concrets** : Intégrer des exemples de code valides et invalides
+
+### Structure de Contenu Recommandée
+```mdc
+# Titre Explicite
+
+## Règles Critiques
+- Directives prioritaires et non-négociables
+- Formatées en listes à puces courtes et actionables
+
+## Standards Spécifiques
+- Conventions techniques détaillées
+- Références aux outils et frameworks
+
+## Exemples
+<example>Code ou pattern correct</example>
+<example type="invalid">Anti-pattern à éviter</example>
+```
+
+## Optimisation du Contexte et Performance
+
+### Gestion de la Fenêtre de Contexte
+- Limiter le nombre de règles Always actives simultanément
+- Utiliser les patterns `globs` pour l'activation conditionnelle
+- Placer les directives critiques en début ou fin de règle (éviter la "perte au milieu")
+- Effectuer une "distillation sémantique" : maximum d'impact avec minimum de tokens
+
+### Efficacité Computationnelle
+- Chaque règle doit justifier son "coût en tokens" par son "retour en guidage"
+- Éviter la redondance entre règles multiples
+- Privilégier la spécificité contextuelle via l'organisation hiérarchique
+- Mesurer l'impact des règles sur la latence et ajuster selon les modèles utilisés
+
+## Erreurs Critiques à Éviter
+
+### Erreurs de Structure
+- ❌ Contradictions entre règles multiples (Always vs Project vs Manual)
+- ❌ Surcharge contextuelle (trop de règles Always)
+- ❌ Règles hors de `.cursor/rules/` pour les projets
+- ❌ Frontmatter incorrect ou manquant
+
+### Erreurs de Contenu
+- ❌ Directives vagues ("écrire du code propre" → spécifier standards précis)
+- ❌ Instructions trop spécifiques (cas unique → généraliser ou supprimer)
+- ❌ Redondance informationnelle entre fichiers
+- ❌ Manque de références contextuelles (@fichier, exemples concrets)
+
+### Erreurs d'Organisation
+- ❌ Règles monolithiques (découper en composants logiques)
+- ❌ Mauvaise hiérarchisation des priorités
+- ❌ Absence de maintenance périodique
+- ❌ Non-synchronisation avec l'évolution du projet
+
+## Workflow de Maintenance et Évolution
+
+### Cycle de Vie des Règles
+- Intégrer les règles au cycle de développement (versioning avec le code)
+- Réviser lors des changements majeurs de technologie ou architecture
+- Adapter aux mises à jour de Cursor et évolutions des modèles IA
+- Mesurer l'efficacité : observer les réponses générées vs attentes
+
+### Bonnes Pratiques de Collaboration
+- Documenter la raison d'être de chaque règle (commentaires, descriptions)
+- Partager les patterns efficaces avec l'équipe
+- Maintenir un changelog pour les modifications importantes
+- Tester les règles avec des "prompts de référence" personnalisés
+
+## Spécificités par Type de Règle
+
+### User Rules (Globales)
+- Concentrer sur les standards universels et préférences personnelles
+- Définir la persona et les attentes de comportement de l'IA
+- Spécifier les technologies privilégiées de manière générale
+- Éviter les détails trop spécifiques à un projet
+
+### Project Rules (Spécifiques)
+- Encoder les connaissances du domaine et standards d'architecture
+- Utiliser les métadonnées pour le ciblage précis
+- Organiser par composants logiques du projet
+- Inclure les références aux fichiers et patterns internes
+
+## Métriques d'Efficacité
+
+### Indicateurs de Performance
+- Cohérence des réponses IA avec les standards définis
+- Réduction du besoin de corrections manuelles post-génération
+- Vitesse d'adaptation de l'IA aux conventions du projet
+- Maintien de la performance malgré l'ajout de contexte
+
+### Signaux d'Alarme
+- Réponses incohérentes ou contradictoires de l'IA
+- Augmentation notable de la latence
+- Besoin fréquent de clarifications manuelles
+- Conflits entre règles multiples

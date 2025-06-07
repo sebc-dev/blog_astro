@@ -1,0 +1,216 @@
+---
+description: ""
+globs: ["*.test.ts", "*.test.js", "*.spec.ts", "*.spec.js", "vitest.config.*", "**/test/**/*", "**/tests/**/*", "**/__tests__/**/*"]
+alwaysApply: false
+---
+
+# Guide complet : Vitest pour applications Astro avec TypeScript
+
+## Configuration optimale et structure projet
+
+**Configuration Vitest moderne pour Astro 5+** utilise la fonction `getViteConfig` d'Astro pour une intégration transparente. Le fichier `vitest.config.ts` optimal combine les avantages de Vite avec les spécificités d'Astro :
+
+```typescript
+/// <reference types="vitest" />
+import { getViteConfig } from 'astro/config';
+
+export default getViteConfig({
+  test: {
+    environment: 'happy-dom', // Plus rapide que jsdom
+    setupFiles: ['./src/test/setup.ts'],
+    globals: true,
+    include: ['src/**/*.{test,spec}.{js,ts,jsx,tsx}'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html', 'json'],
+      exclude: ['coverage/**', 'dist/**', '.astro/**']
+    }
+  }
+});
+```
+
+La **configuration TypeScript** pour les tests nécessite des types spécifiques et une résolution de modules adaptée. Le `tsconfig.json` doit inclure les références Vitest et supporter l'écosystème Astro :
+
+```json
+{
+  "extends": "astro/tsconfigs/strict",
+  "compilerOptions": {
+    "target": "ES2022",
+    "moduleResolution": "bundler",
+    "types": ["vitest/globals", "@astrojs/check", "node"],
+    "paths": {
+      "@/*": ["src/*"],
+      "@/components/*": ["src/components/*"]
+    }
+  }
+}
+```
+
+**Structure de projet recommandée** suit trois approches principales. La plus populaire utilise des dossiers `__tests__` adjacents aux composants, permettant une organisation claire et une maintenance facilitée.
+
+## Patterns de test spécifiques à Astro
+
+**Tests de composants avec Container API** constituent le cœur du testing Astro moderne. Cette API expérimentale mais officielle permet de rendre les composants Astro en isolation complète :
+
+```typescript
+import { experimental_AstroContainer as AstroContainer } from 'astro/container';
+import { expect, test } from 'vitest';
+import Card from './Card.astro';
+
+test('Card renders with props and slots', async () => {
+  const container = await AstroContainer.create();
+  const result = await container.renderToString(Card, {
+    props: { title: 'Test Card', date: '2024-01-01' },
+    slots: { default: 'Card content', header: '<span>Custom header</span>' }
+  });
+  
+  expect(result).toContain('Test Card');
+  expect(result).toContain('Card content');
+});
+```
+
+**Tests d'API routes** nécessitent une approche différente utilisant la méthode `renderToResponse` pour simuler des requêtes HTTP complètes :
+
+```typescript
+test('API endpoint returns JSON', async () => {
+  const container = await AstroContainer.create();
+  const response = await container.renderToResponse(
+    import('./api/posts.ts'),
+    { request: new Request('http://localhost:4321/api/posts') }
+  );
+  
+  expect(response.status).toBe(200);
+  const data = await response.json();
+  expect(Array.isArray(data)).toBe(true);
+});
+```
+
+**Tests de pages et layouts** combinent rendu de composants et vérification de structure HTML. Ces tests vérifient l'intégration correcte des métadonnées, de la navigation et du contenu.
+
+## Mocking et gestion des modules Astro
+
+**Stratégies de mocking** pour l'écosystème Astro nécessitent une attention particulière aux modules virtuels et aux imports dynamiques. Vitest offre des capacités de mocking puissantes adaptées à Astro :
+
+```typescript
+import { vi } from 'vitest';
+
+// Mock des collections de contenu
+vi.mock('astro:content', () => ({
+  getCollection: vi.fn().mockResolvedValue([
+    { slug: 'post-1', data: { title: 'Mock Post' } }
+  ])
+}));
+
+// Mock des assets Astro
+vi.mock('astro:assets', () => ({
+  Image: ({ src, alt }) => `<img src="${src}" alt="${alt}" />`
+}));
+```
+
+**Gestion des dépendances externes** implique souvent de mocker des APIs, des services tiers, ou des modules Node.js. La stratégie consiste à isoler les tests de toute dépendance externe non contrôlée.
+
+## Optimisation des performances et configuration avancée
+
+**Optimisations critiques** pour les performances incluent l'utilisation de `pool: 'threads'` avec `isolate: false` pour les projets où l'isolation stricte n'est pas nécessaire. Cette configuration peut réduire les temps d'exécution de **60-75%** :
+
+```typescript
+export default getViteConfig({
+  test: {
+    pool: 'threads',
+    isolate: false, // Attention : risque de pollution entre tests
+    maxConcurrency: 20,
+    environment: 'happy-dom', // 2x plus rapide que jsdom
+    css: false // Skip CSS processing pour les tests unitaires
+  }
+});
+```
+
+**Sharding des tests** devient essentiel pour les grandes suites de tests. Cette technique divise l'exécution sur plusieurs processus :
+
+```yaml
+# GitHub Actions avec sharding
+strategy:
+  matrix:
+    shardIndex: [1, 2, 3, 4]
+    shardTotal: [4]
+steps:
+  - run: npm test -- --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+```
+
+## Outils complémentaires et intégration CI/CD
+
+**Stack d'outils recommandée** combine Vitest avec des solutions complémentaires pour une couverture complète :
+
+- **Playwright** pour les tests end-to-end avec une intégration native Vitest
+- **MSW (Mock Service Worker)** pour mocker les APIs de manière réaliste  
+- **Testing Library** pour les queries DOM avancées
+- **Storybook** avec test-runner pour les tests de composants isolés
+
+**Configuration CI/CD optimisée** utilise la mise en cache NPM, l'exécution parallèle et la génération de rapports de couverture :
+
+```yaml
+- name: Run tests
+  run: npm run test:ci
+  env:
+    CI: true
+- name: Upload coverage
+  uses: codecov/codecov-action@v3
+  with:
+    file: ./coverage/lcov.info
+```
+
+## Gestion des assets et debugging avancé
+
+**Tests d'assets et styles** nécessitent des approches spécifiques pour valider l'optimisation d'images, les CSS modules et les ressources statiques :
+
+```typescript
+test('Image optimization works', async () => {
+  const optimizedImage = await getImage({
+    src: heroImage,
+    width: 800,
+    format: 'webp'
+  });
+  
+  expect(optimizedImage.src).toContain('.webp');
+  expect(optimizedImage.attributes.width).toBe(800);
+});
+```
+
+**Debugging avec VS Code** s'appuie sur des configurations de launch spécifiques permettant le debugging interactif avec breakpoints :
+
+```json
+{
+  "type": "node",
+  "request": "launch",
+  "name": "Debug Current Test File",
+  "program": "${workspaceRoot}/node_modules/vitest/vitest.mjs",
+  "args": ["run", "${relativeFile}"],
+  "console": "integratedTerminal"
+}
+```
+
+## Migration Jest vers Vitest et cas d'usage avancés
+
+**Migration Jest vers Vitest** se fait en trois étapes principales : changement des dépendances, adaptation de la configuration, et mise à jour de l'API de mocking. La compatibilité étant élevée, la plupart des tests existants fonctionnent avec des modifications minimes.
+
+**Tests SSR et middleware** exploitent les capacités avancées du Container API pour simuler des contextes de serveur complets :
+
+```typescript
+test('SSR page with context', async () => {
+  const container = await AstroContainer.create({ streaming: true });
+  const response = await container.renderToResponse(Page, {
+    request: new Request('http://localhost:4321/ssr-page'),
+    locals: { user: { id: 1 } }
+  });
+  
+  expect(response.status).toBe(200);
+});
+```
+
+## Évolutions récentes et perspectives d'avenir
+
+**Développements 2024-2025** incluent l'amélioration du mode navigateur Vitest, l'API Container stabilisée, et la compatibilité Vite 6. La **version Vitest 3** (janvier 2025) apportera une meilleure intégration avec Astro 5 et des performances encore améliorées.
+
+**Matrice de compatibilité** actuelle recommande Vitest 2.x avec Astro 4.x-5.x, en utilisant des overrides pour gérer les conflits de versions Vite temporaires.
+
+La combinaison Vitest + Astro + TypeScript représente l'état de l'art du testing moderne pour les applications web statiques et hybrides, offrant une expérience développeur excellente avec des performances de test exceptionnelles.

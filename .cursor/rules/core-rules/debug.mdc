@@ -1,0 +1,27 @@
+---
+description: Règles pour le diagnostic et la correction d'erreurs. Activée pour analyser des dysfonctionnements, bugs, comportements inattendus ou problèmes de performance.
+globs: 
+alwaysApply: false
+---
+
+# Règles Focus Debugging
+
+## Méthodologie Diagnostic
+
+- Reproduire le problème systématiquement
+- Analyser les logs et messages d'erreur
+- Isoler la cause racine avant correction
+- Vérifier l'état des dépendances
+
+## Stratégie de Correction
+
+- Fix minimal et ciblé
+- Éviter les effets de bord
+- Valider la correction avec des tests
+- Documenter la cause et la solution
+
+## Prévention
+
+- Identifier les patterns d'erreur récurrents
+- Suggérer des améliorations structurelles
+- Ajouter des vérifications préventives
