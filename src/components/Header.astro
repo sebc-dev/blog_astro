@@ -1,112 +1,417 @@
 ---
+// Header.astro
+interface Props {
+  logo?: string;
+  siteName?: string;
+}
 
+const { logo = "/logo.svg", siteName = "Mon Site" } = Astro.props;
+
+const navLinks = [
+  { href: "/", label: "Accueil", labelEN: "Home" },
+  { href: "/about", label: "À propos", labelEN: "About" },
+  { href: "/services", label: "Services", labelEN: "Services" },
+  { href: "/contact", label: "Contact", labelEN: "Contact" },
+];
 ---
 
 <header
-  id="header"
-  class="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+  id="main-header"
+  class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-base-100/95 backdrop-blur-sm border-b border-base-300/20"
 >
-  <div class="navbar shadow-sm">
+  <div class="navbar max-w-7xl mx-auto px-4">
+    <!-- Logo à gauche -->
     <div class="navbar-start">
-      <div class="dropdown">
-        <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
+      <a href="/" class="btn btn-ghost text-xl font-bold">
+        <img src={logo} alt={siteName} class="w-8 h-8 mr-2" />
+        {siteName}
+      </a>
+    </div>
+
+    <!-- Navigation principale (desktop) -->
+    <div class="navbar-center hidden lg:flex">
+      <ul class="menu menu-horizontal px-1">
+        {
+          navLinks.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                class="nav-link transition-colors duration-200 hover:bg-primary hover:text-primary-content"
+                data-fr={link.label}
+                data-en={link.labelEN}
+              >
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <!-- Droite : Sélecteur langue et theme toggle -->
+    <div class="navbar-end flex items-center gap-2">
+      <!-- Sélecteur de langue -->
+      <div class="dropdown dropdown-end">
+        <div tabindex="0" role="button" class="btn btn-ghost btn-sm">
+          <span id="current-lang">FR</span>
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5"
-            fill="none"
+            width="12"
+            height="12"
             viewBox="0 0 24 24"
+            fill="none"
             stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 6h16M4 12h8m-8 6h16"></path>
+            <path d="M6 9l6 6 6-6"></path>
           </svg>
         </div>
         <ul
           tabindex="0"
-          class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
+          class="dropdown-content menu bg-base-100 rounded-box z-[1] w-24 p-2 shadow-lg border border-base-300"
         >
-          <li><a>Item 1</a></li>
-          <li>
-            <a>Parent</a>
-            <ul class="p-2">
-              <li><a>Submenu 1</a></li>
-              <li><a>Submenu 2</a></li>
-            </ul>
-          </li>
-          <li><a>Item 3</a></li>
+          <li><a href="#" class="lang-option" data-lang="fr">🇫🇷 FR</a></li>
+          <li><a href="#" class="lang-option" data-lang="en">🇺🇸 EN</a></li>
         </ul>
       </div>
-      <a class="btn btn-ghost text-xl">daisyUI</a>
-    </div>
-    <div class="navbar-center hidden lg:flex">
-      <ul class="menu menu-horizontal px-1">
-        <li><a>Item 1</a></li>
-        <li>
-          <details>
-            <summary>Parent</summary>
-            <ul class="p-2">
-              <li><a>Submenu 1</a></li>
-              <li><a>Submenu 2</a></li>
-            </ul>
-          </details>
-        </li>
-        <li><a>Item 3</a></li>
-      </ul>
-    </div>
-    <div class="navbar-end">
-      <a class="btn">Button</a>
+
+      <!-- Theme Toggle -->
+      <label class="flex cursor-pointer gap-2 items-center">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="5"></circle>
+          <path
+            d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"
+          ></path>
+        </svg>
+        <input
+          type="checkbox"
+          value="dark"
+          class="toggle theme-controller"
+          id="theme-toggle"
+        />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </label>
+
+      <!-- Bouton hamburger (mobile) -->
+      <label
+        for="mobile-menu"
+        class="btn btn-square btn-ghost lg:hidden swap swap-rotate"
+      >
+        <input type="checkbox" id="mobile-menu" class="hidden" />
+        <!-- Icône hamburger -->
+        <svg
+          class="swap-off fill-current w-6 h-6"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 512 512"
+        >
+          <path
+            d="M64,384H448V341.33H64Zm0-106.67H448V234.67H64ZM64,128v42.67H448V128Z"
+          ></path>
+        </svg>
+        <!-- Icône fermer -->
+        <svg
+          class="swap-on fill-current w-6 h-6"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 512 512"
+        >
+          <polygon
+            points="400 145.49 366.51 112 256 222.51 145.49 112 112 145.49 222.51 256 112 366.51 145.49 400 256 289.49 366.51 400 400 366.51 289.49 256 400 145.49"
+          ></polygon>
+        </svg>
+      </label>
     </div>
   </div>
 </header>
 
+<!-- Menu mobile overlay -->
+<div
+  id="mobile-overlay"
+  class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300 lg:hidden"
+>
+  <div
+    id="mobile-menu-content"
+    class="fixed top-0 right-0 h-full w-80 bg-base-100 transform translate-x-full transition-transform duration-300 border-l border-base-300"
+  >
+    <!-- Header du menu mobile (même hauteur que le header principal) -->
+    <div
+      class="flex items-center justify-between p-4 border-b border-base-300"
+      style="height: 64px;"
+    >
+      <div class="flex items-center">
+        <img src={logo} alt={siteName} class="w-6 h-6 mr-2" />
+        <span class="font-bold text-lg">{siteName}</span>
+      </div>
+
+      <!-- Sélecteurs dans le header mobile -->
+      <div class="flex items-center gap-2">
+        <!-- Sélecteur de langue mobile -->
+        <div class="dropdown dropdown-end">
+          <div tabindex="0" role="button" class="btn btn-ghost btn-sm">
+            <span id="mobile-current-lang">FR</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M6 9l6 6 6-6"></path>
+            </svg>
+          </div>
+          <ul
+            tabindex="0"
+            class="dropdown-content menu bg-base-100 rounded-box z-[1] w-24 p-2 shadow-lg border border-base-300"
+          >
+            <li>
+              <a href="#" class="mobile-lang-option" data-lang="fr">🇫🇷 FR</a>
+            </li>
+            <li>
+              <a href="#" class="mobile-lang-option" data-lang="en">🇺🇸 EN</a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Theme Toggle mobile -->
+        <label class="flex cursor-pointer items-center">
+          <input
+            type="checkbox"
+            value="dark"
+            class="toggle toggle-sm theme-controller"
+            id="mobile-theme-toggle"
+          />
+        </label>
+      </div>
+    </div>
+
+    <!-- Navigation mobile -->
+    <nav class="p-4">
+      <ul class="menu w-full">
+        {
+          navLinks.map((link) => (
+            <li class="mb-2">
+              <a
+                href={link.href}
+                class="mobile-nav-link text-lg py-3 hover:bg-primary hover:text-primary-content transition-colors duration-200"
+                data-fr={link.label}
+                data-en={link.labelEN}
+              >
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+</div>
+
+<script>
+  // Gestion du scroll pour la transparence du header
+  let lastScrollY = 0;
+  const header = document.getElementById("main-header");
+
+  function updateHeaderOnScroll() {
+    const currentScrollY = window.scrollY;
+
+    if (currentScrollY > 100) {
+      // Scroll vers le bas : header transparent
+      header.classList.remove("bg-base-100/95");
+      header.classList.add("bg-base-100/60");
+      header.classList.add("border-transparent");
+    } else {
+      // En haut de page : header opaque
+      header.classList.remove("bg-base-100/60");
+      header.classList.add("bg-base-100/95");
+      header.classList.remove("border-transparent");
+    }
+
+    lastScrollY = currentScrollY;
+  }
+
+  // Gestion du menu mobile
+  const mobileMenuCheckbox = document.getElementById("mobile-menu");
+  const mobileOverlay = document.getElementById("mobile-overlay");
+  const mobileMenuContent = document.getElementById("mobile-menu-content");
+
+  function toggleMobileMenu(show) {
+    if (show) {
+      mobileOverlay?.classList.remove("opacity-0", "pointer-events-none");
+      mobileMenuContent?.classList.remove("translate-x-full");
+      document.body.classList.add("overflow-hidden");
+    } else {
+      mobileOverlay?.classList.add("opacity-0", "pointer-events-none");
+      mobileMenuContent?.classList.add("translate-x-full");
+      document.body.classList.remove("overflow-hidden");
+    }
+  }
+
+  // Gestion de la langue
+  let currentLanguage = "fr";
+
+  function updateLanguage(lang: string) {
+    currentLanguage = lang;
+
+    // Mise à jour des indicateurs de langue
+    document.getElementById("current-lang").textContent = lang.toUpperCase();
+    document.getElementById("mobile-current-lang").textContent =
+      lang.toUpperCase();
+
+    // Mise à jour des textes de navigation
+    document.querySelectorAll(".nav-link, .mobile-nav-link").forEach((link) => {
+      const text = lang === "fr" ? link.dataset.fr : link.dataset.en;
+      link.textContent = text;
+    });
+
+    // Sauvegarde dans localStorage
+    localStorage.setItem("preferred-language", lang);
+  }
+
+  // Gestion du thème
+  function syncThemeToggles() {
+    const isDark =
+      document.documentElement.getAttribute("data-theme") === "dark";
+    document.getElementById("theme-toggle").checked = isDark;
+    document.getElementById("mobile-theme-toggle").checked = isDark;
+  }
+
+  // Event listeners
+  document.addEventListener("DOMContentLoaded", () => {
+    // Chargement de la langue sauvegardée
+    const savedLang = localStorage.getItem("preferred-language") || "fr";
+    updateLanguage(savedLang);
+
+    // Synchronisation des toggles de thème
+    syncThemeToggles();
+
+    // Observer les changements de thème
+    const observer = new MutationObserver(syncThemeToggles);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+  });
+
+  // Scroll listener
+  window.addEventListener("scroll", updateHeaderOnScroll, { passive: true });
+
+  // Menu mobile listeners
+  mobileMenuCheckbox?.addEventListener("change", (e) => {
+    toggleMobileMenu(e.target.checked);
+  });
+
+  // Fermeture sur clic sur l'overlay
+  mobileOverlay?.addEventListener("click", (e) => {
+    if (e.target === mobileOverlay) {
+      mobileMenuCheckbox.checked = false;
+      toggleMobileMenu(false);
+    }
+  });
+
+  // Langue desktop
+  document.querySelectorAll(".lang-option").forEach((option) => {
+    option.addEventListener("click", (e) => {
+      e.preventDefault();
+      updateLanguage(e.target.dataset.lang);
+    });
+  });
+
+  // Langue mobile
+  document.querySelectorAll(".mobile-lang-option").forEach((option) => {
+    option.addEventListener("click", (e) => {
+      e.preventDefault();
+      updateLanguage(e.target.dataset.lang);
+    });
+  });
+
+  // Fermeture du menu mobile sur clic d'un lien
+  document.querySelectorAll(".mobile-nav-link").forEach((link) => {
+    link.addEventListener("click", () => {
+      mobileMenuCheckbox.checked = false;
+      toggleMobileMenu(false);
+    });
+  });
+
+  // Synchronisation des theme toggles
+  document.getElementById("theme-toggle")?.addEventListener("change", (e) => {
+    document.getElementById("mobile-theme-toggle").checked = e.target.checked;
+  });
+
+  document
+    .getElementById("mobile-theme-toggle")
+    ?.addEventListener("change", (e) => {
+      document.getElementById("theme-toggle").checked = e.target.checked;
+    });
+</script>
+
 <style>
-  #header {
-    -webkit-backdrop-filter: blur(0px);
-    backdrop-filter: blur(0px);
-    border-bottom: 1px solid transparent;
+  /* Styles additionnels pour les transitions smooth */
+  #mobile-menu-content {
+    box-shadow: -4px 0 15px rgba(0, 0, 0, 0.1);
   }
 
-  #header.scrolled {
-    background: rgba(255, 255, 255, 0.3);
-    -webkit-backdrop-filter: blur(5px);
-    backdrop-filter: blur(5px);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  /* Animation pour le header */
+  #main-header {
+    transition:
+      background-color 0.3s ease,
+      border-color 0.3s ease;
   }
 
-  /* Support pour les thèmes sombres */
-  @media (prefers-color-scheme: dark) {
-    #header.scrolled {
-      background: rgba(0, 0, 0, 0.3);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  /* Amélioration du contraste pour les icônes */
+  .navbar svg {
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+  }
+
+  .navbar svg:hover {
+    opacity: 1;
+  }
+
+  /* Style pour le menu mobile */
+  .mobile-nav-link {
+    border-radius: 0.5rem;
+  }
+
+  /* Amélioration des dropdowns */
+  .dropdown-content {
+    animation: dropdown-appear 0.2s ease-out;
+  }
+
+  @keyframes dropdown-appear {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
     }
-  }
-
-  /* Fallback pour les navigateurs qui ne supportent pas backdrop-filter */
-  @supports not (backdrop-filter: blur(10px)) {
-    #header.scrolled {
-      background: rgba(255, 255, 255, 0.95);
-    }
-
-    @media (prefers-color-scheme: dark) {
-      #header.scrolled {
-        background: rgba(0, 0, 0, 0.95);
-      }
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
   }
 </style>
-
-<script client:load>
-  const header = document.getElementById("header");
-
-  window.addEventListener("scroll", () => {
-    if (window.scrollY > 50) {
-      header?.classList.add("scrolled");
-    } else {
-      header?.classList.remove("scrolled");
-    }
-  });
-</script>
