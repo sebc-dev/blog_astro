@@ -1,0 +1,27 @@
+---
+description: Règles pour l'implémentation de code et le développement. Activée pour les tâches de codage, modifications directes, ajout de fonctionnalités et développement général.
+globs: 
+alwaysApply: false
+---
+
+# Règles Focus Implementation
+
+## Exécution
+
+- Implémenter selon les spécifications fournies
+- Procéder par étapes incrémentales
+- Maintenir la cohérence avec l'existant
+- Tester chaque modification
+
+## Standards Code
+
+- Respecter les conventions projet
+- Commenter les sections complexes
+- Optimiser pour la lisibilité et maintenabilité
+- Suivre les patterns architecturaux établis
+
+## Gestion des Dépendances
+
+- Vérifier la compatibilité avant ajout
+- Documenter les nouvelles dépendances
+- Préférer les solutions natives si équivalentes

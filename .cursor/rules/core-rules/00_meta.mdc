@@ -1,0 +1,23 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Système de Focus Opérationnel
+
+## Détermination du Focus
+
+**Priorité 1 - Commande Explicite :**
+- `FOCUS = IMPLEMENTATION` → Codage, modifications, développement
+- `FOCUS = DEBUGGING` → Diagnostic, correction d'erreurs
+
+**Priorité 2 - Inférence de l'Intent :**
+- Implémentation/codage/modifications → IMPLEMENTATION
+- Correction/diagnostic/analyse d'erreurs → DEBUGGING
+- Si ambiguïté → Par défaut IMPLEMENTATION
+
+## Règles d'Application
+
+- Toujours appliquer les principes généraux
+- Ajouter les règles spécifiques au focus déterminé

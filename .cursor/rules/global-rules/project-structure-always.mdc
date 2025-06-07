@@ -1,0 +1,120 @@
+# Structure du Projet - Blog Astro
+
+## Organisation Racine
+
+### Fichiers de Configuration
+- [package.json](mdc:package.json) : Dépendances et scripts npm/pnpm
+- [astro.config.mjs](mdc:astro.config.mjs) : Configuration principale Astro
+- [tsconfig.json](mdc:tsconfig.json) : Configuration TypeScript stricte
+- [pnpm-lock.yaml](mdc:pnpm-lock.yaml) : Lock file pour reproductibilité
+
+### Outils de Qualité
+- [eslint.config.js](mdc:eslint.config.js) : Configuration ESLint moderne (flat config)
+- [vitest.config.ts](mdc:vitest.config.ts) : Configuration tests unitaires
+- [cypress.config.js](mdc:cypress.config.js) : Configuration tests E2E
+
+## Architecture Source (`src/`)
+
+### Pages et Routing
+- `src/pages/` : **Routes automatiques** basées sur le système de fichiers
+  - Chaque fichier `.astro` devient une route
+  - Support des routes dynamiques `[param].astro`
+  - API routes en `.js`/`.ts` pour endpoints
+
+### Composants et Réutilisabilité
+- `src/components/` : **Composants réutilisables**
+  - Composants Astro `.astro` (préféré)
+  - Composants framework si hydratation nécessaire
+  - Organisation par fonctionnalité recommandée
+
+### Templates et Mise en Page
+- `src/layouts/` : **Templates de base**
+  - Layouts partagés entre pages
+  - Structure HTML commune
+  - Gestion des métadonnées et SEO
+
+### Assets et Ressources
+- `src/assets/` : **Assets optimisés par Astro**
+  - Images, fonts, icons
+  - Optimisation automatique
+  - Import direct dans composants
+
+### Scripts et Utilitaires
+- `src/scripts/` : **Scripts utilitaires**
+  - Helpers TypeScript
+  - Utilitaires partagés
+  - Configuration client
+
+## Tests et Validation
+
+### Tests Unitaires
+- `src/test/` : Tests pour composants et utilitaires
+- `tests/` : Tests d'intégration et setup global
+- Configuration Vitest avec JSDOM
+
+### Tests End-to-End
+- Cypress pour parcours utilisateur complets
+- Configuration dans `cypress.config.js`
+- Commandes : `test:e2e` et `test:e2e:open`
+
+## Assets Publics (`public/`)
+
+### Contenu Statique
+- Fichiers servis directement sans transformation
+- Images, fonts, favicons
+- Manifests, robots.txt, etc.
+- URLs absolues depuis la racine
+
+## Configuration Cursor (`.cursor/`)
+
+### Règles Organisées
+- `rules/global-rules/` : Standards universels du projet
+- `rules/core-rules/` : Règles fondamentales de développement
+- `rules/ui-rules/` : Conventions interface utilisateur
+- Organisation hiérarchique pour modularité
+
+## Scripts de Développement
+
+### Commandes Principales
+- `pnpm dev` : Serveur de développement avec HMR
+- `pnpm build` : Build de production optimisé
+- `pnpm preview` : Aperçu du build local
+
+### Qualité et Tests
+- `pnpm lint` : Linting avec correction automatique
+- `pnpm format` : Formatage Prettier
+- `pnpm test` : Suite de tests complète
+- `pnpm test:coverage` : Rapport de couverture
+
+## Conventions d'Organisation
+
+### Nommage des Fichiers
+- **Pages** : kebab-case pour URLs propres
+- **Composants** : PascalCase pour distinction claire
+- **Scripts** : camelCase pour utilitaires
+- **Assets** : descriptif et organisé par type
+
+### Structure Recommandée
+```
+src/
+├── pages/           # Routes automatiques
+│   ├── index.astro
+│   ├── blog/
+│   └── [...slug].astro
+├── components/      # Composants réutilisables
+│   ├── ui/         # Composants base
+│   ├── layout/     # Éléments de layout
+│   └── content/    # Composants contenu
+├── layouts/        # Templates de page
+│   ├── Base.astro
+│   └── Post.astro
+└── assets/         # Ressources optimisées
+    ├── images/
+    └── styles/
+```
+
+### Bonnes Pratiques d'Import
+- Chemins relatifs pour fichiers proches
+- Alias `@/` configuré pour racine src
+- Imports explicites et typés
+- Lazy loading pour composants lourds

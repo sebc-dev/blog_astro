@@ -1,0 +1,197 @@
+---
+description: ""
+globs: ["*.astro", "*.ts", "*.tsx"]
+alwaysApply: false
+---
+
+# Bonnes Pratiques Astro + TypeScript
+
+## Règles Critiques
+
+### Architecture et Structure
+- Utiliser le typage TypeScript strict dans `tsconfig.json` (`"strict": true`)
+- Organiser les composants Astro par feature/domaine, pas par type technique
+- Placer les types partagés dans `src/types/` avec exports explicites
+- Séparer la logique métier des composants d'affichage via des utilitaires typés
+
+### Composants Astro (.astro)
+- Déclarer les props avec interface TypeScript dans le frontmatter
+- Utiliser `Astro.props` avec destructuring typé pour une meilleure DX
+- Préférer les composants fonctionnels React/Vue dans `src/components/` pour la logique complexe
+- Isoler le CSS avec `<style>` scoped et éviter les styles globaux sauf dans les layouts
+
+### Gestion du Typage
+- Créer des types spécifiques pour les données CMS/API dans `src/types/content.ts`
+- Utiliser `satisfies` operator pour maintenir l'inférence de type
+- Typer les props des composants islands avec interfaces explicites
+- Éviter `any` - utiliser `unknown` puis type guards si nécessaire
+
+### Performance et Optimisation
+- Privilégier le rendu statique : minimiser l'usage des directives client (`client:*`)
+- Utiliser `client:load` uniquement pour l'interactivité critique immédiate
+- Préférer `client:visible` pour les composants below-the-fold
+- Implémenter le lazy loading avec `client:idle` pour les fonctionnalités secondaires
+
+## Standards Spécifiques
+
+### Structure de Fichiers Astro
+```typescript
+---
+// Frontmatter TypeScript
+interface Props {
+  title: string;
+  description?: string;
+  items: Array<{id: string; name: string}>;
+}
+
+const { title, description, items } = Astro.props;
+
+// Logique côté serveur uniquement ici
+const processedItems = items.map(item => ({
+  ...item,
+  slug: item.name.toLowerCase().replace(/\s+/g, '-')
+}));
+---
+
+<!-- Template HTML -->
+<main>
+  <h1>{title}</h1>
+  {description && <p>{description}</p>}
+  <!-- Boucles et logique d'affichage -->
+</main>
+
+<style>
+  /* CSS scoped au composant */
+</style>
+```
+
+### Configuration TypeScript Recommandée
+- Activer `"moduleResolution": "bundler"` pour Astro 3+
+- Configurer les path mappings : `"@/*": ["./src/*"]`
+- Utiliser `"target": "ES2022"` minimum pour les features modernes
+- Activer `"exactOptionalPropertyTypes": true` pour la précision
+
+### Patterns d'Intégration
+- Créer des Content Collections typées avec Zod schemas
+- Utiliser `getCollection()` avec inférence de type automatique
+- Implémenter des API routes typées avec `APIRoute` interface
+- Gérer les erreurs avec des types union discriminants
+
+### SEO et Métadonnées
+- Créer un composant `<SEO>` typé pour les métadonnées
+- Utiliser `ViewTransitions` avec types pour les animations de page
+- Typer les données structurées JSON-LD avec interfaces dédiées
+
+## Exemples
+
+<example>
+```typescript
+// Content Collection Schema (src/content/config.ts)
+import { defineCollection, z } from 'astro:content';
+
+const blogCollection = defineCollection({
+  type: 'content',
+  schema: z.object({
+    title: z.string(),
+    publishDate: z.date(),
+    tags: z.array(z.string()).optional(),
+    featured: z.boolean().default(false)
+  })
+});
+
+export const collections = {
+  blog: blogCollection
+};
+
+// Usage dans composant
+---
+import { getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  limit?: number;
+}
+
+const { limit = 10 } = Astro.props;
+const posts: CollectionEntry<'blog'>[] = await getCollection('blog');
+const featuredPosts = posts
+  .filter(post => post.data.featured)
+  .slice(0, limit);
+---
+```
+</example>
+
+<example>
+```typescript
+// Component Island typé
+---
+interface InteractiveCounterProps {
+  initialValue: number;
+  step?: number;
+  max?: number;
+}
+
+const props: InteractiveCounterProps = Astro.props;
+---
+
+<div id="counter-container">
+  <Counter client:load {...props} />
+</div>
+
+// src/components/Counter.tsx
+interface CounterProps {
+  initialValue: number;
+  step?: number;
+  max?: number;
+}
+
+export default function Counter({ 
+  initialValue, 
+  step = 1, 
+  max = 100 
+}: CounterProps) {
+  // Logique React typée
+}
+```
+</example>
+
+<example type="invalid">
+```typescript
+// ❌ Éviter : Props non typées
+---
+const { title, items } = Astro.props; // Pas de typage
+---
+
+// ❌ Éviter : Logique client dans frontmatter
+---
+const data = await fetch('/api/data'); // Côté serveur uniquement
+const handleClick = () => {}; // Logique client à éviter ici
+---
+
+// ❌ Éviter : Any types
+interface Props {
+  data: any; // Utiliser des types spécifiques
+  callback: any; // Typer les fonctions
+}
+```
+</example>
+
+## Intégrations et Outils
+
+### Développement
+- Configurer ESLint avec `@typescript-eslint/recommended` + règles Astro
+- Utiliser Prettier avec plugin Astro pour le formatage cohérent
+- Implémenter Husky + lint-staged pour la qualité de code
+- Configurer Vite pour les alias et optimisations de build
+
+### Testing
+- Utiliser Vitest pour les tests unitaires des utilitaires TypeScript
+- Tester les composants Astro avec `@astro/test` (experimental)
+- Implémenter des tests E2E avec Cypress sur les pages rendues
+- Mocker les Content Collections pour les tests isolés
+
+### Production
+- Optimiser les bundles avec `vite-bundle-analyzer`
+- Configurer les Content Security Policies pour les composants islands
+- Utiliser des Service Workers typés pour le caching avancé
+- Implémenter la compression et l'optimisation d'images avec Sharp
