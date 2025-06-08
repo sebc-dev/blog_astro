@@ -32,7 +32,7 @@ export function getElementById<T extends HTMLElement = HTMLElement>(
 export function querySelectorAll<T extends Element = Element>(
   selector: string,
 ): NodeListOf<T> {
-  return document.querySelectorAll(selector) as NodeListOf<T>;
+  return document.querySelectorAll<T>(selector);
 }
 
 /**

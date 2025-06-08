@@ -228,6 +228,267 @@ class OrderManager {
 - **Responsabilités par classe** : 1 (SRP)
 - **Raison de changement** : 1 par classe (SRP)
 
+## Defensive Programming
+
+### Principe Fondamental
+**"Assume nothing, validate everything, fail gracefully"**
+- Anticiper les erreurs et conditions exceptionnelles
+- Protéger le code contre les entrées invalides et les états incohérents
+- Maintenir la stabilité de l'application même en cas de problème
+
+### Règles de Validation d'Entrée
+
+#### 1. Validation Systématique des Paramètres
+- Valider tous les paramètres d'entrée des méthodes publiques
+- Utiliser des guard clauses pour les vérifications précoces
+- Lancer des exceptions explicites avec messages descriptifs
+
+#### 2. Null Safety et Optional Chaining
+- Vérifier la nullité avant utilisation (`obj?.method()`)
+- Utiliser des valeurs par défaut sensées
+- Préférer les types non-nullable quand possible
+
+#### 3. Validation des Types et Formats
+- Vérifier les types attendus (instanceof, typeof)
+- Valider les formats (email, URL, dates)
+- Contrôler les plages de valeurs numériques
+
+### Gestion d'Erreurs Gracieuse
+
+#### 1. Try-Catch Stratégique
+- Encapsuler les opérations risquées (I/O, API externes, localStorage)
+- Capturer les erreurs spécifiques plutôt que génériques
+- Logger les erreurs avec contexte suffisant
+
+#### 2. Fallback et Dégradation
+- Prévoir des alternatives en cas d'échec
+- Maintenir les fonctionnalités essentielles même en mode dégradé
+- Informer l'utilisateur sans exposer les détails techniques
+
+#### 3. Fail-Fast vs Fail-Safe
+- **Fail-Fast** : Pour les erreurs de développement (assertions, contrats)
+- **Fail-Safe** : Pour les erreurs d'environnement (réseau, permissions)
+
+### Contrats et Assertions
+
+#### 1. Préconditions
+- Valider l'état requis avant l'exécution
+- Documenter les attentes via des assertions
+- Utiliser des guard clauses explicites
+
+#### 2. Postconditions
+- Vérifier que les résultats respectent les contrats
+- Valider l'état de l'objet après modification
+- Assurer la cohérence des données
+
+#### 3. Invariants de Classe
+- Maintenir les règles métier à tout moment
+- Valider l'état dans les méthodes critiques
+- Protéger l'intégrité des données encapsulées
+
+### Exemples Pratiques
+
+<example>
+// ✅ EXCELLENT : Defensive Programming appliqué
+class LanguageManager {
+  private currentLanguage: Language;
+
+  constructor(defaultLanguage: Language) {
+    // Précondition : validation d'entrée
+    if (!defaultLanguage) {
+      throw new Error("La langue par défaut est requise");
+    }
+    this.currentLanguage = defaultLanguage;
+  }
+
+  updateLanguage(newLanguage: Language): void {
+    // Précondition : validation d'entrée
+    if (!newLanguage) {
+      throw new Error("La nouvelle langue ne peut être null");
+    }
+
+    const previousLanguage = this.currentLanguage;
+    this.currentLanguage = newLanguage;
+
+    try {
+      // Opération risquée avec gestion d'erreur
+      this.saveToStorage(newLanguage);
+      this.updateUI(newLanguage);
+    } catch (error) {
+      // Rollback en cas d'erreur
+      this.currentLanguage = previousLanguage;
+      console.warn("Échec de mise à jour de la langue:", error);
+      throw new Error("Impossible de changer la langue");
+    }
+
+    // Postcondition : vérification du résultat
+    if (this.currentLanguage !== newLanguage) {
+      throw new Error("État incohérent après mise à jour");
+    }
+  }
+
+  private saveToStorage(language: Language): void {
+    try {
+      // Protection contre les erreurs localStorage
+      localStorage.setItem("preferred-language", language.getCode());
+    } catch (error) {
+      // Fail-safe : continuer sans persistance
+      console.warn("Impossible de sauvegarder dans localStorage:", error);
+      // Ne pas relancer l'erreur - dégradation gracieuse
+    }
+  }
+
+  private loadSavedLanguage(): Language | null {
+    try {
+      const saved = localStorage.getItem("preferred-language");
+      if (!saved) return null;
+
+      // Validation du format
+      const language = Language.fromString(saved);
+      if (!language) {
+        console.warn("Langue sauvegardée invalide:", saved);
+        return null;
+      }
+
+      return language;
+    } catch (error) {
+      // Fail-safe : retourner null en cas d'erreur
+      console.warn("Erreur lors du chargement de la langue:", error);
+      return null;
+    }
+  }
+}
+
+// Value Object avec validation défensive
+class ElementId {
+  private readonly value: string;
+
+  constructor(id: string) {
+    // Validation d'entrée stricte
+    if (!id) {
+      throw new Error("L'ID d'élément ne peut être vide");
+    }
+    
+    if (typeof id !== 'string') {
+      throw new Error("L'ID d'élément doit être une chaîne");
+    }
+
+    const trimmed = id.trim();
+    if (trimmed.length === 0) {
+      throw new Error("L'ID d'élément ne peut contenir que des espaces");
+    }
+
+    // Validation du format
+    if (!/^[a-zA-Z][\w-]*$/.test(trimmed)) {
+      throw new Error("Format d'ID invalide: doit commencer par une lettre");
+    }
+
+    this.value = trimmed;
+  }
+
+  getValue(): string {
+    // Postcondition : garantir que la valeur est toujours valide
+    if (!this.value || this.value.trim().length === 0) {
+      throw new Error("État incohérent : ID vide détecté");
+    }
+    return this.value;
+  }
+}
+
+// Utilitaire DOM avec protection
+function getElementById<T extends Element>(id: string): T | null {
+  // Précondition : validation d'entrée
+  if (!id || typeof id !== 'string') {
+    console.warn("getElementById: ID invalide fourni:", id);
+    return null;
+  }
+
+  try {
+    // Protection contre les erreurs DOM
+    const element = document.getElementById(id.trim());
+    
+    // Validation du type si spécifié
+    if (element && typeof T !== 'undefined') {
+      // Note: vérification de type runtime si nécessaire
+    }
+    
+    return element as T | null;
+  } catch (error) {
+    // Fail-safe : retourner null plutôt que planter
+    console.warn("Erreur lors de la recherche d'élément:", error);
+    return null;
+  }
+}
+</example>
+
+<example type="invalid">
+// ❌ MAUVAIS : Aucune protection défensive
+class LanguageManager {
+  private currentLanguage: Language;
+
+  constructor(defaultLanguage: Language) {
+    // Pas de validation - peut planter si null
+    this.currentLanguage = defaultLanguage;
+  }
+
+  updateLanguage(newLanguage: Language): void {
+    // Pas de validation - peut corrompre l'état
+    this.currentLanguage = newLanguage;
+    
+    // Opérations risquées sans protection
+    localStorage.setItem("preferred-language", newLanguage.getCode()); // Peut planter
+    this.updateUI(newLanguage); // Peut échouer silencieusement
+  }
+
+  private loadSavedLanguage(): Language {
+    // Pas de gestion d'erreur - peut planter
+    const saved = localStorage.getItem("preferred-language");
+    return Language.fromString(saved); // Peut retourner null/undefined
+  }
+}
+
+// Value Object sans validation
+class ElementId {
+  constructor(private value: string) {
+    // Aucune validation - accepte n'importe quoi
+    this.value = value;
+  }
+
+  getValue(): string {
+    // Peut retourner null, undefined, ou chaîne vide
+    return this.value;
+  }
+}
+
+// Utilitaire DOM fragile
+function getElementById<T extends Element>(id: string): T {
+  // Pas de validation - peut planter avec null/undefined
+  return document.getElementById(id) as T; // Cast dangereux
+}
+</example>
+
+### Checklist Defensive Programming
+
+#### Avant Chaque Méthode Publique
+- [ ] Valider tous les paramètres d'entrée
+- [ ] Vérifier les préconditions métier
+- [ ] Documenter les exceptions possibles
+
+#### Pendant l'Exécution
+- [ ] Encapsuler les opérations risquées dans try-catch
+- [ ] Prévoir des fallbacks pour les échecs
+- [ ] Logger les erreurs avec contexte
+
+#### Après Chaque Opération Critique
+- [ ] Vérifier les postconditions
+- [ ] Valider la cohérence de l'état
+- [ ] Assurer l'intégrité des données
+
+#### Pour les Opérations Externes
+- [ ] Gérer les timeouts et erreurs réseau
+- [ ] Prévoir des modes dégradés
+- [ ] Valider les réponses reçues
+
 ## Patterns et Techniques Recommandés
 
 ### Pour SOLID
@@ -246,3 +507,10 @@ class OrderManager {
 - **State Pattern** : Remplacer conditions complexes
 - **Value Objects** : Encapsuler primitives
 - **First-Class Collections** : Encapsuler comportements de collection
+
+### Pour Defensive Programming
+- **Guard Clauses** : Validation précoce des paramètres
+- **Null Object Pattern** : Éviter les vérifications null répétées
+- **Circuit Breaker** : Protection contre les services défaillants
+- **Retry Pattern** : Gestion des erreurs temporaires
+- **Bulkhead Pattern** : Isolation des ressources critiques

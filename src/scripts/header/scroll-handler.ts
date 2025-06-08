@@ -15,6 +15,7 @@ export class ScrollHandler {
   private header: HTMLElement | null;
   private lastScrollY: number = 0;
   private readonly threshold: number = 100;
+  private boundHandleScroll: (event: Event) => void;
 
   /**
    * Crée une nouvelle instance du gestionnaire de défilement
@@ -22,6 +23,7 @@ export class ScrollHandler {
    */
   constructor(headerId: string = "main-header") {
     this.header = getElementById(headerId);
+    this.boundHandleScroll = this.handleScroll.bind(this);
     this.bindEvents();
   }
 
@@ -30,7 +32,7 @@ export class ScrollHandler {
    * @private
    */
   private bindEvents(): void {
-    window.addEventListener("scroll", this.handleScroll.bind(this), {
+    window.addEventListener("scroll", this.boundHandleScroll, {
       passive: true,
     });
   }
@@ -63,6 +65,6 @@ export class ScrollHandler {
    * @public
    */
   public destroy(): void {
-    window.removeEventListener("scroll", this.handleScroll.bind(this));
+    window.removeEventListener("scroll", this.boundHandleScroll);
   }
 }

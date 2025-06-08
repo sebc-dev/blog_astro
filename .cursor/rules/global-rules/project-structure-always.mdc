@@ -1,3 +1,8 @@
+---
+description: Règles qui décrit la structure du projet
+globs: 
+alwaysApply: false
+---
 # Structure du Projet - Blog Astro
 
 ## Organisation Racine

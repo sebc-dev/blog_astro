@@ -1,6 +1,6 @@
 ---
-description:
-globs:
+description: Régle qui décrit la stack technique du projet
+globs: 
 alwaysApply: true
 ---
 # Stack Technologique - Blog Astro

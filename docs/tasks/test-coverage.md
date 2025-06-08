@@ -1,62 +1,85 @@
 # Couverture de Tests - Module Header
 
-## Value Objects (`value-objects.ts`)
+## Value Objects (`value-objects.ts`) ✅ TESTÉ
 
-### Language
+### Language ✅
 
-- `constructor` - Validation du code de langue
-- `fromString` - Conversion string vers Language
-- `getCode` - Récupération du code
-- `getDisplayText` - Formatage du texte d'affichage
-- `isFrench/isEnglish` - Vérification de la langue
-- `equals` - Comparaison d'instances
+- ✅ `constructor` - Validation du code de langue
+- ✅ `fromString` - Conversion string vers Language
+- ✅ `getCode` - Récupération du code
+- ✅ `getDisplayText` - Formatage du texte d'affichage
+- ✅ `isFrench/isEnglish` - Vérification de la langue
+- ✅ `equals` - Comparaison d'instances
+- ✅ `defaultLanguage` - Langue par défaut
 
-### ElementId & CssSelector
+### ElementId ✅
 
-- `constructor` - Validation des valeurs vides
-- `getValue` - Récupération de la valeur
-- `equals` - Comparaison d'instances
+- ✅ `constructor` - Validation des valeurs vides
+- ✅ `getValue` - Récupération de la valeur
+- ✅ `equals` - Comparaison d'instances
 
-## Utilitaires DOM (`dom.ts`)
+### CssSelector ✅
 
-### Méthodes Critiques
+- ✅ `constructor` - Validation des valeurs vides
+- ✅ `getValue` - Récupération de la valeur
+- ✅ `equals` - Comparaison d'instances
 
-- `getElementById` - Récupération typée d'éléments
-- `querySelectorAll` - Sélection multiple typée
-- `addClass/removeClass` - Manipulation des classes
-- `toggleClass` - Bascule de classes avec force
-- `hasClass` - Vérification de présence de classe
-- `setBodyOverflow` - Contrôle du débordement
+## Utilitaires DOM (`dom.ts`) ✅ TESTÉ
 
-## Collections DOM (`dom-collections.ts`)
+### Méthodes Critiques ✅
 
-### ClickableElements
+- ✅ `getElementById` - Récupération typée d'éléments
+- ✅ `querySelectorAll` - Sélection multiple typée
+- ✅ `addClass/removeClass` - Manipulation des classes
+- ✅ `toggleClass` - Bascule de classes avec force
+- ✅ `hasClass` - Vérification de présence de classe
+- ✅ `setBodyOverflow` - Contrôle du débordement
 
-- `bindClickHandler` - Attachement des handlers
-- `unbindClickHandler` - Détachement des handlers
-- `getCount` - Comptage des éléments
+## Collections DOM (`dom-collections.ts`) ✅ TESTÉ
 
-### NavigationLinks
+### ClickableElements ✅
 
-- `updateTexts` - Mise à jour des textes selon la langue
+- ✅ `constructor` - Création avec sélecteur CSS
+- ✅ `bindClickHandler` - Attachement des handlers à tous les éléments
+- ✅ `unbindClickHandler` - Détachement des handlers de tous les éléments
+- ✅ `getCount` - Comptage correct des éléments
 
-### LanguageIndicators
+### NavigationLinks ✅
 
-- `updateAll` - Mise à jour synchronisée des indicateurs
+- ✅ `constructor` - Création avec sélecteur CSS
+- ✅ `updateTexts` - Mise à jour des textes en français (data-fr)
+- ✅ `updateTexts` - Mise à jour des textes en anglais (data-en)
+- ✅ `updateTexts` - Gestion des attributs manquants (pas de mise à jour)
+- ✅ `getCount` - Comptage correct des liens
+
+### LanguageIndicators ✅
+
+- ✅ `constructor` - Création avec liste d'IDs d'éléments
+- ✅ `constructor` - Filtrage des éléments null/inexistants
+- ✅ `updateAll` - Mise à jour synchronisée de tous les indicateurs
+- ✅ `getCount` - Comptage correct des indicateurs
 
 ## Gestionnaires Principaux
 
-### LanguageManager (`language.ts`)
+### LanguageManager (`language.ts`) ✅ TESTÉ
 
-- `updateLanguage` - Changement de langue
-- `loadSavedLanguage` - Chargement depuis localStorage
-- `handleLanguageClick` - Gestion des clics
-- `getCurrentLanguage` - État actuel
+- ✅ `constructor` - Initialisation avec langue par défaut
+- ✅ `updateLanguage` - Changement de langue
+- ✅ `loadSavedLanguage` - Chargement depuis localStorage
+- ✅ `handleLanguageClick` - Configuration des gestionnaires
+- ✅ `getCurrentLanguage` - État actuel
+- ✅ `destroy` - Nettoyage des ressources
+- ✅ Intégration localStorage - Persistance et gestion d'erreurs
+- ✅ Synchronisation UI - Mise à jour des indicateurs et navigation
 
-### ScrollHandler (`scroll-handler.ts`)
+### ScrollHandler (`scroll-handler.ts`) ✅ TESTÉ
 
-- `handleScroll` - Logique de scroll
-- `destroy` - Nettoyage des ressources
+- ✅ `constructor` - Initialisation avec ID par défaut et personnalisé
+- ✅ `handleScroll` - Logique de scroll avec threshold
+- ✅ `bindEvents` - Configuration des événements avec passive: true
+- ✅ `destroy` - Nettoyage des ressources et suppression des listeners
+- ✅ Gestion des cas limites - Header inexistant, valeurs extrêmes
+- ✅ Tests d'intégration - Scénarios complets de navigation
 
 ### MobileMenu (`mobile-menu.ts`)
 
@@ -101,3 +124,29 @@
 - Tester les edge cases pour la validation
 - Vérifier la gestion des erreurs
 - Assurer la cohérence des états
+
+## 📊 Progression des Tests
+
+### ✅ Modules Testés (5/8)
+
+1. **Value Objects** (`value-objects.test.ts`) - ✅ Complet
+   - Language, ElementId, CssSelector avec tous les cas de test
+2. **Utilitaires DOM** (`dom-utils.test.ts`) - ✅ Complet
+   - Toutes les méthodes critiques avec mocking approprié
+3. **Collections DOM** (`dom-collections.test.ts`) - ✅ Complet
+   - ClickableElements, NavigationLinks, LanguageIndicators
+4. **LanguageManager** (`language-manager.test.ts`) - ✅ Complet
+   - Gestion d'état, localStorage, synchronisation UI
+5. **ScrollHandler** (`scroll-handler.test.ts`) - ✅ Complet
+   - Gestion des événements de scroll, threshold, nettoyage des ressources
+
+### 🔄 Modules Restants (3/8)
+
+6. **MobileMenu** (`mobile-menu.ts`) - 🔴 Prochain à tester
+   - Priorité moyenne - États du menu, gestion de l'overlay
+7. **ThemeManager** (`theme.ts`) - 🔴 À faire
+   - Priorité moyenne - Synchronisation des toggles
+8. **HeaderManager** (`index.ts`) - 🔴 À faire
+   - Priorité moyenne - Singleton pattern
+
+### 📈 Couverture Actuelle : 62.5% (5/8 modules)

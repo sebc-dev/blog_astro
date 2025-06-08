@@ -63,15 +63,21 @@ export class LanguageManager {
 
   /**
    * Charge la langue sauvegardée depuis le localStorage
+   * Gère les erreurs gracieusement et utilise la langue par défaut en cas d'échec
    * @private
    */
   private loadSavedLanguage(): void {
-    const savedLangCode = localStorage.getItem("preferred-language");
-    if (savedLangCode) {
-      const language = Language.fromString(savedLangCode);
-      if (language) {
-        this.updateLanguage(language);
+    try {
+      const savedLangCode = localStorage.getItem("preferred-language");
+      if (savedLangCode) {
+        const language = Language.fromString(savedLangCode);
+        if (language) {
+          this.updateLanguage(language);
+        }
       }
+    } catch (error) {
+      // En cas d'erreur localStorage, on continue avec la langue par défaut
+      console.warn("Impossible de charger la langue depuis localStorage:", error);
     }
   }
 
@@ -87,11 +93,18 @@ export class LanguageManager {
 
   /**
    * Sauvegarde la langue dans le localStorage
+   * Gère les erreurs gracieusement pour maintenir la robustesse de l'application
    * @param {Language} language - La langue à sauvegarder
    * @private
    */
   private saveToStorage(language: Language): void {
-    localStorage.setItem("preferred-language", language.getCode());
+    try {
+      localStorage.setItem("preferred-language", language.getCode());
+    } catch (error) {
+      // Gestion silencieuse des erreurs localStorage (mode privé, quota dépassé, etc.)
+      // L'application continue de fonctionner même sans persistance
+      console.warn("Impossible de sauvegarder la langue dans localStorage:", error);
+    }
   }
 
   /**
