@@ -18,17 +18,18 @@ import {
  * @class MobileMenu
  */
 export class MobileMenu {
-  private checkbox: HTMLInputElement | null;
+  private toggleButton: HTMLButtonElement | null;
   private overlay: HTMLElement | null;
   private content: HTMLElement | null;
   private navLinks: NodeListOf<HTMLElement>;
+  private isOpen: boolean = false;
 
   /**
    * Crée une nouvelle instance du gestionnaire de menu mobile
    * Initialise les références aux éléments DOM et configure les événements
    */
   constructor() {
-    this.checkbox = getElementById<HTMLInputElement>("mobile-menu");
+    this.toggleButton = getElementById<HTMLButtonElement>("mobile-menu-toggle");
     this.overlay = getElementById("mobile-overlay");
     this.content = getElementById("mobile-menu-content");
     this.navLinks = querySelectorAll<HTMLElement>(".mobile-nav-link");
@@ -41,8 +42,8 @@ export class MobileMenu {
    * @private
    */
   private bindEvents(): void {
-    // Toggle sur changement du checkbox
-    this.checkbox?.addEventListener("change", this.handleToggle.bind(this));
+    // Toggle sur clic du bouton
+    this.toggleButton?.addEventListener("click", this.handleToggle.bind(this));
 
     // Fermeture sur clic overlay
     this.overlay?.addEventListener("click", this.handleOverlayClick.bind(this));
@@ -51,16 +52,19 @@ export class MobileMenu {
     this.navLinks.forEach((link) => {
       link.addEventListener("click", this.close.bind(this));
     });
+
+    // Fermeture sur touche Échap
+    document.addEventListener("keydown", this.handleKeyDown.bind(this));
   }
 
   /**
-   * Gère le changement d'état de la checkbox du menu
-   * @param {Event} event - L'événement de changement
+   * Gère le clic sur le bouton hamburger
+   * @param {Event} event - L'événement de clic
    * @private
    */
   private handleToggle(event: Event): void {
-    const checkbox = event.currentTarget as HTMLInputElement;
-    this.toggle(checkbox.checked);
+    event.preventDefault();
+    this.toggle(!this.isOpen);
   }
 
   /**
@@ -75,11 +79,23 @@ export class MobileMenu {
   }
 
   /**
+   * Gère les événements clavier
+   * @param {KeyboardEvent} event - L'événement clavier
+   * @private
+   */
+  private handleKeyDown(event: KeyboardEvent): void {
+    if (event.key === "Escape" && this.isOpen) {
+      this.close();
+    }
+  }
+
+  /**
    * Bascule l'état du menu
    * @param {boolean} show - true pour ouvrir, false pour fermer
    * @private
    */
   private toggle(show: boolean): void {
+    this.isOpen = show;
     if (show) {
       this.open();
     } else {
@@ -92,8 +108,11 @@ export class MobileMenu {
    * @public
    */
   public open(): void {
+    this.isOpen = true;
     removeClass(this.overlay, "opacity-0", "pointer-events-none");
     removeClass(this.content, "translate-x-full");
+    addClass(document.body, "mobile-menu-open");
+    addClass(this.toggleButton, "menu-open");
     setBodyOverflow(true);
   }
 
@@ -102,19 +121,19 @@ export class MobileMenu {
    * @private
    */
   private closeMenu(): void {
+    this.isOpen = false;
     addClass(this.overlay, "opacity-0", "pointer-events-none");
     addClass(this.content, "translate-x-full");
+    removeClass(document.body, "mobile-menu-open");
+    removeClass(this.toggleButton, "menu-open");
     setBodyOverflow(false);
   }
 
   /**
-   * Ferme le menu mobile et réinitialise la checkbox
+   * Ferme le menu mobile
    * @public
    */
   public close(): void {
-    if (this.checkbox) {
-      this.checkbox.checked = false;
-    }
     this.closeMenu();
   }
 
@@ -123,7 +142,10 @@ export class MobileMenu {
    * @public
    */
   public destroy(): void {
-    this.checkbox?.removeEventListener("change", this.handleToggle.bind(this));
+    this.toggleButton?.removeEventListener(
+      "click",
+      this.handleToggle.bind(this),
+    );
     this.overlay?.removeEventListener(
       "click",
       this.handleOverlayClick.bind(this),
@@ -131,5 +153,6 @@ export class MobileMenu {
     this.navLinks.forEach((link) => {
       link.removeEventListener("click", this.close.bind(this));
     });
+    document.removeEventListener("keydown", this.handleKeyDown.bind(this));
   }
 }

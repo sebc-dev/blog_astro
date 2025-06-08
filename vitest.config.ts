@@ -8,16 +8,7 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html", "lcov"],
-      exclude: [
-        "coverage/**",
-        "dist/**",
-        "**/[.]**",
-        "packages/*/test?(s)/**",
-        "**/*.d.ts",
-        "**/virtual:*",
-        "**/__mocks__/*",
-        "**/test/setup.ts",
-      ],
+      include: ["src/**/*.ts"],
     },
   },
   resolve: {
