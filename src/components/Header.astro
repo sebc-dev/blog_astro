@@ -17,13 +17,13 @@ const navLinks = [
 
 <header
   id="main-header"
-  class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-base-100/95 backdrop-blur-sm border-b border-base-300/20"
+  class="bg-base-100/95 border-base-300/20 fixed top-0 right-0 left-0 z-50 border-b backdrop-blur-sm transition-all duration-300"
 >
-  <div class="navbar max-w-7xl mx-auto px-4">
+  <div class="navbar mx-auto max-w-7xl px-4">
     <!-- Logo à gauche -->
     <div class="navbar-start">
       <a href="/" class="btn btn-ghost text-xl font-bold">
-        <img src={logo} alt={siteName} class="w-8 h-8 mr-2" />
+        <img src={logo} alt={siteName} class="mr-2 h-8 w-8" />
         {siteName}
       </a>
     </div>
@@ -36,7 +36,7 @@ const navLinks = [
             <li>
               <a
                 href={link.href}
-                class="nav-link transition-colors duration-200 hover:bg-primary hover:text-primary-content"
+                class="nav-link hover:bg-primary hover:text-primary-content transition-colors duration-200"
                 data-fr={link.label}
                 data-en={link.labelEN}
               >
@@ -70,7 +70,7 @@ const navLinks = [
         </div>
         <ul
           tabindex="0"
-          class="dropdown-content menu bg-base-100 rounded-box z-[1] w-24 p-2 shadow-lg border border-base-300"
+          class="dropdown-content menu bg-base-100 rounded-box border-base-300 z-[1] w-24 border p-2 shadow-lg"
         >
           <li><a href="#" class="lang-option" data-lang="fr">🇫🇷 FR</a></li>
           <li><a href="#" class="lang-option" data-lang="en">🇺🇸 EN</a></li>
@@ -78,7 +78,7 @@ const navLinks = [
       </div>
 
       <!-- Theme Toggle -->
-      <label class="flex cursor-pointer gap-2 items-center">
+      <label class="flex cursor-pointer items-center gap-2">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="20"
@@ -119,12 +119,12 @@ const navLinks = [
       <!-- Bouton hamburger (mobile) -->
       <label
         for="mobile-menu"
-        class="btn btn-square btn-ghost lg:hidden swap swap-rotate"
+        class="btn btn-square btn-ghost swap swap-rotate lg:hidden"
       >
         <input type="checkbox" id="mobile-menu" class="hidden" />
         <!-- Icône hamburger -->
         <svg
-          class="swap-off fill-current w-6 h-6"
+          class="swap-off h-6 w-6 fill-current"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 512 512"
         >
@@ -134,7 +134,7 @@ const navLinks = [
         </svg>
         <!-- Icône fermer -->
         <svg
-          class="swap-on fill-current w-6 h-6"
+          class="swap-on h-6 w-6 fill-current"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 512 512"
         >
@@ -150,20 +150,20 @@ const navLinks = [
 <!-- Menu mobile overlay -->
 <div
   id="mobile-overlay"
-  class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300 lg:hidden"
+  class="pointer-events-none fixed inset-0 z-40 bg-black/50 opacity-0 backdrop-blur-sm transition-opacity duration-300 lg:hidden"
 >
   <div
     id="mobile-menu-content"
-    class="fixed top-0 right-0 h-full w-80 bg-base-100 transform translate-x-full transition-transform duration-300 border-l border-base-300"
+    class="bg-base-100 border-base-300 fixed top-0 right-0 h-full w-80 translate-x-full transform border-l transition-transform duration-300"
   >
     <!-- Header du menu mobile (même hauteur que le header principal) -->
     <div
-      class="flex items-center justify-between p-4 border-b border-base-300"
+      class="border-base-300 flex items-center justify-between border-b p-4"
       style="height: 64px;"
     >
       <div class="flex items-center">
-        <img src={logo} alt={siteName} class="w-6 h-6 mr-2" />
-        <span class="font-bold text-lg">{siteName}</span>
+        <img src={logo} alt={siteName} class="mr-2 h-6 w-6" />
+        <span class="text-lg font-bold">{siteName}</span>
       </div>
 
       <!-- Sélecteurs dans le header mobile -->
@@ -188,7 +188,7 @@ const navLinks = [
           </div>
           <ul
             tabindex="0"
-            class="dropdown-content menu bg-base-100 rounded-box z-[1] w-24 p-2 shadow-lg border border-base-300"
+            class="dropdown-content menu bg-base-100 rounded-box border-base-300 z-[1] w-24 border p-2 shadow-lg"
           >
             <li>
               <a href="#" class="mobile-lang-option" data-lang="fr">🇫🇷 FR</a>
@@ -219,7 +219,7 @@ const navLinks = [
             <li class="mb-2">
               <a
                 href={link.href}
-                class="mobile-nav-link text-lg py-3 hover:bg-primary hover:text-primary-content transition-colors duration-200"
+                class="mobile-nav-link hover:bg-primary hover:text-primary-content py-3 text-lg transition-colors duration-200"
                 data-fr={link.label}
                 data-en={link.labelEN}
               >
@@ -234,141 +234,18 @@ const navLinks = [
 </div>
 
 <script>
-  // Gestion du scroll pour la transparence du header
-  let lastScrollY = 0;
-  const header = document.getElementById("main-header");
+  /**
+   * Import et initialisation du HeaderManager
+   * Toute la logique TypeScript a été extraite dans des modules séparés
+   */
+  import { initializeHeader } from "../scripts/header/index.js";
 
-  function updateHeaderOnScroll() {
-    const currentScrollY = window.scrollY;
+  // Le HeaderManager s'initialise automatiquement au chargement du DOM
+  // via l'event listener dans index.ts
 
-    if (currentScrollY > 100) {
-      // Scroll vers le bas : header transparent
-      header.classList.remove("bg-base-100/95");
-      header.classList.add("bg-base-100/60");
-      header.classList.add("border-transparent");
-    } else {
-      // En haut de page : header opaque
-      header.classList.remove("bg-base-100/60");
-      header.classList.add("bg-base-100/95");
-      header.classList.remove("border-transparent");
-    }
-
-    lastScrollY = currentScrollY;
-  }
-
-  // Gestion du menu mobile
-  const mobileMenuCheckbox = document.getElementById("mobile-menu");
-  const mobileOverlay = document.getElementById("mobile-overlay");
-  const mobileMenuContent = document.getElementById("mobile-menu-content");
-
-  function toggleMobileMenu(show) {
-    if (show) {
-      mobileOverlay?.classList.remove("opacity-0", "pointer-events-none");
-      mobileMenuContent?.classList.remove("translate-x-full");
-      document.body.classList.add("overflow-hidden");
-    } else {
-      mobileOverlay?.classList.add("opacity-0", "pointer-events-none");
-      mobileMenuContent?.classList.add("translate-x-full");
-      document.body.classList.remove("overflow-hidden");
-    }
-  }
-
-  // Gestion de la langue
-  let currentLanguage = "fr";
-
-  function updateLanguage(lang: string) {
-    currentLanguage = lang;
-
-    // Mise à jour des indicateurs de langue
-    document.getElementById("current-lang").textContent = lang.toUpperCase();
-    document.getElementById("mobile-current-lang").textContent =
-      lang.toUpperCase();
-
-    // Mise à jour des textes de navigation
-    document.querySelectorAll(".nav-link, .mobile-nav-link").forEach((link) => {
-      const text = lang === "fr" ? link.dataset.fr : link.dataset.en;
-      link.textContent = text;
-    });
-
-    // Sauvegarde dans localStorage
-    localStorage.setItem("preferred-language", lang);
-  }
-
-  // Gestion du thème
-  function syncThemeToggles() {
-    const isDark =
-      document.documentElement.getAttribute("data-theme") === "dark";
-      document.getElementById("theme-toggle").checked = isDark;
-      document.getElementById("mobile-theme-toggle").checked = isDark;
-  }
-
-  // Event listeners
-  document.addEventListener("DOMContentLoaded", () => {
-    // Chargement de la langue sauvegardée
-    const savedLang = localStorage.getItem("preferred-language") || "fr";
-    updateLanguage(savedLang);
-
-    // Synchronisation des toggles de thème
-    syncThemeToggles();
-
-    // Observer les changements de thème
-    const observer = new MutationObserver(syncThemeToggles);
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["data-theme"],
-    });
-  });
-
-  // Scroll listener
-  window.addEventListener("scroll", updateHeaderOnScroll, { passive: true });
-
-  // Menu mobile listeners
-  mobileMenuCheckbox?.addEventListener("change", (e) => {
-    toggleMobileMenu(e.target.checked);
-  });
-
-  // Fermeture sur clic sur l'overlay
-  mobileOverlay?.addEventListener("click", (e) => {
-    if (e.target === mobileOverlay) {
-      mobileMenuCheckbox.checked = false;
-      toggleMobileMenu(false);
-    }
-  });
-
-  // Langue desktop
-  document.querySelectorAll(".lang-option").forEach((option) => {
-    option.addEventListener("click", (e) => {
-      e.preventDefault();
-      updateLanguage(e.target.dataset.lang);
-    });
-  });
-
-  // Langue mobile
-  document.querySelectorAll(".mobile-lang-option").forEach((option) => {
-    option.addEventListener("click", (e) => {
-      e.preventDefault();
-      updateLanguage(e.target.dataset.lang);
-    });
-  });
-
-  // Fermeture du menu mobile sur clic d'un lien
-  document.querySelectorAll(".mobile-nav-link").forEach((link) => {
-    link.addEventListener("click", () => {
-      mobileMenuCheckbox.checked = false;
-      toggleMobileMenu(false);
-    });
-  });
-
-  // Synchronisation des theme toggles
-  document.getElementById("theme-toggle")?.addEventListener("change", (e) => {
-    document.getElementById("mobile-theme-toggle").checked = e.target.checked;
-  });
-
-  document
-    .getElementById("mobile-theme-toggle")
-    ?.addEventListener("change", (e) => {
-      document.getElementById("theme-toggle").checked = e.target.checked;
-    });
+  // Si besoin d'accéder programmatiquement aux gestionnaires :
+  // import { getHeaderManager } from "../scripts/header/index.js";
+  // const headerManager = getHeaderManager();
 </script>
 
 <style>
