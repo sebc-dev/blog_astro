@@ -109,6 +109,160 @@ vi.mock('astro:assets', () => ({
 
 **Gestion des dépendances externes** implique souvent de mocker des APIs, des services tiers, ou des modules Node.js. La stratégie consiste à isoler les tests de toute dépendance externe non contrôlée.
 
+## Pièges de mocking et solutions Vitest
+
+### ⚠️ Problème : Hoisting des mocks et variables non initialisées
+
+**Problème fréquent** : Vitest hisse les appels `vi.mock()` en haut du fichier, causant des erreurs "Cannot access before initialization" :
+
+```typescript
+// ❌ ERREUR : ReferenceError
+const mockDomUtils = {
+  getElementById: vi.fn(),
+  addClass: vi.fn()
+};
+
+vi.mock("../utils/dom", () => mockDomUtils); // Hissé avant la déclaration
+```
+
+**Solution recommandée** : Utiliser la factory function inline et importer le module réel pour le typage :
+
+```typescript
+// ✅ CORRECT : Mock inline avec factory function
+import * as domUtils from "../utils/dom";
+
+vi.mock("../utils/dom", () => ({
+  getElementById: vi.fn(),
+  addClass: vi.fn(),
+  removeClass: vi.fn(),
+  setBodyOverflow: vi.fn(),
+  querySelectorAll: vi.fn(),
+}));
+
+// Typage des mocks après l'import
+const mockGetElementById = vi.mocked(domUtils.getElementById);
+const mockAddClass = vi.mocked(domUtils.addClass);
+```
+
+### 🔧 Pattern optimal pour mocking de modules utilitaires
+
+**Structure recommandée** pour mocker des modules avec de nombreuses fonctions :
+
+```typescript
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import { MyComponent } from "../components/MyComponent";
+import * as utilsModule from "../utils/myUtils";
+
+// Mock complet du module
+vi.mock("../utils/myUtils", () => ({
+  helperFunction: vi.fn(),
+  calculateValue: vi.fn(),
+  formatData: vi.fn(),
+  validateInput: vi.fn(),
+}));
+
+describe("MyComponent", () => {
+  // Récupération typée des mocks
+  const mockHelperFunction = vi.mocked(utilsModule.helperFunction);
+  const mockCalculateValue = vi.mocked(utilsModule.calculateValue);
+  
+  beforeEach(() => {
+    vi.clearAllMocks();
+    
+    // Configuration des valeurs de retour par défaut
+    mockHelperFunction.mockReturnValue("default");
+    mockCalculateValue.mockReturnValue(42);
+  });
+});
+```
+
+### 🎯 Gestion des NodeListOf et types DOM complexes
+
+**Problème spécifique** : Simuler des types DOM complexes comme `NodeListOf<HTMLElement>` :
+
+```typescript
+// ✅ Simulation correcte de NodeListOf
+const mockNavLinks = {
+  length: 2,
+  item: vi.fn(),
+  forEach: vi.fn((callback) => {
+    callback(navLink1, 0, mockNavLinks);
+    callback(navLink2, 1, mockNavLinks);
+  }),
+  [0]: navLink1,
+  [1]: navLink2,
+} as unknown as NodeListOf<HTMLElement>;
+
+// Mock avec gestion des cas vides
+const emptyNodeList = {
+  length: 0,
+  item: vi.fn().mockReturnValue(null),
+  forEach: vi.fn(),
+} as unknown as NodeListOf<HTMLElement>;
+```
+
+### 🔄 Reset et isolation des mocks
+
+**Bonnes pratiques** pour éviter la pollution entre tests :
+
+```typescript
+describe("Component Tests", () => {
+  beforeEach(() => {
+    // Nettoyage complet des mocks
+    vi.clearAllMocks();
+    
+    // Réinitialisation des implémentations si nécessaire
+    mockFunction.mockImplementation(() => defaultBehavior);
+  });
+
+  afterEach(() => {
+    // Nettoyage des timers et autres ressources
+    vi.clearAllTimers();
+    vi.unstubAllGlobals();
+  });
+});
+```
+
+### 🚨 Éviter les anti-patterns courants
+
+**Anti-patterns à éviter** :
+
+```typescript
+// ❌ Variables globales dans les mocks
+let globalMockState = {};
+vi.mock("module", () => ({ getValue: () => globalMockState }));
+
+// ❌ Mocks trop complexes
+vi.mock("complex-module", () => {
+  // 50+ lignes de logique complexe...
+});
+
+// ❌ Réutilisation de mocks entre fichiers sans isolation
+```
+
+**Alternatives recommandées** :
+
+```typescript
+// ✅ State local dans les tests
+describe("Tests", () => {
+  let localState: any;
+  
+  beforeEach(() => {
+    localState = {};
+    mockFunction.mockImplementation(() => localState);
+  });
+});
+
+// ✅ Factories pour mocks complexes
+function createMockComplexModule(overrides = {}) {
+  return {
+    defaultMethod: vi.fn(),
+    complexMethod: vi.fn(),
+    ...overrides
+  };
+}
+```
+
 ## Optimisation des performances et configuration avancée
 
 **Optimisations critiques** pour les performances incluent l'utilisation de `pool: 'threads'` avec `isolate: false` pour les projets où l'isolation stricte n'est pas nécessaire. Cette configuration peut réduire les temps d'exécution de **60-75%** :

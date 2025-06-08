@@ -81,11 +81,16 @@
 - ✅ Gestion des cas limites - Header inexistant, valeurs extrêmes
 - ✅ Tests d'intégration - Scénarios complets de navigation
 
-### MobileMenu (`mobile-menu.ts`)
+### MobileMenu (`mobile-menu.ts`) ✅ TESTÉ
 
-- `open/close` - États du menu
-- `handleToggle` - Gestion de la checkbox
-- `handleOverlayClick` - Gestion de l'overlay
+- ✅ `constructor` - Initialisation avec références DOM et événements
+- ✅ `open` - Ouverture du menu et suppression des classes masquantes
+- ✅ `close` - Fermeture du menu, décocher checkbox et ajout des classes masquantes
+
+- ✅ `destroy` - Nettoyage des event listeners
+- ✅ Gestion des événements - Configuration correcte des listeners
+- ✅ Gestion des cas limites - Éléments DOM manquants
+- ✅ Tests d'intégration - Cycles complets d'ouverture/fermeture
 
 ### ThemeManager (`theme.ts`)
 
@@ -127,7 +132,7 @@
 
 ## 📊 Progression des Tests
 
-### ✅ Modules Testés (5/8)
+### ✅ Modules Testés (8/8) - COMPLET
 
 1. **Value Objects** (`value-objects.test.ts`) - ✅ Complet
    - Language, ElementId, CssSelector avec tous les cas de test
@@ -139,14 +144,15 @@
    - Gestion d'état, localStorage, synchronisation UI
 5. **ScrollHandler** (`scroll-handler.test.ts`) - ✅ Complet
    - Gestion des événements de scroll, threshold, nettoyage des ressources
+6. **MobileMenu** (`mobile-menu.test.ts`) - ✅ Complet
+   - États du menu, gestion des événements, cycles d'ouverture/fermeture
+7. **ThemeManager** (`theme-manager.test.ts`) - ✅ Complet
+   - Synchronisation des toggles, gestion des mutations, état du thème
+8. **HeaderManager** (`header-manager.test.ts`) - ✅ Complet
+   - Pattern singleton, orchestration des modules, initialisation globale
 
-### 🔄 Modules Restants (3/8)
+### 🔄 Modules Restants (0/8)
 
-6. **MobileMenu** (`mobile-menu.ts`) - 🔴 Prochain à tester
-   - Priorité moyenne - États du menu, gestion de l'overlay
-7. **ThemeManager** (`theme.ts`) - 🔴 À faire
-   - Priorité moyenne - Synchronisation des toggles
-8. **HeaderManager** (`index.ts`) - 🔴 À faire
-   - Priorité moyenne - Singleton pattern
+🎉 **TOUS LES MODULES SONT TESTÉS !**
 
-### 📈 Couverture Actuelle : 62.5% (5/8 modules)
+### 📈 Couverture Actuelle : 100% (8/8 modules) ✅

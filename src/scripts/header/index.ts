@@ -19,10 +19,10 @@ import { ThemeManager } from "./theme.js";
  * @class HeaderManager
  */
 export class HeaderManager {
-  private scrollHandler: ScrollHandler;
-  private mobileMenu: MobileMenu;
-  private languageManager: LanguageManager;
-  private themeManager: ThemeManager;
+  private readonly scrollHandler: ScrollHandler;
+  private readonly mobileMenu: MobileMenu;
+  private readonly languageManager: LanguageManager;
+  private readonly themeManager: ThemeManager;
 
   /**
    * Crée une nouvelle instance du gestionnaire principal
