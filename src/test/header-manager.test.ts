@@ -1,5 +1,9 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
-import { HeaderManager, initializeHeader, getHeaderManager } from "../scripts/header/index";
+import {
+  HeaderManager,
+  initializeHeader,
+  getHeaderManager,
+} from "../scripts/header/index";
 import { ScrollHandler } from "../scripts/header/scroll-handler";
 import { MobileMenu } from "../scripts/header/mobile-menu";
 import { LanguageManager } from "../scripts/header/language";
@@ -40,7 +44,7 @@ describe("HeaderManager", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Reset complètement les mocks des constructeurs
     MockedScrollHandler.mockReset();
     MockedMobileMenu.mockReset();
@@ -48,10 +52,18 @@ describe("HeaderManager", () => {
     MockedThemeManager.mockReset();
 
     // Reconfigurer les mocks
-    MockedScrollHandler.mockImplementation(() => ({ destroy: vi.fn() } as any));
-    MockedMobileMenu.mockImplementation(() => ({ destroy: vi.fn() } as any));
-    MockedLanguageManager.mockImplementation(() => ({ destroy: vi.fn() } as any));
-    MockedThemeManager.mockImplementation(() => ({ destroy: vi.fn() } as any));
+    MockedScrollHandler.mockImplementation(
+      () => ({ destroy: vi.fn() }) as unknown as ScrollHandler,
+    );
+    MockedMobileMenu.mockImplementation(
+      () => ({ destroy: vi.fn() }) as unknown as MobileMenu,
+    );
+    MockedLanguageManager.mockImplementation(
+      () => ({ destroy: vi.fn() }) as unknown as LanguageManager,
+    );
+    MockedThemeManager.mockImplementation(
+      () => ({ destroy: vi.fn() }) as unknown as ThemeManager,
+    );
   });
 
   afterEach(() => {
@@ -85,25 +97,25 @@ describe("HeaderManager", () => {
 
     it("devrait retourner le ScrollHandler", () => {
       const scrollHandler = headerManager.getScrollHandler();
-      
+
       expect(scrollHandler).toBeDefined();
     });
 
     it("devrait retourner le MobileMenu", () => {
       const mobileMenu = headerManager.getMobileMenu();
-      
+
       expect(mobileMenu).toBeDefined();
     });
 
     it("devrait retourner le LanguageManager", () => {
       const languageManager = headerManager.getLanguageManager();
-      
+
       expect(languageManager).toBeDefined();
     });
 
     it("devrait retourner le ThemeManager", () => {
       const themeManager = headerManager.getThemeManager();
-      
+
       expect(themeManager).toBeDefined();
     });
   });
@@ -121,10 +133,22 @@ describe("HeaderManager", () => {
 
       headerManager.destroy();
 
-      expect((scrollHandler as any).destroy).toHaveBeenCalledTimes(1);
-      expect((mobileMenu as any).destroy).toHaveBeenCalledTimes(1);
-      expect((languageManager as any).destroy).toHaveBeenCalledTimes(1);
-      expect((themeManager as any).destroy).toHaveBeenCalledTimes(1);
+      expect(
+        (scrollHandler as unknown as { destroy: ReturnType<typeof vi.fn> })
+          .destroy,
+      ).toHaveBeenCalledTimes(1);
+      expect(
+        (mobileMenu as unknown as { destroy: ReturnType<typeof vi.fn> })
+          .destroy,
+      ).toHaveBeenCalledTimes(1);
+      expect(
+        (languageManager as unknown as { destroy: ReturnType<typeof vi.fn> })
+          .destroy,
+      ).toHaveBeenCalledTimes(1);
+      expect(
+        (themeManager as unknown as { destroy: ReturnType<typeof vi.fn> })
+          .destroy,
+      ).toHaveBeenCalledTimes(1);
     });
 
     it("devrait pouvoir être appelé plusieurs fois sans erreur", () => {
@@ -140,7 +164,7 @@ describe("HeaderManager", () => {
 describe("Fonctions globales", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Reset complètement les mocks des constructeurs
     MockedScrollHandler.mockReset();
     MockedMobileMenu.mockReset();
@@ -148,10 +172,18 @@ describe("Fonctions globales", () => {
     MockedThemeManager.mockReset();
 
     // Reconfigurer les mocks
-    MockedScrollHandler.mockImplementation(() => ({ destroy: vi.fn() } as any));
-    MockedMobileMenu.mockImplementation(() => ({ destroy: vi.fn() } as any));
-    MockedLanguageManager.mockImplementation(() => ({ destroy: vi.fn() } as any));
-    MockedThemeManager.mockImplementation(() => ({ destroy: vi.fn() } as any));
+    MockedScrollHandler.mockImplementation(
+      () => ({ destroy: vi.fn() }) as unknown as ScrollHandler,
+    );
+    MockedMobileMenu.mockImplementation(
+      () => ({ destroy: vi.fn() }) as unknown as MobileMenu,
+    );
+    MockedLanguageManager.mockImplementation(
+      () => ({ destroy: vi.fn() }) as unknown as LanguageManager,
+    );
+    MockedThemeManager.mockImplementation(
+      () => ({ destroy: vi.fn() }) as unknown as ThemeManager,
+    );
   });
 
   afterEach(() => {
@@ -184,7 +216,7 @@ describe("Fonctions globales", () => {
     it("devrait détruire l'instance précédente si elle existe", () => {
       // Créer une première instance
       const firstInstance = initializeHeader();
-      const destroySpy = vi.spyOn(firstInstance, 'destroy');
+      const destroySpy = vi.spyOn(firstInstance, "destroy");
 
       // Créer une deuxième instance
       const secondInstance = initializeHeader();
@@ -239,13 +271,13 @@ describe("Fonctions globales", () => {
     it("devrait permettre la réinitialisation complète", () => {
       // Première initialisation
       const firstInstance = initializeHeader();
-      const firstDestroySpy = vi.spyOn(firstInstance, 'destroy');
-      
+      const firstDestroySpy = vi.spyOn(firstInstance, "destroy");
+
       expect(getHeaderManager()).toBe(firstInstance);
 
       // Réinitialisation
       const secondInstance = initializeHeader();
-      
+
       expect(firstDestroySpy).toHaveBeenCalledTimes(1);
       expect(getHeaderManager()).toBe(secondInstance);
       expect(secondInstance).not.toBe(firstInstance);
@@ -270,30 +302,42 @@ describe("Fonctions globales", () => {
       // Vérifier le nettoyage complet
       headerManager.destroy();
 
-      expect((scrollHandler as any).destroy).toHaveBeenCalled();
-      expect((mobileMenu as any).destroy).toHaveBeenCalled();
-      expect((languageManager as any).destroy).toHaveBeenCalled();
-      expect((themeManager as any).destroy).toHaveBeenCalled();
+      expect(
+        (scrollHandler as unknown as { destroy: ReturnType<typeof vi.fn> })
+          .destroy,
+      ).toHaveBeenCalled();
+      expect(
+        (mobileMenu as unknown as { destroy: ReturnType<typeof vi.fn> })
+          .destroy,
+      ).toHaveBeenCalled();
+      expect(
+        (languageManager as unknown as { destroy: ReturnType<typeof vi.fn> })
+          .destroy,
+      ).toHaveBeenCalled();
+      expect(
+        (themeManager as unknown as { destroy: ReturnType<typeof vi.fn> })
+          .destroy,
+      ).toHaveBeenCalled();
     });
 
     it("devrait supporter plusieurs cycles d'initialisation/destruction", () => {
       // Cycle 1
       const instance1 = initializeHeader();
-      const destroy1Spy = vi.spyOn(instance1, 'destroy');
+      const destroy1Spy = vi.spyOn(instance1, "destroy");
       instance1.destroy();
 
       expect(destroy1Spy).toHaveBeenCalled();
 
       // Cycle 2
       const instance2 = initializeHeader();
-      const destroy2Spy = vi.spyOn(instance2, 'destroy');
-      
+      const destroy2Spy = vi.spyOn(instance2, "destroy");
+
       expect(instance2).not.toBe(instance1);
       expect(getHeaderManager()).toBe(instance2);
 
       // Cycle 3 - réinitialisation automatique
       const instance3 = initializeHeader();
-      
+
       expect(destroy2Spy).toHaveBeenCalled();
       expect(instance3).not.toBe(instance2);
       expect(getHeaderManager()).toBe(instance3);
@@ -302,7 +346,7 @@ describe("Fonctions globales", () => {
     it("devrait maintenir l'état correct des modules après réinitialisations", () => {
       // Première initialisation
       initializeHeader();
-      
+
       expect(MockedScrollHandler).toHaveBeenCalledTimes(1);
       expect(MockedMobileMenu).toHaveBeenCalledTimes(1);
       expect(MockedLanguageManager).toHaveBeenCalledTimes(1);
@@ -310,7 +354,7 @@ describe("Fonctions globales", () => {
 
       // Réinitialisation
       initializeHeader();
-      
+
       expect(MockedScrollHandler).toHaveBeenCalledTimes(2);
       expect(MockedMobileMenu).toHaveBeenCalledTimes(2);
       expect(MockedLanguageManager).toHaveBeenCalledTimes(2);
@@ -350,18 +394,20 @@ describe("Fonctions globales", () => {
       // Vérifier qu'une instance existe déjà
       const existingInstance = getHeaderManager();
       expect(existingInstance).toBeDefined();
-      
+
       // Simuler un nouvel événement DOMContentLoaded
-      const domContentLoadedEvent = new Event('DOMContentLoaded');
-      const destroySpy = existingInstance ? vi.spyOn(existingInstance, 'destroy') : null;
-      
+      const domContentLoadedEvent = new Event("DOMContentLoaded");
+      const destroySpy = existingInstance
+        ? vi.spyOn(existingInstance, "destroy")
+        : null;
+
       document.dispatchEvent(domContentLoadedEvent);
-      
+
       // Vérifier qu'une nouvelle instance a été créée
       if (destroySpy) {
         expect(destroySpy).toHaveBeenCalled();
       }
-      
+
       const newInstance = getHeaderManager();
       expect(newInstance).toBeDefined();
       expect(newInstance).toBeInstanceOf(HeaderManager);
