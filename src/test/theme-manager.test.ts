@@ -10,16 +10,17 @@ vi.mock("../scripts/utils/dom", () => ({
 const mockGetElementById = vi.mocked(domUtils.getElementById);
 
 // Mock de MutationObserver
-class MockMutationObserver {
+class MockMutationObserver implements MutationObserver {
   callback: MutationCallback;
-  
+
   constructor(callback: MutationCallback) {
     this.callback = callback;
   }
-  
+
   observe = vi.fn();
   disconnect = vi.fn();
-  
+  takeRecords = vi.fn().mockReturnValue([]);
+
   // Méthode helper pour simuler des mutations
   trigger() {
     this.callback([], this);
@@ -31,7 +32,7 @@ const mockMutationObserver = vi.fn().mockImplementation((callback) => {
   return new MockMutationObserver(callback);
 });
 
-Object.defineProperty(global, 'MutationObserver', {
+Object.defineProperty(global, "MutationObserver", {
   value: mockMutationObserver,
   writable: true,
 });
@@ -51,7 +52,7 @@ describe("ThemeManager", () => {
       getAttribute: vi.fn(),
     } as unknown as HTMLElement;
 
-    Object.defineProperty(document, 'documentElement', {
+    Object.defineProperty(document, "documentElement", {
       value: mockDocumentElement,
       writable: true,
     });
@@ -98,7 +99,7 @@ describe("ThemeManager", () => {
 
     it("devrait synchroniser l'état des toggles avec le thème actuel", () => {
       vi.mocked(mockDocumentElement.getAttribute).mockReturnValue("dark");
-      
+
       themeManager = new ThemeManager();
 
       expect(mockDesktopToggle.checked).toBe(true);
@@ -110,7 +111,7 @@ describe("ThemeManager", () => {
 
       expect(mockDesktopToggle.addEventListener).toHaveBeenCalledWith(
         "change",
-        expect.any(Function)
+        expect.any(Function),
       );
     });
 
@@ -119,7 +120,7 @@ describe("ThemeManager", () => {
 
       expect(mockMobileToggle.addEventListener).toHaveBeenCalledWith(
         "change",
-        expect.any(Function)
+        expect.any(Function),
       );
     });
 
@@ -127,10 +128,13 @@ describe("ThemeManager", () => {
       themeManager = new ThemeManager();
 
       expect(mockMutationObserver).toHaveBeenCalledWith(expect.any(Function));
-      expect(observerInstance.observe).toHaveBeenCalledWith(document.documentElement, {
-        attributes: true,
-        attributeFilter: ["data-theme"],
-      });
+      expect(observerInstance.observe).toHaveBeenCalledWith(
+        document.documentElement,
+        {
+          attributes: true,
+          attributeFilter: ["data-theme"],
+        },
+      );
     });
 
     it("devrait gérer les toggles manquants sans erreur", () => {
@@ -152,7 +156,7 @@ describe("ThemeManager", () => {
 
     it("devrait synchroniser les toggles avec le thème sombre", () => {
       vi.mocked(mockDocumentElement.getAttribute).mockReturnValue("dark");
-      
+
       themeManager.sync();
 
       expect(mockDesktopToggle.checked).toBe(true);
@@ -161,7 +165,7 @@ describe("ThemeManager", () => {
 
     it("devrait synchroniser les toggles avec le thème clair", () => {
       vi.mocked(mockDocumentElement.getAttribute).mockReturnValue("light");
-      
+
       themeManager.sync();
 
       expect(mockDesktopToggle.checked).toBe(false);
@@ -170,7 +174,7 @@ describe("ThemeManager", () => {
 
     it("devrait traiter l'absence de thème comme thème clair", () => {
       vi.mocked(mockDocumentElement.getAttribute).mockReturnValue(null);
-      
+
       themeManager.sync();
 
       expect(mockDesktopToggle.checked).toBe(false);
@@ -180,16 +184,14 @@ describe("ThemeManager", () => {
     it("devrait gérer les toggles manquants sans erreur", () => {
       // Recréer avec des éléments null
       mockGetElementById.mockReset();
-      mockGetElementById
-        .mockReturnValueOnce(null)
-        .mockReturnValueOnce(null);
-      
+      mockGetElementById.mockReturnValueOnce(null).mockReturnValueOnce(null);
+
       const themeManagerWithNullToggles = new ThemeManager();
-      
+
       expect(() => {
         themeManagerWithNullToggles.sync();
       }).not.toThrow();
-      
+
       themeManagerWithNullToggles.destroy();
     });
   });
@@ -209,7 +211,8 @@ describe("ThemeManager", () => {
       });
 
       // Déclencher l'événement
-      const changeHandler = vi.mocked(mockDesktopToggle.addEventListener).mock.calls[0][1] as EventListener;
+      const changeHandler = vi.mocked(mockDesktopToggle.addEventListener).mock
+        .calls[0][1] as EventListener;
       changeHandler(changeEvent);
 
       expect(mockMobileToggle.checked).toBe(true);
@@ -221,9 +224,9 @@ describe("ThemeManager", () => {
       mockGetElementById
         .mockReturnValueOnce(mockDesktopToggle)
         .mockReturnValueOnce(null);
-      
+
       const themeManagerWithoutMobile = new ThemeManager();
-      
+
       // Simuler un changement sur le toggle desktop
       mockDesktopToggle.checked = true;
       const changeEvent = new Event("change");
@@ -233,10 +236,11 @@ describe("ThemeManager", () => {
       });
 
       expect(() => {
-        const changeHandler = vi.mocked(mockDesktopToggle.addEventListener).mock.calls[0][1] as EventListener;
+        const changeHandler = vi.mocked(mockDesktopToggle.addEventListener).mock
+          .calls[0][1] as EventListener;
         changeHandler(changeEvent);
       }).not.toThrow();
-      
+
       themeManagerWithoutMobile.destroy();
     });
   });
@@ -256,7 +260,8 @@ describe("ThemeManager", () => {
       });
 
       // Déclencher l'événement
-      const changeHandler = vi.mocked(mockMobileToggle.addEventListener).mock.calls[0][1] as EventListener;
+      const changeHandler = vi.mocked(mockMobileToggle.addEventListener).mock
+        .calls[0][1] as EventListener;
       changeHandler(changeEvent);
 
       expect(mockDesktopToggle.checked).toBe(true);
@@ -268,9 +273,9 @@ describe("ThemeManager", () => {
       mockGetElementById
         .mockReturnValueOnce(null)
         .mockReturnValueOnce(mockMobileToggle);
-      
+
       const themeManagerWithoutDesktop = new ThemeManager();
-      
+
       // Simuler un changement sur le toggle mobile
       mockMobileToggle.checked = true;
       const changeEvent = new Event("change");
@@ -280,10 +285,11 @@ describe("ThemeManager", () => {
       });
 
       expect(() => {
-        const changeHandler = vi.mocked(mockMobileToggle.addEventListener).mock.calls[0][1] as EventListener;
+        const changeHandler = vi.mocked(mockMobileToggle.addEventListener).mock
+          .calls[0][1] as EventListener;
         changeHandler(changeEvent);
       }).not.toThrow();
-      
+
       themeManagerWithoutDesktop.destroy();
     });
   });
@@ -301,7 +307,7 @@ describe("ThemeManager", () => {
 
       // Changer le thème
       vi.mocked(mockDocumentElement.getAttribute).mockReturnValue("dark");
-      
+
       // Déclencher l'observateur
       observerInstance.trigger();
 
@@ -310,10 +316,13 @@ describe("ThemeManager", () => {
     });
 
     it("devrait observer les changements d'attributs data-theme", () => {
-      expect(observerInstance.observe).toHaveBeenCalledWith(document.documentElement, {
-        attributes: true,
-        attributeFilter: ["data-theme"],
-      });
+      expect(observerInstance.observe).toHaveBeenCalledWith(
+        document.documentElement,
+        {
+          attributes: true,
+          attributeFilter: ["data-theme"],
+        },
+      );
     });
   });
 
@@ -324,25 +333,25 @@ describe("ThemeManager", () => {
 
     it("devrait retourner true quand le thème est sombre", () => {
       vi.mocked(mockDocumentElement.getAttribute).mockReturnValue("dark");
-      
+
       expect(themeManager.isDarkTheme()).toBe(true);
     });
 
     it("devrait retourner false quand le thème est clair", () => {
       vi.mocked(mockDocumentElement.getAttribute).mockReturnValue("light");
-      
+
       expect(themeManager.isDarkTheme()).toBe(false);
     });
 
     it("devrait retourner false quand aucun thème n'est défini", () => {
       vi.mocked(mockDocumentElement.getAttribute).mockReturnValue(null);
-      
+
       expect(themeManager.isDarkTheme()).toBe(false);
     });
 
     it("devrait retourner false pour un thème inconnu", () => {
       vi.mocked(mockDocumentElement.getAttribute).mockReturnValue("auto");
-      
+
       expect(themeManager.isDarkTheme()).toBe(false);
     });
   });
@@ -357,7 +366,7 @@ describe("ThemeManager", () => {
       mockDesktopToggle.checked = false;
       mockMobileToggle.checked = false;
       vi.mocked(mockDocumentElement.getAttribute).mockReturnValue("dark");
-      
+
       themeManager.sync();
 
       expect(mockDesktopToggle.checked).toBe(true);
@@ -375,7 +384,7 @@ describe("ThemeManager", () => {
 
       expect(mockDesktopToggle.removeEventListener).toHaveBeenCalledWith(
         "change",
-        expect.any(Function)
+        expect.any(Function),
       );
     });
 
@@ -384,7 +393,7 @@ describe("ThemeManager", () => {
 
       expect(mockMobileToggle.removeEventListener).toHaveBeenCalledWith(
         "change",
-        expect.any(Function)
+        expect.any(Function),
       );
     });
 
@@ -397,23 +406,33 @@ describe("ThemeManager", () => {
     it("devrait gérer les toggles manquants sans erreur", () => {
       // Recréer avec des éléments null
       mockGetElementById.mockReset();
-      mockGetElementById
-        .mockReturnValueOnce(null)
-        .mockReturnValueOnce(null);
-      
+      mockGetElementById.mockReturnValueOnce(null).mockReturnValueOnce(null);
+
       const themeManagerWithNullToggles = new ThemeManager();
-      
+
       expect(() => {
         themeManagerWithNullToggles.destroy();
       }).not.toThrow();
     });
 
     it("devrait gérer l'observateur manquant sans erreur", () => {
-      // Simuler un observateur null
-      if (themeManager && (themeManager as any).observer) {
-        (themeManager as any).observer = null;
+      // Créer un ThemeManager avec un observateur qui pourrait être null
+      // Simuler le cas où l'observateur n'existe pas en utilisant une interface personnalisée
+      interface ThemeManagerWithObserver {
+        observer?: MutationObserver | null;
+        destroy(): void;
       }
-      
+
+      const themeManagerWithNullObserver =
+        themeManager as unknown as ThemeManagerWithObserver;
+
+      // Simuler un observateur null
+      Object.defineProperty(themeManagerWithNullObserver, "observer", {
+        value: null,
+        writable: true,
+        configurable: true,
+      });
+
       expect(() => {
         themeManager.destroy();
       }).not.toThrow();
@@ -433,7 +452,8 @@ describe("ThemeManager", () => {
         writable: false,
       });
 
-      const desktopHandler = vi.mocked(mockDesktopToggle.addEventListener).mock.calls[0][1] as EventListener;
+      const desktopHandler = vi.mocked(mockDesktopToggle.addEventListener).mock
+        .calls[0][1] as EventListener;
       desktopHandler(desktopChangeEvent);
 
       expect(mockMobileToggle.checked).toBe(true);
@@ -446,7 +466,8 @@ describe("ThemeManager", () => {
         writable: false,
       });
 
-      const mobileHandler = vi.mocked(mockMobileToggle.addEventListener).mock.calls[0][1] as EventListener;
+      const mobileHandler = vi.mocked(mockMobileToggle.addEventListener).mock
+        .calls[0][1] as EventListener;
       mobileHandler(mobileChangeEvent);
 
       expect(mockDesktopToggle.checked).toBe(false);
@@ -484,15 +505,15 @@ describe("ThemeManager", () => {
       mockGetElementById
         .mockReturnValueOnce(mockDesktopToggle)
         .mockReturnValueOnce(null);
-      
+
       const partialThemeManager = new ThemeManager();
-      
+
       // Vérifier que la synchronisation fonctionne
       vi.mocked(mockDocumentElement.getAttribute).mockReturnValue("dark");
       partialThemeManager.sync();
-      
+
       expect(mockDesktopToggle.checked).toBe(true);
-      
+
       partialThemeManager.destroy();
     });
 
@@ -501,8 +522,8 @@ describe("ThemeManager", () => {
 
       // Tester avec des valeurs non-standard
       const nonStandardThemes = ["", "undefined", "null", "auto", "system"];
-      
-      nonStandardThemes.forEach(theme => {
+
+      nonStandardThemes.forEach((theme) => {
         vi.mocked(mockDocumentElement.getAttribute).mockReturnValue(theme);
         expect(themeManager.isDarkTheme()).toBe(false);
       });
