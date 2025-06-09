@@ -1,5 +1,5 @@
 ---
-description: Régle qui décrit la stack technique du projet
+description:
 globs: 
 alwaysApply: true
 ---
@@ -73,3 +73,20 @@ alwaysApply: true
 - **Node.js** : Runtime JavaScript moderne
 - **Commandes PowerShell** : `Get-ChildItem`, `Set-Location`, `Copy-Item`, etc.
 - **Commandes cross-platform** : `ls`, `cd`, `mkdir` via alias PowerShell
+
+### Bonnes Pratiques Terminal Windows
+- **Toujours utiliser des chemins Windows natifs** : Éviter les chemins Unix-style `/e%3A/Dev/blog_astro`
+- **Préférer les chemins relatifs** : Utiliser `.` ou `.\` pour le répertoire courant
+- **Tests et Scripts** :
+  - `pnpm test` : Exécution des tests unitaires
+  - `pnpm test --reporter=verbose` : Tests avec sortie détaillée
+  - `pnpm test --run` : Tests en mode CI (sans watch)
+  - `pnpm test:ui` : Interface graphique des tests
+- **Gestion des erreurs de commande** :
+  - Vérifier le code de sortie avant d'interpréter les résultats
+  - Utiliser `--verbose` ou `--debug` pour le diagnostic
+  - Éviter les commandes complexes avec `&&` en PowerShell
+  - Préférer les commandes séparées pour un meilleur debugging
+- **Encoding et Caractères** :
+  - S'assurer que PowerShell utilise UTF-8 : `$OutputEncoding = [console]::InputEncoding = [console]::OutputEncoding = New-Object System.Text.UTF8Encoding`
+  - Éviter les caractères spéciaux dans les chemins de commande

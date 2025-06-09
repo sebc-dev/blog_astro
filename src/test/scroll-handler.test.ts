@@ -50,7 +50,8 @@ const triggerScrollEvent = (scrollY: number) => {
 
 describe("ScrollHandler", () => {
   let scrollHandler: ScrollHandler;
-  let mockHeaderElement: HTMLElement;
+  let mockDesktopHeader: HTMLElement;
+  let mockMobileHeader: HTMLElement;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -60,16 +61,25 @@ describe("ScrollHandler", () => {
       mockScrollEventListeners[key] = [];
     });
 
-    // Création d'un élément header mocké
-    mockHeaderElement = {
+    // Création des éléments header mockés
+    mockDesktopHeader = {
       classList: {
         add: vi.fn(),
         remove: vi.fn(),
       },
     } as unknown as HTMLElement;
 
-    // Configuration par défaut : header trouvé
-    mockGetElementById.mockReturnValue(mockHeaderElement);
+    mockMobileHeader = {
+      classList: {
+        add: vi.fn(),
+        remove: vi.fn(),
+      },
+    } as unknown as HTMLElement;
+
+    // Configuration par défaut : headers trouvés
+    mockGetElementById
+      .mockReturnValueOnce(mockDesktopHeader) // desktop-header
+      .mockReturnValueOnce(mockMobileHeader); // mobile-header
 
     // Reset scrollY
     Object.defineProperty(window, "scrollY", { value: 0, writable: true });
@@ -82,17 +92,11 @@ describe("ScrollHandler", () => {
   });
 
   describe("constructor", () => {
-    it("devrait initialiser avec l'ID par défaut 'main-header'", () => {
+    it("devrait initialiser avec les IDs par défaut pour desktop et mobile", () => {
       scrollHandler = new ScrollHandler();
 
-      expect(mockGetElementById).toHaveBeenCalledWith("main-header");
-    });
-
-    it("devrait initialiser avec un ID personnalisé", () => {
-      const customId = "custom-header";
-      scrollHandler = new ScrollHandler(customId);
-
-      expect(mockGetElementById).toHaveBeenCalledWith(customId);
+      expect(mockGetElementById).toHaveBeenCalledWith("desktop-header");
+      expect(mockGetElementById).toHaveBeenCalledWith("mobile-header");
     });
 
     it("devrait configurer l'événement de scroll avec les bonnes options", () => {
@@ -105,14 +109,16 @@ describe("ScrollHandler", () => {
       );
     });
 
-    it("devrait gérer le cas où l'élément header n'existe pas", () => {
+    it("devrait gérer le cas où les éléments header n'existent pas", () => {
+      mockGetElementById.mockReset();
       mockGetElementById.mockReturnValue(null);
 
       expect(() => {
         scrollHandler = new ScrollHandler();
       }).not.toThrow();
 
-      expect(mockGetElementById).toHaveBeenCalledWith("main-header");
+      expect(mockGetElementById).toHaveBeenCalledWith("desktop-header");
+      expect(mockGetElementById).toHaveBeenCalledWith("mobile-header");
     });
   });
 
@@ -121,21 +127,31 @@ describe("ScrollHandler", () => {
       scrollHandler = new ScrollHandler();
     });
 
-    it("devrait rendre le header transparent quand on scroll au-delà du threshold", () => {
+    it("devrait rendre les headers transparents quand on scroll au-delà du threshold", () => {
       triggerScrollEvent(150); // Au-dessus du threshold de 100
 
+      // Vérifier que les deux headers sont rendus transparents
       expect(mockRemoveClass).toHaveBeenCalledWith(
-        mockHeaderElement,
+        mockDesktopHeader,
         "bg-base-100/95"
       );
       expect(mockAddClass).toHaveBeenCalledWith(
-        mockHeaderElement,
+        mockDesktopHeader,
+        "bg-base-100/60",
+        "border-transparent"
+      );
+      expect(mockRemoveClass).toHaveBeenCalledWith(
+        mockMobileHeader,
+        "bg-base-100/95"
+      );
+      expect(mockAddClass).toHaveBeenCalledWith(
+        mockMobileHeader,
         "bg-base-100/60",
         "border-transparent"
       );
     });
 
-    it("devrait rendre le header opaque quand on est en haut de page", () => {
+    it("devrait rendre les headers opaques quand on est en haut de page", () => {
       // D'abord scroll vers le bas
       triggerScrollEvent(150);
       vi.clearAllMocks();
@@ -143,13 +159,23 @@ describe("ScrollHandler", () => {
       // Puis retour en haut
       triggerScrollEvent(50); // En-dessous du threshold de 100
 
+      // Vérifier que les deux headers sont rendus opaques
       expect(mockRemoveClass).toHaveBeenCalledWith(
-        mockHeaderElement,
+        mockDesktopHeader,
         "bg-base-100/60",
         "border-transparent"
       );
       expect(mockAddClass).toHaveBeenCalledWith(
-        mockHeaderElement,
+        mockDesktopHeader,
+        "bg-base-100/95"
+      );
+      expect(mockRemoveClass).toHaveBeenCalledWith(
+        mockMobileHeader,
+        "bg-base-100/60",
+        "border-transparent"
+      );
+      expect(mockAddClass).toHaveBeenCalledWith(
+        mockMobileHeader,
         "bg-base-100/95"
       );
     });
@@ -157,13 +183,23 @@ describe("ScrollHandler", () => {
     it("devrait gérer exactement le threshold (100px)", () => {
       triggerScrollEvent(100); // Exactement au threshold (pas supérieur, donc opaque)
 
+      // Vérifier que les headers restent opaques
       expect(mockRemoveClass).toHaveBeenCalledWith(
-        mockHeaderElement,
+        mockDesktopHeader,
         "bg-base-100/60",
         "border-transparent"
       );
       expect(mockAddClass).toHaveBeenCalledWith(
-        mockHeaderElement,
+        mockDesktopHeader,
+        "bg-base-100/95"
+      );
+      expect(mockRemoveClass).toHaveBeenCalledWith(
+        mockMobileHeader,
+        "bg-base-100/60",
+        "border-transparent"
+      );
+      expect(mockAddClass).toHaveBeenCalledWith(
+        mockMobileHeader,
         "bg-base-100/95"
       );
     });
@@ -171,20 +207,31 @@ describe("ScrollHandler", () => {
     it("devrait gérer le scroll à 0px (top de la page)", () => {
       triggerScrollEvent(0);
 
+      // Vérifier que les headers sont opaques
       expect(mockRemoveClass).toHaveBeenCalledWith(
-        mockHeaderElement,
+        mockDesktopHeader,
         "bg-base-100/60",
         "border-transparent"
       );
       expect(mockAddClass).toHaveBeenCalledWith(
-        mockHeaderElement,
+        mockDesktopHeader,
+        "bg-base-100/95"
+      );
+      expect(mockRemoveClass).toHaveBeenCalledWith(
+        mockMobileHeader,
+        "bg-base-100/60",
+        "border-transparent"
+      );
+      expect(mockAddClass).toHaveBeenCalledWith(
+        mockMobileHeader,
         "bg-base-100/95"
       );
     });
 
-    it("ne devrait rien faire si le header n'existe pas", () => {
-      // Créer un ScrollHandler sans header
+    it("ne devrait rien faire si les headers n'existent pas", () => {
+      // Créer un ScrollHandler sans headers
       scrollHandler.destroy(); // Nettoyer l'instance précédente
+      mockGetElementById.mockReset();
       mockGetElementById.mockReturnValue(null);
       vi.clearAllMocks(); // Nettoyer tous les appels précédents
       
@@ -205,7 +252,11 @@ describe("ScrollHandler", () => {
 
       // Devrait appliquer à nouveau la logique car la condition se base sur currentScrollY
       expect(mockRemoveClass).toHaveBeenCalledWith(
-        mockHeaderElement,
+        mockDesktopHeader,
+        "bg-base-100/95"
+      );
+      expect(mockRemoveClass).toHaveBeenCalledWith(
+        mockMobileHeader,
         "bg-base-100/95"
       );
     });
@@ -214,7 +265,12 @@ describe("ScrollHandler", () => {
       // Scroll vers le bas
       triggerScrollEvent(200);
       expect(mockAddClass).toHaveBeenCalledWith(
-        mockHeaderElement,
+        mockDesktopHeader,
+        "bg-base-100/60",
+        "border-transparent"
+      );
+      expect(mockAddClass).toHaveBeenCalledWith(
+        mockMobileHeader,
         "bg-base-100/60",
         "border-transparent"
       );
@@ -224,7 +280,11 @@ describe("ScrollHandler", () => {
       // Scroll vers le haut
       triggerScrollEvent(50);
       expect(mockAddClass).toHaveBeenCalledWith(
-        mockHeaderElement,
+        mockDesktopHeader,
+        "bg-base-100/95"
+      );
+      expect(mockAddClass).toHaveBeenCalledWith(
+        mockMobileHeader,
         "bg-base-100/95"
       );
 
@@ -233,7 +293,12 @@ describe("ScrollHandler", () => {
       // Scroll à nouveau vers le bas
       triggerScrollEvent(300);
       expect(mockAddClass).toHaveBeenCalledWith(
-        mockHeaderElement,
+        mockDesktopHeader,
+        "bg-base-100/60",
+        "border-transparent"
+      );
+      expect(mockAddClass).toHaveBeenCalledWith(
+        mockMobileHeader,
         "bg-base-100/60",
         "border-transparent"
       );
@@ -278,46 +343,29 @@ describe("ScrollHandler", () => {
     it("devrait gérer un scénario complet de navigation", () => {
       scrollHandler = new ScrollHandler();
 
-      // Démarrage en haut de page
+      // 1. Page chargée (scroll = 0)
       triggerScrollEvent(0);
       expect(mockAddClass).toHaveBeenCalledWith(
-        mockHeaderElement,
+        mockDesktopHeader,
         "bg-base-100/95"
       );
 
       vi.clearAllMocks();
 
-      // Scroll progressif vers le bas
-      triggerScrollEvent(50); // Encore opaque
+      // 2. Scroll vers le bas
+      triggerScrollEvent(200);
       expect(mockAddClass).toHaveBeenCalledWith(
-        mockHeaderElement,
-        "bg-base-100/95"
-      );
-
-      vi.clearAllMocks();
-
-      triggerScrollEvent(150); // Maintenant transparent
-      expect(mockAddClass).toHaveBeenCalledWith(
-        mockHeaderElement,
+        mockDesktopHeader,
         "bg-base-100/60",
         "border-transparent"
       );
 
       vi.clearAllMocks();
 
-      triggerScrollEvent(500); // Toujours transparent
+      // 3. Retour en haut
+      triggerScrollEvent(0);
       expect(mockAddClass).toHaveBeenCalledWith(
-        mockHeaderElement,
-        "bg-base-100/60",
-        "border-transparent"
-      );
-
-      vi.clearAllMocks();
-
-      // Retour vers le haut
-      triggerScrollEvent(75); // Redevient opaque
-      expect(mockAddClass).toHaveBeenCalledWith(
-        mockHeaderElement,
+        mockDesktopHeader,
         "bg-base-100/95"
       );
     });
@@ -325,7 +373,6 @@ describe("ScrollHandler", () => {
     it("devrait préserver les performances avec passive: true", () => {
       scrollHandler = new ScrollHandler();
 
-      // Vérifier que l'option passive est bien configurée
       expect(window.addEventListener).toHaveBeenCalledWith(
         "scroll",
         expect.any(Function),
@@ -335,41 +382,59 @@ describe("ScrollHandler", () => {
   });
 
   describe("edge cases", () => {
-    it("devrait gérer les valeurs de scroll négatives", () => {
+    beforeEach(() => {
       scrollHandler = new ScrollHandler();
-      
-      // Simuler un scroll négatif (peut arriver sur certains navigateurs)
-      Object.defineProperty(window, "scrollY", { value: -10, writable: true });
+    });
+
+    it("devrait gérer les valeurs de scroll négatives", () => {
       triggerScrollEvent(-10);
 
-      // Devrait traiter comme 0 (en haut de page)
+      // Valeur négative traitée comme 0, donc header opaque
       expect(mockAddClass).toHaveBeenCalledWith(
-        mockHeaderElement,
+        mockDesktopHeader,
+        "bg-base-100/95"
+      );
+      expect(mockAddClass).toHaveBeenCalledWith(
+        mockMobileHeader,
         "bg-base-100/95"
       );
     });
 
     it("devrait gérer les très grandes valeurs de scroll", () => {
-      scrollHandler = new ScrollHandler();
-      
       triggerScrollEvent(999999);
 
+      // Grande valeur, donc header transparent
       expect(mockAddClass).toHaveBeenCalledWith(
-        mockHeaderElement,
+        mockDesktopHeader,
+        "bg-base-100/60",
+        "border-transparent"
+      );
+      expect(mockAddClass).toHaveBeenCalledWith(
+        mockMobileHeader,
         "bg-base-100/60",
         "border-transparent"
       );
     });
 
-    it("devrait fonctionner même si classList n'existe pas", () => {
-      // Créer un élément mock sans classList
-      const mockBrokenElement = {} as HTMLElement;
-      mockGetElementById.mockReturnValue(mockBrokenElement);
+    it("devrait fonctionner même si un seul header existe", () => {
+      scrollHandler.destroy();
+      mockGetElementById.mockReset();
+      mockGetElementById
+        .mockReturnValueOnce(mockDesktopHeader) // desktop-header existe
+        .mockReturnValueOnce(null); // mobile-header n'existe pas
+      vi.clearAllMocks();
 
-      expect(() => {
-        scrollHandler = new ScrollHandler();
-        triggerScrollEvent(150);
-      }).not.toThrow();
+      scrollHandler = new ScrollHandler();
+      triggerScrollEvent(150);
+
+      // Seul le desktop header devrait être modifié
+      expect(mockAddClass).toHaveBeenCalledWith(
+        mockDesktopHeader,
+        "bg-base-100/60",
+        "border-transparent"
+      );
+      // Le mobile header ne devrait pas générer d'erreur
+      expect(() => triggerScrollEvent(150)).not.toThrow();
     });
   });
 }); 

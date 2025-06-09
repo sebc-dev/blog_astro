@@ -14,9 +14,10 @@ const navLinks = [
 ];
 ---
 
+<!-- Header Desktop (visible sur grand écran uniquement) -->
 <header
-  id="main-header"
-  class="bg-base-100/95 border-base-300/20 fixed top-0 right-0 left-0 z-50 border-b backdrop-blur-sm transition-all duration-300"
+  id="desktop-header"
+  class="bg-base-100/95 border-base-300/20 fixed top-0 right-0 left-0 z-50 hidden border-b backdrop-blur-sm transition-all duration-300 lg:block"
 >
   <div class="navbar mx-auto max-w-7xl px-4">
     <!-- Logo à gauche -->
@@ -30,7 +31,7 @@ const navLinks = [
     </div>
 
     <!-- Navigation principale (desktop) -->
-    <div class="navbar-center hidden lg:flex">
+    <div class="navbar-center">
       <ul class="menu menu-horizontal px-1">
         {
           navLinks.map((link) => (
@@ -125,24 +126,43 @@ const navLinks = [
           </div>
         </div>
       </label>
-
-      <!-- Bouton hamburger (mobile) -->
-      <button
-        id="mobile-menu-toggle"
-        class="btn btn-square btn-ghost relative lg:hidden"
-        aria-label="Toggle mobile menu"
-      >
-        <div class="hamburger-icon">
-          <span class="hamburger-line"></span>
-          <span class="hamburger-line"></span>
-          <span class="hamburger-line"></span>
-        </div>
-      </button>
     </div>
   </div>
 </header>
 
-<!-- Menu mobile overlay -->
+<!-- Header Mobile (visible sur petit écran uniquement) -->
+<header
+  id="mobile-header"
+  class="bg-base-100/95 border-base-300/20 fixed top-0 right-0 left-0 z-50 border-b backdrop-blur-sm transition-all duration-300 lg:hidden"
+>
+  <div
+    class="flex items-center justify-between px-4 py-2"
+    style="height: 64px;"
+  >
+    <!-- Logo -->
+    <a
+      href="/"
+      class="from-primary to-secondary bg-gradient-to-r bg-clip-text font-mono text-xl font-bold text-transparent"
+    >
+      {siteName}
+    </a>
+
+    <!-- Bouton hamburger -->
+    <button
+      id="mobile-menu-toggle"
+      class="btn btn-square btn-ghost relative"
+      aria-label="Toggle mobile menu"
+    >
+      <div class="hamburger-icon">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+      </div>
+    </button>
+  </div>
+</header>
+
+<!-- Menu mobile overlay (visible uniquement sur mobile) -->
 <div
   id="mobile-overlay"
   class="pointer-events-none fixed inset-0 z-40 bg-black/50 opacity-0 backdrop-blur-sm transition-opacity duration-300 lg:hidden"
@@ -151,22 +171,32 @@ const navLinks = [
     id="mobile-menu-content"
     class="bg-base-100 fixed top-0 right-0 flex h-full w-full translate-x-full transform flex-col transition-transform duration-300"
   >
-    <!-- Header du menu mobile (même hauteur que le header principal) -->
-    <div
-      class="border-base-300 flex flex-shrink-0 items-center justify-between border-b px-6 py-4"
-      style="height: 64px;"
-    >
-      <div class="flex items-center">
-        <span
-          class="from-primary to-secondary bg-gradient-to-r bg-clip-text font-mono text-xl font-bold text-transparent"
-          >{siteName}</span
-        >
-      </div>
+    <!-- Navigation mobile -->
+    <div class="flex h-full flex-col justify-center px-6">
+      <!-- Liens de navigation -->
+      <nav class="flex flex-1 items-center justify-center">
+        <ul class="menu w-full max-w-md">
+          {
+            navLinks.map((link) => (
+              <li class="mb-4">
+                <a
+                  href={link.href}
+                  class="mobile-nav-link hover:bg-primary hover:text-primary-content block py-4 text-center text-xl font-medium transition-colors duration-200"
+                  data-fr={link.label}
+                  data-en={link.labelEN}
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
 
-      <!-- Sélecteurs dans le header mobile -->
-      <div class="flex items-center gap-3">
+      <!-- Contrôles en bas du menu -->
+      <div class="flex items-center justify-center gap-6 pb-8">
         <!-- Sélecteur de langue mobile -->
-        <div class="dropdown dropdown-end">
+        <div class="dropdown dropdown-top">
           <div tabindex="0" role="button" class="btn btn-ghost btn-sm">
             <span id="mobile-current-lang">FR</span>
             <svg
@@ -179,6 +209,7 @@ const navLinks = [
               stroke-width="2"
               stroke-linecap="round"
               stroke-linejoin="round"
+              class="rotate-180 transform"
             >
               <path d="M6 9l6 6 6-6"></path>
             </svg>
@@ -196,7 +227,7 @@ const navLinks = [
           </ul>
         </div>
 
-        <!-- Theme Toggle mobile avec icônes intégrées -->
+        <!-- Theme Toggle mobile -->
         <label
           class="theme-switch relative inline-flex cursor-pointer items-center"
         >
@@ -207,14 +238,14 @@ const navLinks = [
             id="mobile-theme-toggle"
           />
           <div
-            class="theme-switch-track relative h-5 w-10 rounded-full bg-gradient-to-r from-gray-300 to-gray-400 transition-all duration-300 ease-in-out"
+            class="theme-switch-track relative h-6 w-12 rounded-full bg-gradient-to-r from-gray-300 to-gray-400 transition-all duration-300 ease-in-out"
           >
             <div
-              class="theme-switch-thumb absolute top-0.5 left-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-white shadow-md transition-all duration-300 ease-in-out"
+              class="theme-switch-thumb absolute top-0.5 left-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-md transition-all duration-300 ease-in-out"
             >
               <!-- Icône soleil (mode clair) -->
               <svg
-                class="theme-icon-sun h-2.5 w-2.5 text-gray-600 transition-all duration-300 ease-in-out"
+                class="theme-icon-sun h-3 w-3 text-gray-600 transition-all duration-300 ease-in-out"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="currentColor"
@@ -237,7 +268,7 @@ const navLinks = [
               </svg>
               <!-- Icône lune (mode sombre) -->
               <svg
-                class="theme-icon-moon absolute top-1/2 left-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 text-gray-500 opacity-0 transition-all duration-300 ease-in-out"
+                class="theme-icon-moon absolute top-1/2 left-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 text-gray-500 opacity-0 transition-all duration-300 ease-in-out"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="currentColor"
@@ -250,26 +281,6 @@ const navLinks = [
         </label>
       </div>
     </div>
-
-    <!-- Navigation mobile -->
-    <nav class="flex flex-1 items-center justify-center px-6">
-      <ul class="menu w-full max-w-md">
-        {
-          navLinks.map((link) => (
-            <li class="mb-4">
-              <a
-                href={link.href}
-                class="mobile-nav-link hover:bg-primary hover:text-primary-content block py-4 text-center text-xl font-medium transition-colors duration-200"
-                data-fr={link.label}
-                data-en={link.labelEN}
-              >
-                {link.label}
-              </a>
-            </li>
-          ))
-        }
-      </ul>
-    </nav>
   </div>
 </div>
 
@@ -283,8 +294,9 @@ const navLinks = [
     box-shadow: -4px 0 15px rgba(0, 0, 0, 0.1);
   }
 
-  /* Animation pour le header */
-  #main-header {
+  /* Animation pour les headers */
+  #desktop-header,
+  #mobile-header {
     transition:
       background-color 0.3s ease,
       border-color 0.3s ease;
@@ -339,6 +351,36 @@ const navLinks = [
       opacity: 1;
       transform: translateX(0);
     }
+  }
+
+  /* Animation pour les contrôles en bas du menu mobile */
+  .mobile-menu-open .flex.items-center.justify-center.gap-6 {
+    animation: slideInFromBottom 0.4s ease-out forwards;
+    animation-delay: 0.2s;
+    opacity: 0;
+  }
+
+  @keyframes slideInFromBottom {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Styles pour les contrôles du menu mobile */
+  .mobile-menu-open .dropdown-top .dropdown-content {
+    bottom: 100%;
+    top: auto;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Amélioration du contraste pour les contrôles mobiles */
+  #mobile-theme-toggle:checked + .theme-switch-track .theme-switch-thumb {
+    transform: translateX(1.5rem); /* Même taille que desktop pour cohérence */
   }
 
   /* Amélioration des dropdowns */

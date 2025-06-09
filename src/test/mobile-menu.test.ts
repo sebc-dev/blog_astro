@@ -65,7 +65,7 @@ describe("MobileMenu", () => {
 
     // Configuration des mocks pour retourner les éléments simulés
     mockGetElementById
-      .mockReturnValueOnce(mockCheckbox) // mobile-menu
+      .mockReturnValueOnce(mockCheckbox) // mobile-menu-toggle
       .mockReturnValueOnce(mockOverlay) // mobile-overlay
       .mockReturnValueOnce(mockContent); // mobile-menu-content
 
@@ -82,7 +82,7 @@ describe("MobileMenu", () => {
     it("devrait initialiser les références DOM correctement", () => {
       mobileMenu = new MobileMenu();
 
-      expect(mockGetElementById).toHaveBeenCalledWith("mobile-menu");
+      expect(mockGetElementById).toHaveBeenCalledWith("mobile-menu-toggle");
       expect(mockGetElementById).toHaveBeenCalledWith("mobile-overlay");
       expect(mockGetElementById).toHaveBeenCalledWith("mobile-menu-content");
       expect(mockQuerySelectorAll).toHaveBeenCalledWith(".mobile-nav-link");
@@ -92,8 +92,8 @@ describe("MobileMenu", () => {
       mobileMenu = new MobileMenu();
 
       expect(mockCheckbox.addEventListener).toHaveBeenCalledWith(
-        "change",
-        expect.any(Function)
+        "click",
+        expect.any(Function),
       );
     });
 
@@ -102,7 +102,7 @@ describe("MobileMenu", () => {
 
       expect(mockOverlay.addEventListener).toHaveBeenCalledWith(
         "click",
-        expect.any(Function)
+        expect.any(Function),
       );
     });
 
@@ -118,13 +118,13 @@ describe("MobileMenu", () => {
         .mockReturnValueOnce(null) // mobile-menu
         .mockReturnValueOnce(null) // mobile-overlay
         .mockReturnValueOnce(null); // mobile-menu-content
-      
+
       const emptyNodeList = {
         length: 0,
         item: vi.fn().mockReturnValue(null),
         forEach: vi.fn(),
       } as unknown as NodeListOf<HTMLElement>;
-      
+
       mockQuerySelectorAll.mockReturnValue(emptyNodeList);
 
       expect(() => {
@@ -144,7 +144,7 @@ describe("MobileMenu", () => {
       expect(mockRemoveClass).toHaveBeenCalledWith(
         mockOverlay,
         "opacity-0",
-        "pointer-events-none"
+        "pointer-events-none",
       );
     });
 
@@ -153,7 +153,7 @@ describe("MobileMenu", () => {
 
       expect(mockRemoveClass).toHaveBeenCalledWith(
         mockContent,
-        "translate-x-full"
+        "translate-x-full",
       );
     });
 
@@ -169,12 +169,10 @@ describe("MobileMenu", () => {
       mobileMenu = new MobileMenu();
     });
 
-    it("devrait décocher la checkbox", () => {
-      mockCheckbox.checked = true;
-
+    it("devrait supprimer la classe menu-open du bouton toggle", () => {
       mobileMenu.close();
 
-      expect(mockCheckbox.checked).toBe(false);
+      expect(mockRemoveClass).toHaveBeenCalledWith(mockCheckbox, "menu-open");
     });
 
     it("devrait ajouter les classes d'overlay pour masquer", () => {
@@ -183,7 +181,7 @@ describe("MobileMenu", () => {
       expect(mockAddClass).toHaveBeenCalledWith(
         mockOverlay,
         "opacity-0",
-        "pointer-events-none"
+        "pointer-events-none",
       );
     });
 
@@ -192,7 +190,7 @@ describe("MobileMenu", () => {
 
       expect(mockAddClass).toHaveBeenCalledWith(
         mockContent,
-        "translate-x-full"
+        "translate-x-full",
       );
     });
 
@@ -239,8 +237,8 @@ describe("MobileMenu", () => {
       mobileMenu.destroy();
 
       expect(mockCheckbox.removeEventListener).toHaveBeenCalledWith(
-        "change",
-        expect.any(Function)
+        "click",
+        expect.any(Function),
       );
     });
 
@@ -249,7 +247,7 @@ describe("MobileMenu", () => {
 
       expect(mockOverlay.removeEventListener).toHaveBeenCalledWith(
         "click",
-        expect.any(Function)
+        expect.any(Function),
       );
     });
 
@@ -265,13 +263,13 @@ describe("MobileMenu", () => {
         .mockReturnValueOnce(null) // mobile-menu
         .mockReturnValueOnce(null) // mobile-overlay
         .mockReturnValueOnce(null); // mobile-menu-content
-      
+
       const emptyNodeList = {
         length: 0,
         item: vi.fn().mockReturnValue(null),
         forEach: vi.fn(),
       } as unknown as NodeListOf<HTMLElement>;
-      
+
       mockQuerySelectorAll.mockReturnValue(emptyNodeList);
 
       mobileMenu = new MobileMenu();
@@ -294,7 +292,7 @@ describe("MobileMenu", () => {
       expect(mockRemoveClass).toHaveBeenCalledWith(
         mockOverlay,
         "opacity-0",
-        "pointer-events-none"
+        "pointer-events-none",
       );
       expect(mockSetBodyOverflow).toHaveBeenCalledWith(true);
 
@@ -307,7 +305,7 @@ describe("MobileMenu", () => {
       expect(mockAddClass).toHaveBeenCalledWith(
         mockOverlay,
         "opacity-0",
-        "pointer-events-none"
+        "pointer-events-none",
       );
       expect(mockSetBodyOverflow).toHaveBeenCalledWith(false);
     });
@@ -331,4 +329,4 @@ describe("MobileMenu", () => {
       expect(mockSetBodyOverflow).toHaveBeenCalledWith(true);
     });
   });
-}); 
+});
