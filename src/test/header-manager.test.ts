@@ -3,11 +3,11 @@ import {
   HeaderManager,
   initializeHeader,
   getHeaderManager,
-} from "../scripts/header/index";
-import { ScrollHandler } from "../scripts/header/scroll-handler";
-import { MobileMenu } from "../scripts/header/mobile-menu";
-import { LanguageManager } from "../scripts/header/language";
-import { ThemeManager } from "../scripts/header/theme";
+} from "../scripts/header";
+import { ScrollHandler } from "../scripts/header";
+import { MobileMenu } from "../scripts/header";
+import { LanguageManager } from "../scripts/header";
+import { ThemeManager } from "../scripts/header";
 
 // Mock de tous les sous-modules
 vi.mock("../scripts/header/scroll-handler", () => ({
@@ -363,29 +363,183 @@ describe("Fonctions globales", () => {
   });
 
   describe("Gestion des erreurs", () => {
-    it("devrait gérer les erreurs d'initialisation des sous-modules", () => {
-      // Faire échouer l'initialisation d'un module
+    let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
+
+    beforeEach(() => {
+      // Mock console.error pour capturer les logs
+      consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      consoleErrorSpy.mockRestore();
+    });
+
+    it("devrait logger et re-lancer une erreur lors de l'échec d'initialisation de ScrollHandler", () => {
+      const testError = new Error("Erreur d'initialisation ScrollHandler");
       MockedScrollHandler.mockImplementation(() => {
-        throw new Error("Erreur d'initialisation ScrollHandler");
+        throw testError;
+      });
+
+      expect(() => {
+        new HeaderManager();
+      }).toThrow("Erreur d'initialisation ScrollHandler");
+
+      // Vérifier que l'erreur a été loggée
+      expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Erreur lors de l'initialisation du HeaderManager:",
+        testError
+      );
+    });
+
+    it("devrait logger et re-lancer une erreur lors de l'échec d'initialisation de MobileMenu", () => {
+      const testError = new Error("Erreur d'initialisation MobileMenu");
+      MockedMobileMenu.mockImplementation(() => {
+        throw testError;
+      });
+
+      expect(() => {
+        new HeaderManager();
+      }).toThrow("Erreur d'initialisation MobileMenu");
+
+      // Vérifier que l'erreur a été loggée avec le bon message
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Erreur lors de l'initialisation du HeaderManager:",
+        testError
+      );
+    });
+
+    it("devrait logger et re-lancer une erreur lors de l'échec d'initialisation de LanguageManager", () => {
+      const testError = new Error("Erreur d'initialisation LanguageManager");
+      MockedLanguageManager.mockImplementation(() => {
+        throw testError;
+      });
+
+      expect(() => {
+        new HeaderManager();
+      }).toThrow("Erreur d'initialisation LanguageManager");
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Erreur lors de l'initialisation du HeaderManager:",
+        testError
+      );
+    });
+
+    it("devrait logger et re-lancer une erreur lors de l'échec d'initialisation de ThemeManager", () => {
+      const testError = new Error("Erreur d'initialisation ThemeManager");
+      MockedThemeManager.mockImplementation(() => {
+        throw testError;
+      });
+
+      expect(() => {
+        new HeaderManager();
+      }).toThrow("Erreur d'initialisation ThemeManager");
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Erreur lors de l'initialisation du HeaderManager:",
+        testError
+      );
+    });
+
+    it("devrait gérer les erreurs d'initialisation des sous-modules via initializeHeader", () => {
+      const testError = new Error("Erreur d'initialisation ScrollHandler");
+      MockedScrollHandler.mockImplementation(() => {
+        throw testError;
       });
 
       expect(() => {
         initializeHeader();
       }).toThrow("Erreur d'initialisation ScrollHandler");
+
+      // Vérifier que l'erreur a été loggée
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Erreur lors de l'initialisation du HeaderManager:",
+        testError
+      );
     });
 
     it("devrait maintenir la cohérence même en cas d'erreur partielle", () => {
+      const testError = new Error("Erreur MobileMenu");
       // Simuler une erreur sur le deuxième module
       MockedMobileMenu.mockImplementation(() => {
-        throw new Error("Erreur MobileMenu");
+        throw testError;
       });
 
       expect(() => {
         initializeHeader();
       }).toThrow("Erreur MobileMenu");
 
-      // Vérifier que le premier module a quand même été initialisé
+      // Vérifier que le premier module a quand même été initialisé avant l'erreur
       expect(MockedScrollHandler).toHaveBeenCalled();
+      
+      // Vérifier le logging de l'erreur
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Erreur lors de l'initialisation du HeaderManager:",
+        testError
+      );
+    });
+
+    it("devrait préserver le type et le message d'erreur original", () => {
+      class CustomError extends Error {
+        public code: string;
+        constructor(message: string, code: string) {
+          super(message);
+          this.name = "CustomError";
+          this.code = code;
+        }
+      }
+
+      const customError = new CustomError("Erreur personnalisée", "CUSTOM_001");
+      MockedScrollHandler.mockImplementation(() => {
+        throw customError;
+      });
+
+      let thrownError: Error | null = null;
+      try {
+        new HeaderManager();
+      } catch (error) {
+        thrownError = error as Error;
+      }
+
+      // Vérifier que l'erreur originale est préservée
+      expect(thrownError).toBe(customError);
+      expect(thrownError?.name).toBe("CustomError");
+      expect(thrownError?.message).toBe("Erreur personnalisée");
+      expect((thrownError as CustomError)?.code).toBe("CUSTOM_001");
+
+      // Vérifier que l'erreur complète a été loggée
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Erreur lors de l'initialisation du HeaderManager:",
+        customError
+      );
+    });
+
+    it("devrait gérer les erreurs qui ne sont pas des instances Error", () => {
+      const stringError = "Erreur sous forme de string";
+      MockedScrollHandler.mockImplementation(() => {
+        throw stringError;
+      });
+
+      expect(() => {
+        new HeaderManager();
+      }).toThrow(stringError);
+
+      // Vérifier que même les erreurs non-Error sont loggées
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Erreur lors de l'initialisation du HeaderManager:",
+        stringError
+      );
+    });
+
+    it("ne devrait pas affecter console.error si aucune erreur ne survient", () => {
+      // S'assurer que tous les mocks sont configurés pour réussir
+      const manager = new HeaderManager();
+
+      // Vérifier qu'aucun log d'erreur n'a été émis
+      expect(consoleErrorSpy).not.toHaveBeenCalled();
+
+      // Nettoyer
+      manager.destroy();
     });
   });
 

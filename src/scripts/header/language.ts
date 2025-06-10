@@ -9,6 +9,7 @@ import {
   ClickableElements,
   NavigationLinks,
   LanguageIndicators,
+  DropdownButtons,
 } from "./dom-collections.js";
 
 /**
@@ -132,12 +133,19 @@ export class LanguageManager {
 class LanguageControls {
   private readonly clickableElements: ClickableElements;
   private readonly uiElements: LanguageUIElements;
+  private readonly dropdownButtons: DropdownButtons;
 
   constructor() {
     this.clickableElements = new ClickableElements(
       new CssSelector(".lang-option, .mobile-lang-option"),
     );
     this.uiElements = new LanguageUIElements();
+    this.dropdownButtons = new DropdownButtons(
+      new CssSelector('[aria-controls="desktop-lang-menu"], [aria-controls="mobile-lang-menu"]')
+    );
+    
+    // Initialiser la gestion ARIA des dropdowns
+    this.dropdownButtons.bindAriaHandlers();
   }
 
   /**
@@ -154,6 +162,8 @@ class LanguageControls {
    */
   public updateDisplay(language: Language): void {
     this.uiElements.updateAll(language);
+    // Fermer les dropdowns après sélection
+    this.dropdownButtons.setAllAriaExpanded(false);
   }
 
   public destroy(): void {

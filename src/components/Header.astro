@@ -1,17 +1,27 @@
 ---
 // Header.astro
-interface Props {
-  siteName?: string;
+
+// Interface pour définir la structure d'un lien de navigation
+interface NavLink {
+  href: string;
+  label: string;
+  labelEN: string;
 }
 
-const { siteName = "sebc.dev" } = Astro.props;
+interface Props {
+  siteName?: string;
+  navLinks?: NavLink[];
+}
 
-const navLinks = [
-  { href: "/", label: "Accueil", labelEN: "Home" },
-  { href: "/about", label: "À propos", labelEN: "About" },
-  { href: "/services", label: "Services", labelEN: "Services" },
-  { href: "/contact", label: "Contact", labelEN: "Contact" },
-];
+const { 
+  siteName = "sebc.dev",
+  navLinks = [
+    { href: "/", label: "Accueil", labelEN: "Home" },
+    { href: "/about", label: "À propos", labelEN: "About" },
+    { href: "/services", label: "Services", labelEN: "Services" },
+    { href: "/contact", label: "Contact", labelEN: "Contact" },
+  ]
+} = Astro.props;
 ---
 
 <!-- Header Desktop (visible sur grand écran uniquement) -->
@@ -54,7 +64,14 @@ const navLinks = [
     <div class="navbar-end flex items-center gap-2">
       <!-- Sélecteur de langue -->
       <div class="dropdown dropdown-end">
-        <div tabindex="0" role="button" class="btn btn-ghost btn-sm">
+        <div 
+          tabindex="0" 
+          role="button" 
+          class="btn btn-ghost btn-sm"
+          aria-haspopup="true"
+          aria-expanded="false"
+          aria-controls="desktop-lang-menu"
+        >
           <span id="current-lang">FR</span>
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -71,6 +88,7 @@ const navLinks = [
           </svg>
         </div>
         <ul
+          id="desktop-lang-menu"
           tabindex="0"
           class="dropdown-content menu bg-base-100 rounded-box border-base-300 z-[1] w-24 border p-2 shadow-lg"
         >
@@ -197,7 +215,14 @@ const navLinks = [
       <div class="flex items-center justify-center gap-6 pb-8">
         <!-- Sélecteur de langue mobile -->
         <div class="dropdown dropdown-top">
-          <div tabindex="0" role="button" class="btn btn-ghost btn-sm">
+          <div 
+            tabindex="0" 
+            role="button" 
+            class="btn btn-ghost btn-sm"
+            aria-haspopup="true"
+            aria-expanded="false"
+            aria-controls="mobile-lang-menu"
+          >
             <span id="mobile-current-lang">FR</span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -215,6 +240,7 @@ const navLinks = [
             </svg>
           </div>
           <ul
+            id="mobile-lang-menu"
             tabindex="0"
             class="dropdown-content menu bg-base-100 rounded-box border-base-300 z-[1] w-24 border p-2 shadow-lg"
           >

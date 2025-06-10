@@ -29,10 +29,15 @@ export class HeaderManager {
    * Initialise tous les sous-modules
    */
   constructor() {
-    this.scrollHandler = new ScrollHandler();
-    this.mobileMenu = new MobileMenu();
-    this.languageManager = new LanguageManager();
-    this.themeManager = new ThemeManager();
+    try {
+      this.scrollHandler = new ScrollHandler();
+      this.mobileMenu = new MobileMenu();
+      this.languageManager = new LanguageManager();
+      this.themeManager = new ThemeManager();
+    } catch(error) {
+        console.error('Erreur lors de l\'initialisation du HeaderManager:', error);
+        throw error;
+    }
   }
 
   /**
@@ -111,9 +116,9 @@ export function getHeaderManager(): HeaderManager | null {
  * Auto-initialisation au chargement du DOM
  * @event DOMContentLoaded
  */
-document.addEventListener("DOMContentLoaded", () => {
-  initializeHeader();
-});
+  document.addEventListener("DOMContentLoaded", () => {
+    initializeHeader();
+  });
 
 // Exports pour usage externe
 export { ScrollHandler } from "./scroll-handler.js";

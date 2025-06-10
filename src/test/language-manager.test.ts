@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
-import { LanguageManager } from "../scripts/header/language";
-import { Language } from "../scripts/header/value-objects";
+import { LanguageManager } from "../scripts/header";
+import { Language } from "../scripts/header";
 
 // Mock des dépendances
 const mockClickableElements = {
@@ -19,10 +19,18 @@ const mockLanguageIndicators = {
   getCount: vi.fn().mockReturnValue(2),
 };
 
+const mockDropdownButtons = {
+  setAriaExpanded: vi.fn(),
+  setAllAriaExpanded: vi.fn(),
+  bindAriaHandlers: vi.fn(),
+  getCount: vi.fn().mockReturnValue(2),
+};
+
 vi.mock("../scripts/header/dom-collections", () => ({
   ClickableElements: vi.fn().mockImplementation(() => mockClickableElements),
   NavigationLinks: vi.fn().mockImplementation(() => mockNavigationLinks),
   LanguageIndicators: vi.fn().mockImplementation(() => mockLanguageIndicators),
+  DropdownButtons: vi.fn().mockImplementation(() => mockDropdownButtons),
 }));
 
 // Mock du localStorage
@@ -45,6 +53,10 @@ describe("LanguageManager", () => {
     vi.clearAllMocks();
     // Reset localStorage mock
     mockLocalStorage.getItem.mockReturnValue(null);
+    // Reset dropdown buttons mock
+    mockDropdownButtons.setAriaExpanded.mockClear();
+    mockDropdownButtons.setAllAriaExpanded.mockClear();
+    mockDropdownButtons.bindAriaHandlers.mockClear();
   });
 
   afterEach(() => {
@@ -82,6 +94,7 @@ describe("LanguageManager", () => {
       languageManager = new LanguageManager();
 
       expect(mockClickableElements.bindClickHandler).toHaveBeenCalledWith(expect.any(Function));
+      expect(mockDropdownButtons.bindAriaHandlers).toHaveBeenCalled();
     });
   });
 
@@ -113,6 +126,7 @@ describe("LanguageManager", () => {
 
       expect(mockLanguageIndicators.updateAll).toHaveBeenCalledWith("EN");
       expect(mockNavigationLinks.updateTexts).toHaveBeenCalledWith(false); // false car c'est l'anglais
+      expect(mockDropdownButtons.setAllAriaExpanded).toHaveBeenCalledWith(false); // Fermer les dropdowns après sélection
     });
 
     it("devrait gérer le passage du français à l'anglais", () => {
