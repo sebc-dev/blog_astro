@@ -1,92 +1,77 @@
 ---
-description: ""
+description: Règle TypeScript complète pour projets Astro appliquant la philosophie "TypeScript-first" avec intégration privilégiée dans les composants .astro, configuration optimisée, Content Collections typées et patterns de performance. Couvre l'architecture, le typage strict, l'organisation par domaine et les bonnes pratiques de développement Astro moderne.
 globs: ["*.astro", "*.ts", "*.tsx"]
 alwaysApply: false
 ---
 
-# Bonnes Pratiques Astro + TypeScript
+# TypeScript Astro : Architecture et Bonnes Pratiques Complètes
 
 ## Règles Critiques
 
-### Architecture et Structure
-- Utiliser le typage TypeScript strict dans `tsconfig.json` (`"strict": true`)
-- Organiser les composants Astro par feature/domaine, pas par type technique
-- Placer les types partagés dans `src/types/` avec exports explicites
-- Séparer la logique métier des composants d'affichage via des utilitaires typés
+### Architecture et Typage
+- **Utiliser le typage TypeScript strict** avec `"strict": true` dans tsconfig.json
+- **Organiser par feature/domaine**, pas par type technique (Component-First pattern)
+- **Privilégier l'intégration TypeScript** dans le frontmatter pour la logique spécifique aux composants
+- **Externaliser uniquement** quand logique réutilisée dans 3+ composants ou dépasse 100 lignes
+- **Déclarer les Props** avec interfaces TypeScript explicites dans chaque composant
+- **Éviter `any`** - utiliser `unknown` puis type guards, ou `satisfies` operator
 
-### Composants Astro (.astro)
-- Déclarer les props avec interface TypeScript dans le frontmatter
-- Utiliser `Astro.props` avec destructuring typé pour une meilleure DX
-- Préférer les composants fonctionnels React/Vue dans `src/components/` pour la logique complexe
-- Isoler le CSS avec `<style>` scoped et éviter les styles globaux sauf dans les layouts
+### Performance et Rendu
+- **Privilégier le rendu statique** - minimiser les directives client (`client:*`)
+- **Utiliser `client:load`** uniquement pour l'interactivité critique immédiate
+- **Préférer `client:visible`** pour les composants below-the-fold
+- **Implémenter `client:idle`** pour les fonctionnalités secondaires
 
-### Gestion du Typage
-- Créer des types spécifiques pour les données CMS/API dans `src/types/content.ts`
-- Utiliser `satisfies` operator pour maintenir l'inférence de type
-- Typer les props des composants islands avec interfaces explicites
-- Éviter `any` - utiliser `unknown` puis type guards si nécessaire
+### Content Collections et Données
+- **Créer des Content Collections typées** avec schemas Zod obligatoires
+- **Utiliser `getCollection()`** avec inférence de type automatique
+- **Typer les données CMS/API** dans `src/types/content.ts`
+- **Implémenter des API routes typées** avec interface `APIRoute`
 
-### Performance et Optimisation
-- Privilégier le rendu statique : minimiser l'usage des directives client (`client:*`)
-- Utiliser `client:load` uniquement pour l'interactivité critique immédiate
-- Préférer `client:visible` pour les composants below-the-fold
-- Implémenter le lazy loading avec `client:idle` pour les fonctionnalités secondaires
+## Configuration TypeScript Optimisée
 
-## Standards Spécifiques
+- **moduleResolution: "bundler"** pour Astro 3+
+- **target: "ES2022"** minimum pour les features modernes  
+- **exactOptionalPropertyTypes: true** pour la précision maximale
+- **Path mappings configurés** : `"@/*": ["./src/*"]`
 
-### Structure de Fichiers Astro
-```typescript
----
-// Frontmatter TypeScript
-interface Props {
-  title: string;
-  description?: string;
-  items: Array<{id: string; name: string}>;
-}
+## Organisation Structurelle
 
-const { title, description, items } = Astro.props;
-
-// Logique côté serveur uniquement ici
-const processedItems = items.map(item => ({
-  ...item,
-  slug: item.name.toLowerCase().replace(/\s+/g, '-')
-}));
----
-
-<!-- Template HTML -->
-<main>
-  <h1>{title}</h1>
-  {description && <p>{description}</p>}
-  <!-- Boucles et logique d'affichage -->
-</main>
-
-<style>
-  /* CSS scoped au composant */
-</style>
+```
+src/
+├── components/       # Composants .astro avec TS intégré
+├── types/           # Types partagés avec exports explicites
+├── content/         # Collections avec schemas Zod
+├── lib/utils/       # Utilitaires réutilisables typés
+└── pages/           # Routes avec logique intégrée
 ```
 
-### Configuration TypeScript Recommandée
-- Activer `"moduleResolution": "bundler"` pour Astro 3+
-- Configurer les path mappings : `"@/*": ["./src/*"]`
-- Utiliser `"target": "ES2022"` minimum pour les features modernes
-- Activer `"exactOptionalPropertyTypes": true` pour la précision
+## Critères de Décision pour l'Externalisation
 
-### Patterns d'Intégration
-- Créer des Content Collections typées avec Zod schemas
-- Utiliser `getCollection()` avec inférence de type automatique
-- Implémenter des API routes typées avec `APIRoute` interface
-- Gérer les erreurs avec des types union discriminants
+### Externaliser quand :
+- **Logique réutilisée** dans 3+ composants différents
+- **Fonction complexe** dépassant 100 lignes de code
+- **Logique métier** indépendante de l'interface utilisateur
+- **Tests unitaires** spécifiques nécessaires pour la fonction
 
-### SEO et Métadonnées
-- Créer un composant `<SEO>` typé pour les métadonnées
-- Utiliser `ViewTransitions` avec types pour les animations de page
-- Typer les données structurées JSON-LD avec interfaces dédiées
+### Garder intégré quand :
+- **Logique spécifique** au composant uniquement
+- **Accès `Astro.props`** requis pour le fonctionnement
+- **Cohésion template/logique** critique pour la maintenance
+- **Simplicité** prime sur la réutilisabilité théorique
 
-## Exemples
+## Patterns de Composants Astro
+
+### Structure Standard
+- **Frontmatter TypeScript** avec interfaces Props explicites
+- **Destructuring typé** de `Astro.props` pour meilleure DX
+- **Logique côté serveur uniquement** dans le frontmatter
+- **CSS scoped** avec `<style>` - éviter les styles globaux sauf layouts
+
+## Patterns de Code
 
 <example>
-```typescript
-// Content Collection Schema (src/content/config.ts)
+// Content Collection avec Schema Zod
 import { defineCollection, z } from 'astro:content';
 
 const blogCollection = defineCollection({
@@ -99,9 +84,7 @@ const blogCollection = defineCollection({
   })
 });
 
-export const collections = {
-  blog: blogCollection
-};
+export const collections = { blog: blogCollection };
 
 // Usage dans composant
 ---
@@ -118,12 +101,48 @@ const featuredPosts = posts
   .filter(post => post.data.featured)
   .slice(0, limit);
 ---
-```
 </example>
 
 <example>
-```typescript
-// Component Island typé
+// Composant Astro avec TypeScript intégré optimal
+---
+interface Props {
+  title: string;
+  description?: string;
+  items: Array<{id: string; name: string}>;
+  variant?: 'primary' | 'secondary';
+}
+
+const { title, description, items, variant = 'primary' } = Astro.props;
+
+// Logique côté serveur uniquement
+const processedItems = items.map(item => ({
+  ...item,
+  slug: item.name.toLowerCase().replace(/\s+/g, '-')
+}));
+---
+
+<main class={`layout--${variant}`}>
+  <h1>{title}</h1>
+  {description && <p>{description}</p>}
+  <ul>
+    {processedItems.map(item => (
+      <li key={item.id}>
+        <a href={`/items/${item.slug}`}>{item.name}</a>
+      </li>
+    ))}
+  </ul>
+</main>
+
+<style>
+  /* CSS scoped au composant */
+  .layout--primary { @apply bg-blue-50; }
+  .layout--secondary { @apply bg-gray-50; }
+</style>
+</example>
+
+<example>
+// Component Island typé pour interactivité
 ---
 interface InteractiveCounterProps {
   initialValue: number;
@@ -135,7 +154,7 @@ const props: InteractiveCounterProps = Astro.props;
 ---
 
 <div id="counter-container">
-  <Counter client:load {...props} />
+  <Counter client:visible {...props} />
 </div>
 
 // src/components/Counter.tsx
@@ -150,48 +169,55 @@ export default function Counter({
   step = 1, 
   max = 100 
 }: CounterProps) {
-  // Logique React typée
+  // Logique React typée avec hooks
 }
-```
 </example>
 
 <example type="invalid">
-```typescript
-// ❌ Éviter : Props non typées
+// ❌ À éviter : Anti-patterns Astro + TypeScript
 ---
-const { title, items } = Astro.props; // Pas de typage
----
+// Props non typées
+const { title, items } = Astro.props; // Manque interface Props
 
-// ❌ Éviter : Logique client dans frontmatter
----
-const data = await fetch('/api/data'); // Côté serveur uniquement
+// Logique client dans frontmatter  
 const handleClick = () => {}; // Logique client à éviter ici
----
+const data = await fetch('/api/data'); // OK côté serveur
 
-// ❌ Éviter : Any types
+// Types any
 interface Props {
   data: any; // Utiliser des types spécifiques
   callback: any; // Typer les fonctions
 }
-```
+
+// Sur-externalisation inutile
+import { formatTitle } from '@lib/formatters'; // Pour .toUpperCase()
+---
 </example>
 
-## Intégrations et Outils
+## Intégrations et Outils Recommandés
 
 ### Développement
-- Configurer ESLint avec `@typescript-eslint/recommended` + règles Astro
-- Utiliser Prettier avec plugin Astro pour le formatage cohérent
-- Implémenter Husky + lint-staged pour la qualité de code
-- Configurer Vite pour les alias et optimisations de build
+- **ESLint** avec `@typescript-eslint/recommended` + règles Astro
+- **Prettier** avec plugin Astro pour formatage cohérent  
+- **Path mappings** configurés dans astro.config.mjs et tsconfig.json
+- **Vite** pour alias et optimisations de build
 
-### Testing
-- Utiliser Vitest pour les tests unitaires des utilitaires TypeScript
-- Tester les composants Astro avec `@astro/test` (experimental)
-- Implémenter des tests E2E avec Cypress sur les pages rendues
-- Mocker les Content Collections pour les tests isolés
+### Testing et Qualité
+- **Vitest** pour tests unitaires des utilitaires TypeScript
+- **Husky + lint-staged** pour contrôle qualité pre-commit
+- **Type coverage** avec `typescript-coverage-report`
+- **Tests E2E** avec Cypress sur les pages rendues
 
-### Production
-- Optimiser les bundles avec `vite-bundle-analyzer`
-- Configurer les Content Security Policies pour les composants islands
-- Utiliser des Service Workers typés pour le caching avancé
-- Implémenter la compression et l'optimisation d'images avec Sharp
+### SEO et Métadonnées
+- **Composant `<SEO>`** typé pour métadonnées cohérentes
+- **ViewTransitions** avec types pour animations de page
+- **Données structurées JSON-LD** avec interfaces dédiées
+- **Content Security Policies** typées pour composants islands
+
+## Anti-Patterns Critiques
+
+- **Logique client dans frontmatter** : utiliser les composants islands appropriés
+- **Types `any`** : privilégier `unknown` avec type guards ou `satisfies`
+- **Sur-externalisation** : éviter les fichiers pour chaque petite fonction  
+- **Imports circulaires** : organiser la hiérarchie des dépendances proprement
+- **Styles globaux excessifs** : privilégier CSS scoped sauf pour les layouts

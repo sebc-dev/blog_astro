@@ -1,3 +1,8 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
 # Structure du Projet - Blog Astro
 
 ## Organisation Racine
