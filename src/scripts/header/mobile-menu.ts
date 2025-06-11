@@ -18,17 +18,19 @@ import {
  * @class MobileMenu
  */
 export class MobileMenu {
-  private toggleButton: HTMLButtonElement | null;
-  private overlay: HTMLElement | null;
-  private content: HTMLElement | null;
-  private navLinks: NodeListOf<HTMLElement>;
-  private isOpen: boolean = false;
+  private readonly toggleButton: HTMLButtonElement | null;
+  private readonly overlay: HTMLElement | null;
+  private readonly content: HTMLElement | null;
+  private readonly navLinks: NodeListOf<HTMLElement>;
+  private isOpen = false;
+  private readonly abortController: AbortController;
 
   /**
    * Crée une nouvelle instance du gestionnaire de menu mobile
    * Initialise les références aux éléments DOM et configure les événements
    */
   constructor() {
+    this.abortController = new AbortController();
     this.toggleButton = getElementById<HTMLButtonElement>("mobile-menu-toggle");
     this.overlay = getElementById("mobile-overlay");
     this.content = getElementById("mobile-menu-content");
@@ -42,19 +44,29 @@ export class MobileMenu {
    * @private
    */
   private bindEvents(): void {
+    const signal = this.abortController.signal;
+
     // Toggle sur clic du bouton
-    this.toggleButton?.addEventListener("click", this.handleToggle.bind(this));
+    this.toggleButton?.addEventListener("click", this.handleToggle.bind(this), {
+      signal,
+    });
 
     // Fermeture sur clic overlay
-    this.overlay?.addEventListener("click", this.handleOverlayClick.bind(this));
+    this.overlay?.addEventListener(
+      "click",
+      this.handleOverlayClick.bind(this),
+      { signal },
+    );
 
     // Fermeture sur clic des liens de navigation
     this.navLinks.forEach((link) => {
-      link.addEventListener("click", this.close.bind(this));
+      link.addEventListener("click", this.close.bind(this), { signal });
     });
 
     // Fermeture sur touche Échap
-    document.addEventListener("keydown", this.handleKeyDown.bind(this));
+    document.addEventListener("keydown", this.handleKeyDown.bind(this), {
+      signal,
+    });
   }
 
   /**
@@ -138,21 +150,11 @@ export class MobileMenu {
   }
 
   /**
-   * Nettoie les ressources en supprimant les gestionnaires d'événements
+   * Nettoie les ressources en supprimant automatiquement tous les gestionnaires d'événements
    * @public
    */
   public destroy(): void {
-    this.toggleButton?.removeEventListener(
-      "click",
-      this.handleToggle.bind(this),
-    );
-    this.overlay?.removeEventListener(
-      "click",
-      this.handleOverlayClick.bind(this),
-    );
-    this.navLinks.forEach((link) => {
-      link.removeEventListener("click", this.close.bind(this));
-    });
-    document.removeEventListener("keydown", this.handleKeyDown.bind(this));
+    // AbortController supprime automatiquement tous les event listeners associés
+    this.abortController.abort();
   }
 }

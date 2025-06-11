@@ -12,20 +12,20 @@ import { getElementById, addClass, removeClass } from "../utils/dom.js";
  * @class ScrollHandler
  */
 export class ScrollHandler {
-  private desktopHeader: HTMLElement | null;
-  private mobileHeader: HTMLElement | null;
-  private lastScrollY: number = 0;
+  private readonly desktopHeader: HTMLElement | null;
+  private readonly mobileHeader: HTMLElement | null;
+  private lastScrollY = 0;
   private readonly threshold: number = 100;
-  private boundHandleScroll: (event: Event) => void;
+  private readonly abortController: AbortController;
 
   /**
    * Crée une nouvelle instance du gestionnaire de défilement
    * Gère les headers desktop et mobile
    */
   constructor() {
+    this.abortController = new AbortController();
     this.desktopHeader = getElementById("desktop-header");
     this.mobileHeader = getElementById("mobile-header");
-    this.boundHandleScroll = this.handleScroll.bind(this);
     this.bindEvents();
   }
 
@@ -34,8 +34,11 @@ export class ScrollHandler {
    * @private
    */
   private bindEvents(): void {
-    window.addEventListener("scroll", this.boundHandleScroll, {
+    const signal = this.abortController.signal;
+
+    window.addEventListener("scroll", this.handleScroll.bind(this), {
       passive: true,
+      signal,
     });
   }
 
@@ -66,10 +69,11 @@ export class ScrollHandler {
   }
 
   /**
-   * Nettoie les ressources en supprimant les gestionnaires d'événements
+   * Nettoie les ressources en supprimant automatiquement tous les gestionnaires d'événements
    * @public
    */
   public destroy(): void {
-    window.removeEventListener("scroll", this.boundHandleScroll);
+    // AbortController supprime automatiquement tous les event listeners associés
+    this.abortController.abort();
   }
 }

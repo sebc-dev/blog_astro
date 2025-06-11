@@ -6,16 +6,19 @@ import { Language } from "../scripts/header";
 const mockClickableElements = {
   bindClickHandler: vi.fn(),
   unbindClickHandler: vi.fn(),
+  destroy: vi.fn(),
   getCount: vi.fn().mockReturnValue(2),
 };
 
 const mockNavigationLinks = {
   updateTexts: vi.fn(),
+  destroy: vi.fn(),
   getCount: vi.fn().mockReturnValue(3),
 };
 
 const mockLanguageIndicators = {
   updateAll: vi.fn(),
+  destroy: vi.fn(),
   getCount: vi.fn().mockReturnValue(2),
 };
 
@@ -23,6 +26,7 @@ const mockDropdownButtons = {
   setAriaExpanded: vi.fn(),
   setAllAriaExpanded: vi.fn(),
   bindAriaHandlers: vi.fn(),
+  cleanup: vi.fn(),
   getCount: vi.fn().mockReturnValue(2),
 };
 
@@ -78,7 +82,9 @@ describe("LanguageManager", () => {
 
       languageManager = new LanguageManager();
 
-      expect(mockLocalStorage.getItem).toHaveBeenCalledWith("preferred-language");
+      expect(mockLocalStorage.getItem).toHaveBeenCalledWith(
+        "preferred-language",
+      );
       expect(languageManager.getCurrentLanguage().getCode()).toBe("en");
     });
 
@@ -93,7 +99,9 @@ describe("LanguageManager", () => {
     it("devrait configurer les gestionnaires d'événements", () => {
       languageManager = new LanguageManager();
 
-      expect(mockClickableElements.bindClickHandler).toHaveBeenCalledWith(expect.any(Function));
+      expect(mockClickableElements.bindClickHandler).toHaveBeenCalledWith(
+        expect.any(Function),
+      );
       expect(mockDropdownButtons.bindAriaHandlers).toHaveBeenCalled();
     });
   });
@@ -108,7 +116,9 @@ describe("LanguageManager", () => {
 
       languageManager.updateLanguage(englishLang);
 
-      expect(languageManager.getCurrentLanguage().equals(englishLang)).toBe(true);
+      expect(languageManager.getCurrentLanguage().equals(englishLang)).toBe(
+        true,
+      );
     });
 
     it("devrait sauvegarder la langue dans localStorage", () => {
@@ -116,7 +126,10 @@ describe("LanguageManager", () => {
 
       languageManager.updateLanguage(englishLang);
 
-      expect(mockLocalStorage.setItem).toHaveBeenCalledWith("preferred-language", "en");
+      expect(mockLocalStorage.setItem).toHaveBeenCalledWith(
+        "preferred-language",
+        "en",
+      );
     });
 
     it("devrait mettre à jour l'affichage des éléments UI", () => {
@@ -126,7 +139,9 @@ describe("LanguageManager", () => {
 
       expect(mockLanguageIndicators.updateAll).toHaveBeenCalledWith("EN");
       expect(mockNavigationLinks.updateTexts).toHaveBeenCalledWith(false); // false car c'est l'anglais
-      expect(mockDropdownButtons.setAllAriaExpanded).toHaveBeenCalledWith(false); // Fermer les dropdowns après sélection
+      expect(mockDropdownButtons.setAllAriaExpanded).toHaveBeenCalledWith(
+        false,
+      ); // Fermer les dropdowns après sélection
     });
 
     it("devrait gérer le passage du français à l'anglais", () => {
@@ -135,7 +150,10 @@ describe("LanguageManager", () => {
       languageManager.updateLanguage(englishLang);
 
       expect(languageManager.getCurrentLanguage().isEnglish()).toBe(true);
-      expect(mockLocalStorage.setItem).toHaveBeenCalledWith("preferred-language", "en");
+      expect(mockLocalStorage.setItem).toHaveBeenCalledWith(
+        "preferred-language",
+        "en",
+      );
     });
 
     it("devrait gérer le passage de l'anglais au français", () => {
@@ -147,7 +165,10 @@ describe("LanguageManager", () => {
       languageManager.updateLanguage(frenchLang);
 
       expect(languageManager.getCurrentLanguage().isFrench()).toBe(true);
-      expect(mockLocalStorage.setItem).toHaveBeenCalledWith("preferred-language", "fr");
+      expect(mockLocalStorage.setItem).toHaveBeenCalledWith(
+        "preferred-language",
+        "fr",
+      );
     });
   });
 
@@ -180,7 +201,9 @@ describe("LanguageManager", () => {
 
     it("devrait configurer les gestionnaires de clic", () => {
       // Vérifier que bindClickHandler a été appelé avec une fonction
-      expect(mockClickableElements.bindClickHandler).toHaveBeenCalledWith(expect.any(Function));
+      expect(mockClickableElements.bindClickHandler).toHaveBeenCalledWith(
+        expect.any(Function),
+      );
     });
 
     // Note: Les tests de handleLanguageClick nécessiteraient d'accéder à des méthodes privées
@@ -232,7 +255,7 @@ describe("LanguageManager", () => {
       expect(languageManager.getCurrentLanguage().getCode()).toBe("fr");
       expect(consoleSpy).toHaveBeenCalledWith(
         "Impossible de charger la langue depuis localStorage:",
-        expect.any(Error)
+        expect.any(Error),
       );
 
       consoleSpy.mockRestore();
@@ -240,20 +263,27 @@ describe("LanguageManager", () => {
   });
 
   describe("destroy", () => {
-    it("devrait nettoyer les ressources", () => {
+    beforeEach(() => {
       languageManager = new LanguageManager();
-
-      // La méthode destroy ne devrait pas lever d'erreur
-      expect(() => languageManager.destroy()).not.toThrow();
     });
 
-    it("devrait être appelable plusieurs fois sans erreur", () => {
-      languageManager = new LanguageManager();
+    it("devrait appeler cleanup() sur les DropdownButtons", () => {
+      if (languageManager) {
+        languageManager.destroy();
+      }
 
-      expect(() => {
+      expect(mockDropdownButtons.cleanup).toHaveBeenCalled();
+    });
+
+    it("devrait pouvoir être appelé plusieurs fois sans erreur", () => {
+      if (languageManager) {
         languageManager.destroy();
-        languageManager.destroy();
-      }).not.toThrow();
+        expect(mockDropdownButtons.cleanup).toHaveBeenCalledTimes(1);
+
+        // Deuxième appel - ne devrait pas lever d'erreur
+        expect(() => languageManager.destroy()).not.toThrow();
+        expect(mockDropdownButtons.cleanup).toHaveBeenCalledTimes(2);
+      }
     });
   });
 
@@ -263,11 +293,17 @@ describe("LanguageManager", () => {
 
       // Changer vers l'anglais
       languageManager.updateLanguage(new Language("en"));
-      expect(mockLocalStorage.setItem).toHaveBeenCalledWith("preferred-language", "en");
+      expect(mockLocalStorage.setItem).toHaveBeenCalledWith(
+        "preferred-language",
+        "en",
+      );
 
       // Changer vers le français
       languageManager.updateLanguage(new Language("fr"));
-      expect(mockLocalStorage.setItem).toHaveBeenCalledWith("preferred-language", "fr");
+      expect(mockLocalStorage.setItem).toHaveBeenCalledWith(
+        "preferred-language",
+        "fr",
+      );
     });
 
     it("devrait gérer les erreurs de localStorage gracieusement", () => {
@@ -286,7 +322,7 @@ describe("LanguageManager", () => {
       // Vérifier que l'erreur est loggée
       expect(consoleSpy).toHaveBeenCalledWith(
         "Impossible de sauvegarder la langue dans localStorage:",
-        expect.any(Error)
+        expect.any(Error),
       );
 
       // La langue doit quand même être mise à jour en mémoire
@@ -316,4 +352,4 @@ describe("LanguageManager", () => {
       expect(mockNavigationLinks.updateTexts).toHaveBeenCalledWith(true);
     });
   });
-}); 
+});

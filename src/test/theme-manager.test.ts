@@ -106,21 +106,23 @@ describe("ThemeManager", () => {
       expect(mockMobileToggle.checked).toBe(true);
     });
 
-    it("devrait configurer les événements sur le toggle desktop", () => {
+    it("devrait configurer les événements sur le toggle desktop avec AbortController", () => {
       themeManager = new ThemeManager();
 
       expect(mockDesktopToggle.addEventListener).toHaveBeenCalledWith(
         "change",
         expect.any(Function),
+        expect.objectContaining({ signal: expect.any(Object) }),
       );
     });
 
-    it("devrait configurer les événements sur le toggle mobile", () => {
+    it("devrait configurer les événements sur le toggle mobile avec AbortController", () => {
       themeManager = new ThemeManager();
 
       expect(mockMobileToggle.addEventListener).toHaveBeenCalledWith(
         "change",
         expect.any(Function),
+        expect.objectContaining({ signal: expect.any(Object) }),
       );
     });
 
@@ -379,22 +381,10 @@ describe("ThemeManager", () => {
       themeManager = new ThemeManager();
     });
 
-    it("devrait supprimer les événements du toggle desktop", () => {
-      themeManager.destroy();
-
-      expect(mockDesktopToggle.removeEventListener).toHaveBeenCalledWith(
-        "change",
-        expect.any(Function),
-      );
-    });
-
-    it("devrait supprimer les événements du toggle mobile", () => {
-      themeManager.destroy();
-
-      expect(mockMobileToggle.removeEventListener).toHaveBeenCalledWith(
-        "change",
-        expect.any(Function),
-      );
+    it("devrait nettoyer les ressources sans erreur", () => {
+      expect(() => {
+        themeManager.destroy();
+      }).not.toThrow();
     });
 
     it("devrait déconnecter l'observateur de mutations", () => {

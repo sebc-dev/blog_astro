@@ -1,10 +1,14 @@
 /**
- * Gestion du changement de langue - Respecte les principes SOLID et Callisthénie
+ * Gestion du changement de langue
  * @module language-manager
- * @see {@link https://github.com/thoughtworks/object-calisthenics|Object Calisthenics}
  */
 
-import { Language, ElementId, CssSelector } from "./value-objects.js";
+import {
+  Language,
+  ElementId,
+  CssSelector,
+  type LanguageCode,
+} from "./value-objects.js";
 import {
   ClickableElements,
   NavigationLinks,
@@ -52,7 +56,7 @@ export class LanguageManager {
   private handleLanguageClick(event: MouseEvent): void {
     event.preventDefault();
     const target = event.target as HTMLElement;
-    const langCode = target.dataset.lang;
+    const langCode = target.dataset.lang as LanguageCode;
 
     if (!langCode) return;
 
@@ -69,7 +73,9 @@ export class LanguageManager {
    */
   private loadSavedLanguage(): void {
     try {
-      const savedLangCode = localStorage.getItem("preferred-language");
+      const savedLangCode = localStorage.getItem(
+        "preferred-language",
+      ) as LanguageCode;
       if (savedLangCode) {
         const language = Language.fromString(savedLangCode);
         if (language) {
@@ -78,7 +84,10 @@ export class LanguageManager {
       }
     } catch (error) {
       // En cas d'erreur localStorage, on continue avec la langue par défaut
-      console.warn("Impossible de charger la langue depuis localStorage:", error);
+      console.warn(
+        "Impossible de charger la langue depuis localStorage:",
+        error,
+      );
     }
   }
 
@@ -104,7 +113,10 @@ export class LanguageManager {
     } catch (error) {
       // Gestion silencieuse des erreurs localStorage (mode privé, quota dépassé, etc.)
       // L'application continue de fonctionner même sans persistance
-      console.warn("Impossible de sauvegarder la langue dans localStorage:", error);
+      console.warn(
+        "Impossible de sauvegarder la langue dans localStorage:",
+        error,
+      );
     }
   }
 
@@ -141,9 +153,11 @@ class LanguageControls {
     );
     this.uiElements = new LanguageUIElements();
     this.dropdownButtons = new DropdownButtons(
-      new CssSelector('[aria-controls="desktop-lang-menu"], [aria-controls="mobile-lang-menu"]')
+      new CssSelector(
+        '[aria-controls="desktop-lang-menu"], [aria-controls="mobile-lang-menu"]',
+      ),
     );
-    
+
     // Initialiser la gestion ARIA des dropdowns
     this.dropdownButtons.bindAriaHandlers();
   }
@@ -167,7 +181,10 @@ class LanguageControls {
   }
 
   public destroy(): void {
-    // Les handlers sont automatiquement nettoyés par ClickableElements
+    // Nettoyer automatiquement tous les event listeners avec AbortController
+    this.clickableElements.destroy();
+    this.uiElements.destroy();
+    this.dropdownButtons.cleanup();
   }
 }
 
@@ -197,5 +214,14 @@ class LanguageUIElements {
   public updateAll(language: Language): void {
     this.indicators.updateAll(language.getDisplayText());
     this.navigationLinks.updateTexts(language.isFrench());
+  }
+
+  /**
+   * Nettoie les ressources utilisées par les éléments UI
+   * @public
+   */
+  public destroy(): void {
+    this.indicators.destroy();
+    this.navigationLinks.destroy();
   }
 }

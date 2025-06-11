@@ -34,25 +34,30 @@ describe("ClickableElements", () => {
     expect(querySelectorAll).toHaveBeenCalledWith(".test-selector");
   });
 
-  it("devrait attacher le gestionnaire de clic à tous les éléments", () => {
+  it("devrait attacher le gestionnaire de clic à tous les éléments avec AbortController", () => {
     const handler = vi.fn();
     clickableElements.bindClickHandler(handler);
 
     mockElements.forEach((element) => {
-      expect(element.addEventListener).toHaveBeenCalledWith("click", handler);
+      expect(element.addEventListener).toHaveBeenCalledWith(
+        "click",
+        handler,
+        expect.objectContaining({ signal: expect.any(AbortSignal) }),
+      );
     });
   });
 
-  it("devrait détacher le gestionnaire de clic de tous les éléments", () => {
+  it("devrait nettoyer automatiquement tous les event listeners avec destroy", () => {
     const handler = vi.fn();
-    clickableElements.unbindClickHandler(handler);
+    clickableElements.bindClickHandler(handler);
 
-    mockElements.forEach((element) => {
-      expect(element.removeEventListener).toHaveBeenCalledWith(
-        "click",
-        handler,
-      );
-    });
+    const abortSpy = vi.spyOn(AbortController.prototype, "abort");
+
+    clickableElements.destroy();
+
+    expect(abortSpy).toHaveBeenCalled();
+
+    abortSpy.mockRestore();
   });
 
   it("devrait retourner le nombre correct d'éléments", () => {

@@ -8,6 +8,15 @@ export default defineConfig([
   prettierConfig,
   ...astroPlugin.configs.recommended,
   {
+    // Ignorer les fichiers générés automatiquement par Astro
+    ignores: [
+      '.astro/**/*',
+      'dist/**/*',
+      'node_modules/**/*',
+      'coverage/**/*'
+    ],
+  },
+  {
     languageOptions: {
       ecmaVersion: 2024,
       sourceType: 'module',

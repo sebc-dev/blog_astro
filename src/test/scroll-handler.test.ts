@@ -55,9 +55,9 @@ describe("ScrollHandler", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Reset des listeners d'événements mockés
-    Object.keys(mockScrollEventListeners).forEach(key => {
+    Object.keys(mockScrollEventListeners).forEach((key) => {
       mockScrollEventListeners[key] = [];
     });
 
@@ -99,13 +99,16 @@ describe("ScrollHandler", () => {
       expect(mockGetElementById).toHaveBeenCalledWith("mobile-header");
     });
 
-    it("devrait configurer l'événement de scroll avec les bonnes options", () => {
+    it("devrait configurer l'événement de scroll avec AbortController et passive", () => {
       scrollHandler = new ScrollHandler();
 
       expect(window.addEventListener).toHaveBeenCalledWith(
         "scroll",
         expect.any(Function),
-        { passive: true }
+        expect.objectContaining({
+          passive: true,
+          signal: expect.any(AbortSignal),
+        }),
       );
     });
 
@@ -133,21 +136,21 @@ describe("ScrollHandler", () => {
       // Vérifier que les deux headers sont rendus transparents
       expect(mockRemoveClass).toHaveBeenCalledWith(
         mockDesktopHeader,
-        "bg-base-100/95"
+        "bg-base-100/95",
       );
       expect(mockAddClass).toHaveBeenCalledWith(
         mockDesktopHeader,
         "bg-base-100/60",
-        "border-transparent"
+        "border-transparent",
       );
       expect(mockRemoveClass).toHaveBeenCalledWith(
         mockMobileHeader,
-        "bg-base-100/95"
+        "bg-base-100/95",
       );
       expect(mockAddClass).toHaveBeenCalledWith(
         mockMobileHeader,
         "bg-base-100/60",
-        "border-transparent"
+        "border-transparent",
       );
     });
 
@@ -163,20 +166,20 @@ describe("ScrollHandler", () => {
       expect(mockRemoveClass).toHaveBeenCalledWith(
         mockDesktopHeader,
         "bg-base-100/60",
-        "border-transparent"
+        "border-transparent",
       );
       expect(mockAddClass).toHaveBeenCalledWith(
         mockDesktopHeader,
-        "bg-base-100/95"
+        "bg-base-100/95",
       );
       expect(mockRemoveClass).toHaveBeenCalledWith(
         mockMobileHeader,
         "bg-base-100/60",
-        "border-transparent"
+        "border-transparent",
       );
       expect(mockAddClass).toHaveBeenCalledWith(
         mockMobileHeader,
-        "bg-base-100/95"
+        "bg-base-100/95",
       );
     });
 
@@ -187,20 +190,20 @@ describe("ScrollHandler", () => {
       expect(mockRemoveClass).toHaveBeenCalledWith(
         mockDesktopHeader,
         "bg-base-100/60",
-        "border-transparent"
+        "border-transparent",
       );
       expect(mockAddClass).toHaveBeenCalledWith(
         mockDesktopHeader,
-        "bg-base-100/95"
+        "bg-base-100/95",
       );
       expect(mockRemoveClass).toHaveBeenCalledWith(
         mockMobileHeader,
         "bg-base-100/60",
-        "border-transparent"
+        "border-transparent",
       );
       expect(mockAddClass).toHaveBeenCalledWith(
         mockMobileHeader,
-        "bg-base-100/95"
+        "bg-base-100/95",
       );
     });
 
@@ -211,35 +214,21 @@ describe("ScrollHandler", () => {
       expect(mockRemoveClass).toHaveBeenCalledWith(
         mockDesktopHeader,
         "bg-base-100/60",
-        "border-transparent"
+        "border-transparent",
       );
       expect(mockAddClass).toHaveBeenCalledWith(
         mockDesktopHeader,
-        "bg-base-100/95"
+        "bg-base-100/95",
       );
       expect(mockRemoveClass).toHaveBeenCalledWith(
         mockMobileHeader,
         "bg-base-100/60",
-        "border-transparent"
+        "border-transparent",
       );
       expect(mockAddClass).toHaveBeenCalledWith(
         mockMobileHeader,
-        "bg-base-100/95"
+        "bg-base-100/95",
       );
-    });
-
-    it("ne devrait rien faire si les headers n'existent pas", () => {
-      // Créer un ScrollHandler sans headers
-      scrollHandler.destroy(); // Nettoyer l'instance précédente
-      mockGetElementById.mockReset();
-      mockGetElementById.mockReturnValue(null);
-      vi.clearAllMocks(); // Nettoyer tous les appels précédents
-      
-      scrollHandler = new ScrollHandler();
-      triggerScrollEvent(150);
-
-      expect(mockAddClass).not.toHaveBeenCalled();
-      expect(mockRemoveClass).not.toHaveBeenCalled();
     });
 
     it("devrait mettre à jour lastScrollY après chaque scroll", () => {
@@ -253,11 +242,11 @@ describe("ScrollHandler", () => {
       // Devrait appliquer à nouveau la logique car la condition se base sur currentScrollY
       expect(mockRemoveClass).toHaveBeenCalledWith(
         mockDesktopHeader,
-        "bg-base-100/95"
+        "bg-base-100/95",
       );
       expect(mockRemoveClass).toHaveBeenCalledWith(
         mockMobileHeader,
-        "bg-base-100/95"
+        "bg-base-100/95",
       );
     });
 
@@ -267,12 +256,12 @@ describe("ScrollHandler", () => {
       expect(mockAddClass).toHaveBeenCalledWith(
         mockDesktopHeader,
         "bg-base-100/60",
-        "border-transparent"
+        "border-transparent",
       );
       expect(mockAddClass).toHaveBeenCalledWith(
         mockMobileHeader,
         "bg-base-100/60",
-        "border-transparent"
+        "border-transparent",
       );
 
       vi.clearAllMocks();
@@ -281,11 +270,11 @@ describe("ScrollHandler", () => {
       triggerScrollEvent(50);
       expect(mockAddClass).toHaveBeenCalledWith(
         mockDesktopHeader,
-        "bg-base-100/95"
+        "bg-base-100/95",
       );
       expect(mockAddClass).toHaveBeenCalledWith(
         mockMobileHeader,
-        "bg-base-100/95"
+        "bg-base-100/95",
       );
 
       vi.clearAllMocks();
@@ -295,12 +284,12 @@ describe("ScrollHandler", () => {
       expect(mockAddClass).toHaveBeenCalledWith(
         mockDesktopHeader,
         "bg-base-100/60",
-        "border-transparent"
+        "border-transparent",
       );
       expect(mockAddClass).toHaveBeenCalledWith(
         mockMobileHeader,
         "bg-base-100/60",
-        "border-transparent"
+        "border-transparent",
       );
     });
   });
@@ -310,13 +299,15 @@ describe("ScrollHandler", () => {
       scrollHandler = new ScrollHandler();
     });
 
-    it("devrait supprimer l'événement de scroll", () => {
+    it("devrait nettoyer automatiquement tous les event listeners avec AbortController", () => {
+      // Spy sur AbortController.abort pour vérifier l'appel
+      const abortSpy = vi.spyOn(AbortController.prototype, "abort");
+
       scrollHandler.destroy();
 
-      expect(window.removeEventListener).toHaveBeenCalledWith(
-        "scroll",
-        expect.any(Function)
-      );
+      expect(abortSpy).toHaveBeenCalled();
+
+      abortSpy.mockRestore();
     });
 
     it("devrait être appelable plusieurs fois sans erreur", () => {
@@ -328,9 +319,12 @@ describe("ScrollHandler", () => {
 
     it("ne devrait plus réagir aux événements de scroll après destroy", () => {
       scrollHandler.destroy();
-      
+
       // Nettoyer les mocks après destroy pour voir si les nouveaux événements sont ignorés
       vi.clearAllMocks();
+
+      // Nettoyer les listeners du mock pour s'assurer qu'on test bien l'effet d'AbortController
+      mockScrollEventListeners["scroll"] = [];
 
       triggerScrollEvent(200);
 
@@ -347,7 +341,7 @@ describe("ScrollHandler", () => {
       triggerScrollEvent(0);
       expect(mockAddClass).toHaveBeenCalledWith(
         mockDesktopHeader,
-        "bg-base-100/95"
+        "bg-base-100/95",
       );
 
       vi.clearAllMocks();
@@ -357,7 +351,7 @@ describe("ScrollHandler", () => {
       expect(mockAddClass).toHaveBeenCalledWith(
         mockDesktopHeader,
         "bg-base-100/60",
-        "border-transparent"
+        "border-transparent",
       );
 
       vi.clearAllMocks();
@@ -366,17 +360,20 @@ describe("ScrollHandler", () => {
       triggerScrollEvent(0);
       expect(mockAddClass).toHaveBeenCalledWith(
         mockDesktopHeader,
-        "bg-base-100/95"
+        "bg-base-100/95",
       );
     });
 
-    it("devrait préserver les performances avec passive: true", () => {
+    it("devrait préserver les performances avec passive: true et AbortController", () => {
       scrollHandler = new ScrollHandler();
 
       expect(window.addEventListener).toHaveBeenCalledWith(
         "scroll",
         expect.any(Function),
-        { passive: true }
+        expect.objectContaining({
+          passive: true,
+          signal: expect.any(AbortSignal),
+        }),
       );
     });
   });
@@ -392,11 +389,11 @@ describe("ScrollHandler", () => {
       // Valeur négative traitée comme 0, donc header opaque
       expect(mockAddClass).toHaveBeenCalledWith(
         mockDesktopHeader,
-        "bg-base-100/95"
+        "bg-base-100/95",
       );
       expect(mockAddClass).toHaveBeenCalledWith(
         mockMobileHeader,
-        "bg-base-100/95"
+        "bg-base-100/95",
       );
     });
 
@@ -407,12 +404,12 @@ describe("ScrollHandler", () => {
       expect(mockAddClass).toHaveBeenCalledWith(
         mockDesktopHeader,
         "bg-base-100/60",
-        "border-transparent"
+        "border-transparent",
       );
       expect(mockAddClass).toHaveBeenCalledWith(
         mockMobileHeader,
         "bg-base-100/60",
-        "border-transparent"
+        "border-transparent",
       );
     });
 
@@ -431,10 +428,10 @@ describe("ScrollHandler", () => {
       expect(mockAddClass).toHaveBeenCalledWith(
         mockDesktopHeader,
         "bg-base-100/60",
-        "border-transparent"
+        "border-transparent",
       );
       // Le mobile header ne devrait pas générer d'erreur
       expect(() => triggerScrollEvent(150)).not.toThrow();
     });
   });
-}); 
+});

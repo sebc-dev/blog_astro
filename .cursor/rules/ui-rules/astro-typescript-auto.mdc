@@ -1,5 +1,5 @@
 ---
-description: Règle TypeScript complète pour projets Astro appliquant la philosophie "TypeScript-first" avec intégration privilégiée dans les composants .astro, configuration optimisée, Content Collections typées et patterns de performance. Couvre l'architecture, le typage strict, l'organisation par domaine et les bonnes pratiques de développement Astro moderne.
+description: Guide complet des bonnes pratiques TypeScript pour projets Astro - architecture, typage strict, performance et patterns modernes.
 globs: ["*.astro", "*.ts", "*.tsx"]
 alwaysApply: false
 ---

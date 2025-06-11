@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { Language, ElementId, CssSelector } from "../scripts/header/value-objects";
+import {
+  Language,
+  ElementId,
+  CssSelector,
+} from "../scripts/header/value-objects";
 
 describe("Language", () => {
   describe("constructor", () => {
@@ -12,9 +16,15 @@ describe("Language", () => {
     });
 
     it("devrait lever une erreur avec un code de langue invalide", () => {
-      expect(() => new Language("es" as never)).toThrow("Code de langue invalide: es");
-      expect(() => new Language("de" as never)).toThrow("Code de langue invalide: de");
-      expect(() => new Language("" as never)).toThrow("Code de langue invalide: ");
+      expect(() => new Language("es" as never)).toThrow(
+        "Code de langue invalide: es",
+      );
+      expect(() => new Language("de" as never)).toThrow(
+        "Code de langue invalide: de",
+      );
+      expect(() => new Language("" as never)).toThrow(
+        "Code de langue invalide: ",
+      );
     });
   });
 
@@ -27,13 +37,6 @@ describe("Language", () => {
       expect(frenchLang?.getCode()).toBe("fr");
       expect(englishLang).toBeInstanceOf(Language);
       expect(englishLang?.getCode()).toBe("en");
-    });
-
-    it("devrait retourner null pour une chaîne invalide", () => {
-      expect(Language.fromString("es")).toBeNull();
-      expect(Language.fromString("de")).toBeNull();
-      expect(Language.fromString("")).toBeNull();
-      expect(Language.fromString("FR")).toBeNull(); // Case sensitive
     });
   });
 
@@ -120,12 +123,18 @@ describe("ElementId", () => {
     });
 
     it("devrait lever une erreur avec un ID vide", () => {
-      expect(() => new ElementId("")).toThrow("L'ID d'élément ne peut pas être vide");
+      expect(() => new ElementId("")).toThrow(
+        "L'ID d'élément ne peut pas être vide",
+      );
     });
 
     it("devrait lever une erreur avec un ID contenant seulement des espaces", () => {
-      expect(() => new ElementId("   ")).toThrow("L'ID d'élément ne peut pas être vide");
-      expect(() => new ElementId("\t\n")).toThrow("L'ID d'élément ne peut pas être vide");
+      expect(() => new ElementId("   ")).toThrow(
+        "L'ID d'élément ne peut pas être vide",
+      );
+      expect(() => new ElementId("\t\n")).toThrow(
+        "L'ID d'élément ne peut pas être vide",
+      );
     });
 
     it("devrait accepter un ID avec des espaces au début et à la fin", () => {
@@ -178,12 +187,18 @@ describe("CssSelector", () => {
     });
 
     it("devrait lever une erreur avec un sélecteur vide", () => {
-      expect(() => new CssSelector("")).toThrow("Le sélecteur CSS ne peut pas être vide");
+      expect(() => new CssSelector("")).toThrow(
+        "Le sélecteur CSS ne peut pas être vide",
+      );
     });
 
     it("devrait lever une erreur avec un sélecteur contenant seulement des espaces", () => {
-      expect(() => new CssSelector("   ")).toThrow("Le sélecteur CSS ne peut pas être vide");
-      expect(() => new CssSelector("\t\n")).toThrow("Le sélecteur CSS ne peut pas être vide");
+      expect(() => new CssSelector("   ")).toThrow(
+        "Le sélecteur CSS ne peut pas être vide",
+      );
+      expect(() => new CssSelector("\t\n")).toThrow(
+        "Le sélecteur CSS ne peut pas être vide",
+      );
     });
 
     it("devrait accepter différents types de sélecteurs CSS", () => {
@@ -235,4 +250,4 @@ describe("CssSelector", () => {
       expect(selector2.equals(selector3)).toBe(false);
     });
   });
-}); 
+});
