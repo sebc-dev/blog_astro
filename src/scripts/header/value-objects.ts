@@ -72,8 +72,11 @@ export class Language {
    * @param {string} value - La chaîne à convertir
    * @returns {Language | null} Une instance de Language si la chaîne est valide, null sinon
    */
-  public static fromString(value: LanguageCode): Language {
-    return new Language(value);
+  public static fromString(value: string): Language | null {
+    if (value === "fr" || value === "en") {
+      return new Language(value as LanguageCode);
+    }
+    return null;
   }
 
   /**

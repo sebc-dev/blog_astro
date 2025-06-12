@@ -128,6 +128,7 @@ export class ThemeManager {
 
   /**
    * Nettoie les ressources en supprimant les gestionnaires d'événements et l'observateur
+   * Utilise l'AbortController pour supprimer automatiquement tous les event listeners
    * @public
    */
   public destroy(): void {

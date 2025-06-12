@@ -56,14 +56,17 @@ export class LanguageManager {
   private handleLanguageClick(event: MouseEvent): void {
     event.preventDefault();
     const target = event.target as HTMLElement;
-    const langCode = target.dataset.lang as LanguageCode;
+    const rawLang = target.dataset.lang as string;
 
-    if (!langCode) return;
+    if (!rawLang) return;
 
-    const language = Language.fromString(langCode);
-    if (language) {
-      this.updateLanguage(language);
+    const language = Language.fromString(rawLang);
+    if (!language) {
+      console.error("Langue invalide:", rawLang);
+      return;
     }
+
+    this.updateLanguage(language);
   }
 
   /**
@@ -184,7 +187,7 @@ class LanguageControls {
     // Nettoyer automatiquement tous les event listeners avec AbortController
     this.clickableElements.destroy();
     this.uiElements.destroy();
-    this.dropdownButtons.cleanup();
+    this.dropdownButtons.destroy();
   }
 }
 

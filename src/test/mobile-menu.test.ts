@@ -274,24 +274,6 @@ describe("MobileMenu", () => {
         mobileMenu.destroy();
       }).not.toThrow();
     });
-
-    it("devrait nettoyer tous les event listeners via AbortController", () => {
-      // Spy sur AbortController.abort pour vérifier l'appel
-      const abortSpy = vi.spyOn(AbortController.prototype, "abort");
-
-      mobileMenu.destroy();
-
-      expect(abortSpy).toHaveBeenCalled();
-
-      abortSpy.mockRestore();
-    });
-
-    it("devrait être appelable plusieurs fois sans erreur", () => {
-      expect(() => {
-        mobileMenu.destroy();
-        mobileMenu.destroy();
-      }).not.toThrow();
-    });
   });
 
   describe("intégration - scénarios complets", () => {

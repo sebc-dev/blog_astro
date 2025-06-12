@@ -312,7 +312,7 @@ describe("DropdownButtons", () => {
       const abortSpy = vi.spyOn(AbortController.prototype, "abort");
 
       // Appeler cleanup
-      dropdownButtons.cleanup();
+      dropdownButtons.destroy();
 
       // Vérifier que AbortController.abort a été appelé
       expect(abortSpy).toHaveBeenCalled();
@@ -324,15 +324,15 @@ describe("DropdownButtons", () => {
       dropdownButtons.bindAriaHandlers();
 
       // Premier cleanup
-      dropdownButtons.cleanup();
+      dropdownButtons.destroy();
 
       // Deuxième cleanup - ne devrait pas lever d'erreur
-      expect(() => dropdownButtons.cleanup()).not.toThrow();
+      expect(() => dropdownButtons.destroy()).not.toThrow();
     });
 
     it("devrait pouvoir être appelé sans avoir appelé bindAriaHandlers", () => {
       // Cleanup sans avoir d'abord attaché des handlers
-      expect(() => dropdownButtons.cleanup()).not.toThrow();
+      expect(() => dropdownButtons.destroy()).not.toThrow();
     });
   });
 });

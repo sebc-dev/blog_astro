@@ -12,7 +12,6 @@ export default defineConfig([
     ignores: [
       '.astro/**/*',
       'dist/**/*',
-      'node_modules/**/*',
       'coverage/**/*'
     ],
   },

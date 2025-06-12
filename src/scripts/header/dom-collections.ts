@@ -29,7 +29,11 @@ export class ClickableElements {
    */
   public bindClickHandler(handler: (event: MouseEvent) => void): void {
     // Créer un nouveau AbortController si nécessaire
-    this.abortController ??= new AbortController();
+    if (this.abortController) {
+      this.abortController.abort();
+    }
+
+    this.abortController = new AbortController();
 
     const signal = this.abortController.signal;
 
@@ -267,7 +271,7 @@ export class DropdownButtons {
    * Nettoie automatiquement tous les event listeners pour éviter les fuites mémoire
    * Cette méthode doit être appelée quand l'instance n'est plus nécessaire
    */
-  public cleanup(): void {
+  public destroy(): void {
     if (this.abortController) {
       this.abortController.abort();
       this.abortController = null;
