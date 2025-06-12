@@ -13,14 +13,14 @@ interface Props {
   navLinks?: NavLink[];
 }
 
-const { 
+const {
   siteName = "sebc.dev",
   navLinks = [
     { href: "/", label: "Accueil", labelEN: "Home" },
     { href: "/about", label: "À propos", labelEN: "About" },
     { href: "/services", label: "Services", labelEN: "Services" },
     { href: "/contact", label: "Contact", labelEN: "Contact" },
-  ]
+  ],
 } = Astro.props;
 ---
 
@@ -64,9 +64,7 @@ const {
     <div class="navbar-end flex items-center gap-2">
       <!-- Sélecteur de langue -->
       <div class="dropdown dropdown-end">
-        <div 
-          tabindex="0" 
-          role="button" 
+        <button
           class="btn btn-ghost btn-sm"
           aria-haspopup="true"
           aria-expanded="false"
@@ -86,7 +84,7 @@ const {
           >
             <path d="M6 9l6 6 6-6"></path>
           </svg>
-        </div>
+        </button>
         <ul
           id="desktop-lang-menu"
           tabindex="0"
@@ -215,9 +213,7 @@ const {
       <div class="flex items-center justify-center gap-6 pb-8">
         <!-- Sélecteur de langue mobile -->
         <div class="dropdown dropdown-top">
-          <div 
-            tabindex="0" 
-            role="button" 
+          <button
             class="btn btn-ghost btn-sm"
             aria-haspopup="true"
             aria-expanded="false"
@@ -238,7 +234,7 @@ const {
             >
               <path d="M6 9l6 6 6-6"></path>
             </svg>
-          </div>
+          </button>
           <ul
             id="mobile-lang-menu"
             tabindex="0"
@@ -310,8 +306,9 @@ const {
   </div>
 </div>
 
-<script>
-  import { initializeHeader } from "../scripts/header/index.ts";
+<script type="module">
+  // Import pour déclencher l'auto-initialisation du header
+  import "../scripts/header/index.ts";
 </script>
 
 <style>

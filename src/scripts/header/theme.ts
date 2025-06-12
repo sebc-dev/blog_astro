@@ -12,15 +12,17 @@ import { getElementById } from "../utils/dom.js";
  * @class ThemeManager
  */
 export class ThemeManager {
-  private desktopToggle: HTMLInputElement | null;
-  private mobileToggle: HTMLInputElement | null;
+  private readonly desktopToggle: HTMLInputElement | null;
+  private readonly mobileToggle: HTMLInputElement | null;
   private observer: MutationObserver | null = null;
+  private readonly abortController: AbortController;
 
   /**
    * Crée une nouvelle instance du gestionnaire de thème
    * Initialise les toggles et configure les événements
    */
   constructor() {
+    this.abortController = new AbortController();
     this.desktopToggle = getElementById<HTMLInputElement>("theme-toggle");
     this.mobileToggle = getElementById<HTMLInputElement>("mobile-theme-toggle");
 
@@ -34,16 +36,20 @@ export class ThemeManager {
    * @private
    */
   private bindEvents(): void {
+    const signal = this.abortController.signal;
+
     // Synchronisation desktop vers mobile
     this.desktopToggle?.addEventListener(
       "change",
       this.handleDesktopChange.bind(this),
+      { signal },
     );
 
     // Synchronisation mobile vers desktop
     this.mobileToggle?.addEventListener(
       "change",
       this.handleMobileChange.bind(this),
+      { signal },
     );
   }
 
@@ -122,17 +128,12 @@ export class ThemeManager {
 
   /**
    * Nettoie les ressources en supprimant les gestionnaires d'événements et l'observateur
+   * Utilise l'AbortController pour supprimer automatiquement tous les event listeners
    * @public
    */
   public destroy(): void {
-    this.desktopToggle?.removeEventListener(
-      "change",
-      this.handleDesktopChange.bind(this),
-    );
-    this.mobileToggle?.removeEventListener(
-      "change",
-      this.handleMobileChange.bind(this),
-    );
+    // Supprime automatiquement tous les event listeners associés à ce controller
+    this.abortController.abort();
     this.observer?.disconnect();
   }
 }

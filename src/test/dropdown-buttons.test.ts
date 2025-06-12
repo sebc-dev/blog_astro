@@ -40,20 +40,28 @@ describe("DropdownButtons", () => {
       },
     ];
 
-    // Mock document.addEventListener
-    document.addEventListener = vi.fn();
+    // Spy on document.addEventListener et removeEventListener
+    vi.spyOn(document, "addEventListener");
+    vi.spyOn(document, "removeEventListener");
 
     // Mock querySelectorAll
-    mockQuerySelectorAll = domUtils.querySelectorAll as ReturnType<typeof vi.fn>;
-    (mockQuerySelectorAll as ReturnType<typeof vi.fn>).mockReturnValue(mockButtons as unknown as NodeListOf<HTMLElement>);
+    mockQuerySelectorAll = domUtils.querySelectorAll as ReturnType<
+      typeof vi.fn
+    >;
+    (mockQuerySelectorAll as ReturnType<typeof vi.fn>).mockReturnValue(
+      mockButtons as unknown as NodeListOf<HTMLElement>,
+    );
 
     dropdownButtons = new DropdownButtons(
-      new CssSelector('[aria-controls="desktop-lang-menu"], [aria-controls="mobile-lang-menu"]')
+      new CssSelector(
+        '[aria-controls="desktop-lang-menu"], [aria-controls="mobile-lang-menu"]',
+      ),
     );
   });
 
   afterEach(() => {
     vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe("constructor", () => {
@@ -65,18 +73,25 @@ describe("DropdownButtons", () => {
   describe("setAriaExpanded", () => {
     beforeEach(() => {
       // Mock matches pour identifier le bouton
-      mockButtons[0].matches.mockImplementation((selector: string) => 
-        selector === '[aria-controls="desktop-lang-menu"]'
+      mockButtons[0].matches.mockImplementation(
+        (selector: string) =>
+          selector === '[aria-controls="desktop-lang-menu"]',
       );
-      mockButtons[1].matches.mockImplementation((selector: string) => 
-        selector === '[aria-controls="mobile-lang-menu"]'
+      mockButtons[1].matches.mockImplementation(
+        (selector: string) => selector === '[aria-controls="mobile-lang-menu"]',
       );
     });
 
     it("devrait mettre à jour aria-expanded d'un bouton spécifique", () => {
-      dropdownButtons.setAriaExpanded('[aria-controls="desktop-lang-menu"]', true);
+      dropdownButtons.setAriaExpanded(
+        '[aria-controls="desktop-lang-menu"]',
+        true,
+      );
 
-      expect(mockButtons[0].setAttribute).toHaveBeenCalledWith('aria-expanded', 'true');
+      expect(mockButtons[0].setAttribute).toHaveBeenCalledWith(
+        "aria-expanded",
+        "true",
+      );
       expect(mockButtons[1].setAttribute).not.toHaveBeenCalled();
     });
 
@@ -92,44 +107,84 @@ describe("DropdownButtons", () => {
     it("devrait mettre à jour tous les boutons en expanded", () => {
       dropdownButtons.setAllAriaExpanded(true);
 
-      expect(mockButtons[0].setAttribute).toHaveBeenCalledWith('aria-expanded', 'true');
-      expect(mockButtons[1].setAttribute).toHaveBeenCalledWith('aria-expanded', 'true');
+      expect(mockButtons[0].setAttribute).toHaveBeenCalledWith(
+        "aria-expanded",
+        "true",
+      );
+      expect(mockButtons[1].setAttribute).toHaveBeenCalledWith(
+        "aria-expanded",
+        "true",
+      );
     });
 
     it("devrait mettre à jour tous les boutons en collapsed", () => {
       dropdownButtons.setAllAriaExpanded(false);
 
-      expect(mockButtons[0].setAttribute).toHaveBeenCalledWith('aria-expanded', 'false');
-      expect(mockButtons[1].setAttribute).toHaveBeenCalledWith('aria-expanded', 'false');
+      expect(mockButtons[0].setAttribute).toHaveBeenCalledWith(
+        "aria-expanded",
+        "false",
+      );
+      expect(mockButtons[1].setAttribute).toHaveBeenCalledWith(
+        "aria-expanded",
+        "false",
+      );
     });
   });
 
   describe("bindAriaHandlers", () => {
-    it("devrait attacher les event listeners aux boutons", () => {
+    it("devrait attacher les event listeners aux boutons avec AbortController", () => {
       dropdownButtons.bindAriaHandlers();
 
-      // Vérifier que addEventListener a été appelé pour chaque bouton
-      expect(mockButtons[0].addEventListener).toHaveBeenCalledWith('click', expect.any(Function));
-      expect(mockButtons[0].addEventListener).toHaveBeenCalledWith('keydown', expect.any(Function));
-      expect(mockButtons[0].addEventListener).toHaveBeenCalledWith('blur', expect.any(Function));
+      // Vérifier que addEventListener a été appelé pour chaque bouton avec signal
+      expect(mockButtons[0].addEventListener).toHaveBeenCalledWith(
+        "click",
+        expect.any(Function),
+        expect.objectContaining({ signal: expect.any(AbortSignal) }),
+      );
+      expect(mockButtons[0].addEventListener).toHaveBeenCalledWith(
+        "keydown",
+        expect.any(Function),
+        expect.objectContaining({ signal: expect.any(AbortSignal) }),
+      );
+      expect(mockButtons[0].addEventListener).toHaveBeenCalledWith(
+        "blur",
+        expect.any(Function),
+        expect.objectContaining({ signal: expect.any(AbortSignal) }),
+      );
 
-      expect(mockButtons[1].addEventListener).toHaveBeenCalledWith('click', expect.any(Function));
-      expect(mockButtons[1].addEventListener).toHaveBeenCalledWith('keydown', expect.any(Function));
-      expect(mockButtons[1].addEventListener).toHaveBeenCalledWith('blur', expect.any(Function));
+      expect(mockButtons[1].addEventListener).toHaveBeenCalledWith(
+        "click",
+        expect.any(Function),
+        expect.objectContaining({ signal: expect.any(AbortSignal) }),
+      );
+      expect(mockButtons[1].addEventListener).toHaveBeenCalledWith(
+        "keydown",
+        expect.any(Function),
+        expect.objectContaining({ signal: expect.any(AbortSignal) }),
+      );
+      expect(mockButtons[1].addEventListener).toHaveBeenCalledWith(
+        "blur",
+        expect.any(Function),
+        expect.objectContaining({ signal: expect.any(AbortSignal) }),
+      );
     });
 
-    it("devrait attacher un event listener global au document", () => {
+    it("devrait attacher un event listener global au document avec AbortController", () => {
       dropdownButtons.bindAriaHandlers();
 
-      expect(document.addEventListener).toHaveBeenCalledWith('click', expect.any(Function));
+      expect(document.addEventListener).toHaveBeenCalledWith(
+        "click",
+        expect.any(Function),
+        expect.objectContaining({ signal: expect.any(AbortSignal) }),
+      );
     });
   });
 
   describe("interaction avec les boutons", () => {
     beforeEach(() => {
       // Mock getAttribute pour simuler l'état actuel
-      mockButtons[0].getAttribute.mockReturnValue('false');
-      mockButtons[1].getAttribute.mockReturnValue('false');
+      mockButtons[0].getAttribute.mockReturnValue("false");
+      mockButtons[1].getAttribute.mockReturnValue("false");
     });
 
     it("devrait basculer aria-expanded au clic", () => {
@@ -137,7 +192,7 @@ describe("DropdownButtons", () => {
 
       // Récupérer le handler de click du premier bouton
       const clickHandler = mockButtons[0].addEventListener.mock.calls.find(
-        call => call[0] === 'click'
+        (call) => call[0] === "click",
       )?.[1];
 
       expect(clickHandler).toBeDefined();
@@ -148,9 +203,15 @@ describe("DropdownButtons", () => {
       }
 
       // Vérifier que l'état a été basculé
-      expect(mockButtons[0].setAttribute).toHaveBeenCalledWith('aria-expanded', 'true');
+      expect(mockButtons[0].setAttribute).toHaveBeenCalledWith(
+        "aria-expanded",
+        "true",
+      );
       // Vérifier que les autres dropdowns ont été fermés
-      expect(mockButtons[1].setAttribute).toHaveBeenCalledWith('aria-expanded', 'false');
+      expect(mockButtons[1].setAttribute).toHaveBeenCalledWith(
+        "aria-expanded",
+        "false",
+      );
     });
 
     it("devrait gérer les touches Enter et Espace", () => {
@@ -158,23 +219,26 @@ describe("DropdownButtons", () => {
 
       // Récupérer le handler de keydown du premier bouton
       const keydownHandler = mockButtons[0].addEventListener.mock.calls.find(
-        call => call[0] === 'keydown'
+        (call) => call[0] === "keydown",
       )?.[1];
 
       expect(keydownHandler).toBeDefined();
 
-             // Simuler Enter
-       const enterEvent = {
-         key: 'Enter',
-         preventDefault: vi.fn(),
-       } as unknown as KeyboardEvent;
+      // Simuler Enter
+      const enterEvent = {
+        key: "Enter",
+        preventDefault: vi.fn(),
+      } as unknown as KeyboardEvent;
 
       if (keydownHandler) {
         keydownHandler(enterEvent);
       }
 
       expect(enterEvent.preventDefault).toHaveBeenCalled();
-      expect(mockButtons[0].setAttribute).toHaveBeenCalledWith('aria-expanded', 'true');
+      expect(mockButtons[0].setAttribute).toHaveBeenCalledWith(
+        "aria-expanded",
+        "true",
+      );
     });
   });
 
@@ -197,7 +261,7 @@ describe("DropdownButtons", () => {
 
       // Récupérer le handler de blur
       const blurHandler = mockButtons[0].addEventListener.mock.calls.find(
-        call => call[0] === 'blur'
+        (call) => call[0] === "blur",
       )?.[1];
 
       expect(blurHandler).toBeDefined();
@@ -209,7 +273,10 @@ describe("DropdownButtons", () => {
       // Avancer le timer
       vi.advanceTimersByTime(150);
 
-      expect(mockButtons[0].setAttribute).toHaveBeenCalledWith('aria-expanded', 'false');
+      expect(mockButtons[0].setAttribute).toHaveBeenCalledWith(
+        "aria-expanded",
+        "false",
+      );
     });
 
     it("ne devrait pas fermer le dropdown si toujours focus-within", () => {
@@ -221,7 +288,7 @@ describe("DropdownButtons", () => {
       dropdownButtons.bindAriaHandlers();
 
       const blurHandler = mockButtons[0].addEventListener.mock.calls.find(
-        call => call[0] === 'blur'
+        (call) => call[0] === "blur",
       )?.[1];
 
       if (blurHandler) {
@@ -230,7 +297,42 @@ describe("DropdownButtons", () => {
 
       vi.advanceTimersByTime(150);
 
-      expect(mockButtons[0].setAttribute).not.toHaveBeenCalledWith('aria-expanded', 'false');
+      expect(mockButtons[0].setAttribute).not.toHaveBeenCalledWith(
+        "aria-expanded",
+        "false",
+      );
     });
   });
-}); 
+
+  describe("cleanup", () => {
+    it("devrait nettoyer automatiquement tous les event listeners avec AbortController", () => {
+      // D'abord attacher les handlers
+      dropdownButtons.bindAriaHandlers();
+
+      const abortSpy = vi.spyOn(AbortController.prototype, "abort");
+
+      // Appeler cleanup
+      dropdownButtons.destroy();
+
+      // Vérifier que AbortController.abort a été appelé
+      expect(abortSpy).toHaveBeenCalled();
+
+      abortSpy.mockRestore();
+    });
+
+    it("devrait pouvoir être appelé plusieurs fois sans erreur", () => {
+      dropdownButtons.bindAriaHandlers();
+
+      // Premier cleanup
+      dropdownButtons.destroy();
+
+      // Deuxième cleanup - ne devrait pas lever d'erreur
+      expect(() => dropdownButtons.destroy()).not.toThrow();
+    });
+
+    it("devrait pouvoir être appelé sans avoir appelé bindAriaHandlers", () => {
+      // Cleanup sans avoir d'abord attaché des handlers
+      expect(() => dropdownButtons.destroy()).not.toThrow();
+    });
+  });
+});

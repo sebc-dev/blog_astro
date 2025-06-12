@@ -9,6 +9,14 @@ export default defineConfig({
       provider: "v8",
       reporter: ["text", "json", "html", "lcov"],
       include: ["src/**/*.ts"],
+      exclude: [
+        "src/test/**/*.ts",
+        "src/**/__mocks__/**/*.ts",
+        "src/**/__fixtures__/**/*.ts",
+        "src/test-helpers/**/*.ts",
+        "src/**/__tests__/**/*.ts",
+        "src/test/setup.ts", // déjà référencé mais exécuté
+      ],
     },
   },
   resolve: {

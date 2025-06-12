@@ -1,8 +1,7 @@
 /**
- * Collections First-Class selon la Callisthénie règle 4
+ * Collections First-Class
  * Encapsule les collections d'éléments DOM avec comportements spécifiques
  * @module dom-collections
- * @see {@link https://github.com/thoughtworks/object-calisthenics#4-first-class-collections|Object Calisthenics Rule 4}
  */
 
 import { querySelectorAll, getElementById } from "../utils/dom.js";
@@ -14,6 +13,7 @@ import { CssSelector, ElementId } from "./value-objects.js";
  */
 export class ClickableElements {
   private readonly elements: NodeListOf<HTMLElement>;
+  private abortController: AbortController | null = null;
 
   /**
    * Crée une nouvelle collection d'éléments cliquables
@@ -28,22 +28,32 @@ export class ClickableElements {
    * @param {function} handler - Le gestionnaire d'événements à attacher
    */
   public bindClickHandler(handler: (event: MouseEvent) => void): void {
+    // Créer un nouveau AbortController si nécessaire
+    if (this.abortController) {
+      this.abortController.abort();
+    }
+
+    this.abortController = new AbortController();
+
+    const signal = this.abortController.signal;
+
     this.elements.forEach((element) => {
-      element.addEventListener("click", handler);
+      element.addEventListener("click", handler, { signal });
     });
   }
 
   /**
-   * Détache un gestionnaire d'événements click de tous les éléments
-   * @param {function} handler - Le gestionnaire d'événements à détacher
+   * Nettoie automatiquement tous les event listeners associés
+   * @public
    */
-  public unbindClickHandler(handler: (event: MouseEvent) => void): void {
-    this.elements.forEach((element) => {
-      element.removeEventListener("click", handler);
-    });
+  public destroy(): void {
+    if (this.abortController) {
+      this.abortController.abort();
+      this.abortController = null;
+    }
   }
 
-    /**
+  /**
    * Retourne le nombre d'éléments dans la collection
    * @returns {number} Le nombre d'éléments
    */
@@ -67,6 +77,7 @@ export class NavigationLinks {
     this.links = querySelectorAll<HTMLElement>(selector.getValue());
   }
 
+  //TODO : A changer quand on passera à i18n
   /**
    * Met à jour les textes des liens selon la langue
    * @param {boolean} isFrench - true pour le français, false pour l'anglais
@@ -83,6 +94,18 @@ export class NavigationLinks {
     });
   }
 
+  /**
+   * Nettoie les ressources (aucune ressource à nettoyer pour cette classe)
+   * @public
+   */
+  public destroy(): void {
+    // Aucun event listener à nettoyer pour cette classe
+  }
+
+  /**
+   * Retourne le nombre de liens dans la collection
+   * @returns {number} Le nombre de liens de navigation
+   */
   public getCount(): number {
     return this.links.length;
   }
@@ -115,6 +138,18 @@ export class LanguageIndicators {
     });
   }
 
+  /**
+   * Nettoie les ressources (aucune ressource à nettoyer pour cette classe)
+   * @public
+   */
+  public destroy(): void {
+    // Aucun event listener à nettoyer pour cette classe
+  }
+
+  /**
+   * Retourne le nombre d'indicateurs dans la collection
+   * @returns {number} Le nombre d'indicateurs de langue
+   */
   public getCount(): number {
     return this.indicators.length;
   }
@@ -126,13 +161,16 @@ export class LanguageIndicators {
  */
 export class DropdownButtons {
   private readonly buttons: HTMLElement[];
+  private abortController: AbortController | null = null;
 
   /**
    * Crée une nouvelle collection de boutons dropdown
    * @param {CssSelector} selector - Le sélecteur CSS pour trouver les boutons
    */
   constructor(selector: CssSelector) {
-    this.buttons = Array.from(querySelectorAll<HTMLElement>(selector.getValue()));
+    this.buttons = Array.from(
+      querySelectorAll<HTMLElement>(selector.getValue()),
+    );
   }
 
   /**
@@ -141,9 +179,9 @@ export class DropdownButtons {
    * @param {boolean} isExpanded - L'état d'expansion du dropdown
    */
   public setAriaExpanded(buttonSelector: string, isExpanded: boolean): void {
-    const button = this.buttons.find(btn => btn.matches(buttonSelector));
+    const button = this.buttons.find((btn) => btn.matches(buttonSelector));
     if (button) {
-      button.setAttribute('aria-expanded', isExpanded.toString());
+      button.setAttribute("aria-expanded", isExpanded.toString());
     }
   }
 
@@ -152,63 +190,98 @@ export class DropdownButtons {
    * @param {boolean} isExpanded - L'état d'expansion des dropdowns
    */
   public setAllAriaExpanded(isExpanded: boolean): void {
-    this.buttons.forEach(button => {
-      button.setAttribute('aria-expanded', isExpanded.toString());
+    this.buttons.forEach((button) => {
+      button.setAttribute("aria-expanded", isExpanded.toString());
     });
   }
 
   /**
    * Attache des gestionnaires d'événements pour gérer automatiquement aria-expanded
+   * Configure les événements click, keydown et blur pour gérer l'ouverture/fermeture des dropdowns
+   * et maintenir l'accessibilité ARIA
    */
   public bindAriaHandlers(): void {
-    this.buttons.forEach(button => {
-      // Gérer l'ouverture au focus et clic
-      button.addEventListener('click', () => {
-        this.toggleAriaExpanded(button);
-      });
+    // Créer un nouveau AbortController
+    this.abortController = new AbortController();
+    const signal = this.abortController.signal;
 
-      button.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
+    this.buttons.forEach((button) => {
+      // Gérer l'ouverture au focus et clic
+      button.addEventListener(
+        "click",
+        () => {
           this.toggleAriaExpanded(button);
-        }
-      });
+        },
+        { signal },
+      );
+
+      button.addEventListener(
+        "keydown",
+        (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            this.toggleAriaExpanded(button);
+          }
+        },
+        { signal },
+      );
 
       // Gérer la fermeture au blur (avec délai pour permettre la sélection)
-      button.addEventListener('blur', () => {
-        setTimeout(() => {
-          const dropdown = button.closest('.dropdown');
-          if (dropdown && !dropdown.matches(':focus-within')) {
-            button.setAttribute('aria-expanded', 'false');
-          }
-        }, 150);
-      });
+      button.addEventListener(
+        "blur",
+        () => {
+          setTimeout(() => {
+            const dropdown = button.closest(".dropdown");
+            if (dropdown && !dropdown.matches(":focus-within")) {
+              button.setAttribute("aria-expanded", "false");
+            }
+          }, 150);
+        },
+        { signal },
+      );
     });
 
     // Fermer tous les dropdowns quand on clique ailleurs
-    document.addEventListener('click', (event) => {
+    const globalClickHandler = (event: MouseEvent) => {
       const target = event.target as Element;
-      if (!target.closest('.dropdown')) {
+      if (!target.closest(".dropdown")) {
         this.setAllAriaExpanded(false);
       }
-    });
+    };
+    document.addEventListener("click", globalClickHandler, { signal });
   }
 
   /**
    * Bascule l'état aria-expanded d'un bouton
+   * Ferme tous les autres dropdowns avant de basculer l'état du bouton courant
    * @param {HTMLElement} button - Le bouton à basculer
    * @private
    */
   private toggleAriaExpanded(button: HTMLElement): void {
-    const currentState = button.getAttribute('aria-expanded') === 'true';
-    
+    const currentState = button.getAttribute("aria-expanded") === "true";
+
     // Fermer tous les autres dropdowns
     this.setAllAriaExpanded(false);
-    
+
     // Basculer le dropdown courant
-    button.setAttribute('aria-expanded', (!currentState).toString());
+    button.setAttribute("aria-expanded", (!currentState).toString());
   }
 
+  /**
+   * Nettoie automatiquement tous les event listeners pour éviter les fuites mémoire
+   * Cette méthode doit être appelée quand l'instance n'est plus nécessaire
+   */
+  public destroy(): void {
+    if (this.abortController) {
+      this.abortController.abort();
+      this.abortController = null;
+    }
+  }
+
+  /**
+   * Retourne le nombre de boutons dans la collection
+   * @returns {number} Le nombre de boutons dropdown
+   */
   public getCount(): number {
     return this.buttons.length;
   }

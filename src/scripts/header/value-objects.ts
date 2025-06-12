@@ -74,7 +74,7 @@ export class Language {
    */
   public static fromString(value: string): Language | null {
     if (value === "fr" || value === "en") {
-      return new Language(value);
+      return new Language(value as LanguageCode);
     }
     return null;
   }
@@ -89,27 +89,57 @@ export class Language {
 }
 
 /**
+ * Classe de base abstraite pour les Value Objects basés sur des chaînes de caractères
+ * Encapsule la logique commune de validation, stockage et comparaison
+ * @abstract
+ * @class StringValueObject
+ */
+abstract class StringValueObject {
+  /**
+   * Crée une nouvelle instance de StringValueObject
+   * @param {string} value - La valeur à encapsuler
+   * @param {string} errorMessage - Le message d'erreur spécifique en cas de valeur invalide
+   * @throws {Error} Si la valeur est vide ou ne contient que des espaces
+   */
+  constructor(
+    protected readonly value: string,
+    errorMessage: string,
+  ) {
+    if (!value || value.trim().length === 0) {
+      throw new Error(errorMessage);
+    }
+  }
+
+  /**
+   * Retourne la valeur encapsulée
+   * @returns {string} La valeur
+   */
+  public getValue(): string {
+    return this.value;
+  }
+
+  /**
+   * Compare cette instance avec une autre du même type
+   * @param {StringValueObject} other - L'autre instance à comparer
+   * @returns {boolean} true si les valeurs sont identiques
+   */
+  public equals(other: StringValueObject): boolean {
+    return this.value === other.value;
+  }
+}
+
+/**
  * Value Object pour encapsuler les identifiants d'éléments DOM
  * @class ElementId
  */
-export class ElementId {
+export class ElementId extends StringValueObject {
   /**
    * Crée une nouvelle instance de ElementId
    * @param {string} value - L'identifiant à encapsuler
    * @throws {Error} Si l'identifiant est vide ou ne contient que des espaces
    */
-  constructor(private readonly value: string) {
-    if (!value || value.trim().length === 0) {
-      throw new Error("L'ID d'élément ne peut pas être vide");
-    }
-  }
-
-  /**
-   * Retourne l'identifiant encapsulé
-   * @returns {string} L'identifiant
-   */
-  public getValue(): string {
-    return this.value;
+  constructor(value: string) {
+    super(value, "L'ID d'élément ne peut pas être vide");
   }
 
   /**
@@ -118,7 +148,7 @@ export class ElementId {
    * @returns {boolean} true si les identifiants sont identiques
    */
   public equals(other: ElementId): boolean {
-    return this.value === other.value;
+    return super.equals(other);
   }
 }
 
@@ -126,24 +156,14 @@ export class ElementId {
  * Value Object pour encapsuler les sélecteurs CSS
  * @class CssSelector
  */
-export class CssSelector {
+export class CssSelector extends StringValueObject {
   /**
    * Crée une nouvelle instance de CssSelector
    * @param {string} value - Le sélecteur CSS à encapsuler
    * @throws {Error} Si le sélecteur est vide ou ne contient que des espaces
    */
-  constructor(private readonly value: string) {
-    if (!value || value.trim().length === 0) {
-      throw new Error("Le sélecteur CSS ne peut pas être vide");
-    }
-  }
-
-  /**
-   * Retourne le sélecteur CSS encapsulé
-   * @returns {string} Le sélecteur CSS
-   */
-  public getValue(): string {
-    return this.value;
+  constructor(value: string) {
+    super(value, "Le sélecteur CSS ne peut pas être vide");
   }
 
   /**
@@ -152,6 +172,6 @@ export class CssSelector {
    * @returns {boolean} true si les sélecteurs sont identiques
    */
   public equals(other: CssSelector): boolean {
-    return this.value === other.value;
+    return super.equals(other);
   }
 }
