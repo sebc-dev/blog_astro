@@ -14,6 +14,8 @@ export default defineConfig({
         "src/**/__mocks__/**/*.ts",
         "src/**/__fixtures__/**/*.ts",
         "src/test-helpers/**/*.ts",
+        "src/**/__tests__/**/*.ts",
+        "src/test/setup.ts", // déjà référencé mais exécuté
       ],
     },
   },
