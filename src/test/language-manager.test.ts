@@ -26,7 +26,7 @@ const mockDropdownButtons = {
   setAriaExpanded: vi.fn(),
   setAllAriaExpanded: vi.fn(),
   bindAriaHandlers: vi.fn(),
-  cleanup: vi.fn(),
+  destroy: vi.fn(),
   getCount: vi.fn().mockReturnValue(2),
 };
 
@@ -267,22 +267,22 @@ describe("LanguageManager", () => {
       languageManager = new LanguageManager();
     });
 
-    it("devrait appeler cleanup() sur les DropdownButtons", () => {
+    it("devrait appeler destroy() sur les DropdownButtons", () => {
       if (languageManager) {
         languageManager.destroy();
       }
 
-      expect(mockDropdownButtons.cleanup).toHaveBeenCalled();
+      expect(mockDropdownButtons.destroy).toHaveBeenCalled();
     });
 
     it("devrait pouvoir être appelé plusieurs fois sans erreur", () => {
       if (languageManager) {
         languageManager.destroy();
-        expect(mockDropdownButtons.cleanup).toHaveBeenCalledTimes(1);
+        expect(mockDropdownButtons.destroy).toHaveBeenCalledTimes(1);
 
         // Deuxième appel - ne devrait pas lever d'erreur
         expect(() => languageManager.destroy()).not.toThrow();
-        expect(mockDropdownButtons.cleanup).toHaveBeenCalledTimes(2);
+        expect(mockDropdownButtons.destroy).toHaveBeenCalledTimes(2);
       }
     });
   });
