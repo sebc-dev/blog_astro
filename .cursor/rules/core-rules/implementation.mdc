@@ -3,8 +3,17 @@ description: Règles pour l'implémentation de code et le développement. Activ�
 globs: 
 alwaysApply: false
 ---
-
 # Règles Focus Implementation
+
+## Méthodologie Étape par Étape
+
+- **Implémentation séquentielle** : Quand plusieurs étapes/parties sont à implémenter, procéder étape par étape
+- **Tests complets** : Après chaque étape, réaliser les tests appropriés :
+  - Tests unitaires pour les fonctions/composants individuels
+  - Tests d'intégration pour les interactions entre modules
+  - Tests end-to-end pour les workflows complets
+- **Validation requise** : Attendre la validation de l'utilisateur avant de passer à l'étape suivante
+- **Documentation des étapes** : Présenter clairement ce qui a été accompli et ce qui reste à faire
 
 ## Exécution
 
