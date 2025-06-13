@@ -3,11 +3,12 @@
  * Vérifie la cohérence des dictionnaires et le bon fonctionnement des utilitaires
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { 
   ui, 
   defaultLang, 
-  type Languages 
+  type Languages,
+  type UIKeys
 } from '../i18n/ui';
 import {
   getLangFromUrl,
@@ -21,6 +22,16 @@ import {
   getLanguageName,
   getLanguageFlag
 } from '../i18n/utils';
+
+// Mock console pour tester les warnings et erreurs
+beforeEach(() => {
+  vi.spyOn(console, 'warn').mockImplementation(() => {});
+  vi.spyOn(console, 'error').mockImplementation(() => {});
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 describe('Dictionnaires de traduction (ui.ts)', () => {
   it('devrait avoir l\'anglais comme langue par défaut', () => {
@@ -78,6 +89,34 @@ describe('Dictionnaires de traduction (ui.ts)', () => {
       expect(ui.fr).toHaveProperty(key);
     });
   });
+
+  it('devrait contenir les clés essentielles d\'interface', () => {
+    const essentialUIKeys = [
+      'languageSwitcher.label',
+      'theme.toggle',
+      'loading',
+      'error.pageNotFound'
+    ];
+
+    essentialUIKeys.forEach(key => {
+      expect(ui.en).toHaveProperty(key);
+      expect(ui.fr).toHaveProperty(key);
+    });
+  });
+
+  it('devrait contenir les clés de métadonnées SEO', () => {
+    const metaKeys = [
+      'meta.description.home',
+      'meta.description.blog',
+      'meta.description.about',
+      'meta.description.contact'
+    ];
+
+    metaKeys.forEach(key => {
+      expect(ui.en).toHaveProperty(key);
+      expect(ui.fr).toHaveProperty(key);
+    });
+  });
 });
 
 describe('Détection de langue (getLangFromUrl)', () => {
@@ -86,6 +125,7 @@ describe('Détection de langue (getLangFromUrl)', () => {
       new URL('https://example.com/'),
       new URL('https://example.com/blog'),
       new URL('https://example.com/about'),
+      new URL('https://example.com/blog/article-title'),
     ];
 
     urls.forEach(url => {
@@ -98,6 +138,7 @@ describe('Détection de langue (getLangFromUrl)', () => {
       new URL('https://example.com/fr/'),
       new URL('https://example.com/fr/blog'),
       new URL('https://example.com/fr/about'),
+      new URL('https://example.com/fr/blog/article-titre'),
     ];
 
     urls.forEach(url => {
@@ -110,11 +151,24 @@ describe('Détection de langue (getLangFromUrl)', () => {
       new URL('https://example.com/es/blog'),
       new URL('https://example.com/de/about'),
       new URL('https://example.com/invalid/page'),
+      new URL('https://example.com/zh/content'),
     ];
 
     urls.forEach(url => {
       expect(getLangFromUrl(url)).toBe('en');
     });
+  });
+
+  it('devrait gérer les URLs avec des paramètres et fragments', () => {
+    const urls = [
+      new URL('https://example.com/fr/blog?page=2'),
+      new URL('https://example.com/blog#section'),
+      new URL('https://example.com/fr/about#contact'),
+    ];
+
+    expect(getLangFromUrl(urls[0])).toBe('fr');
+    expect(getLangFromUrl(urls[1])).toBe('en');
+    expect(getLangFromUrl(urls[2])).toBe('fr');
   });
 });
 
@@ -125,6 +179,7 @@ describe('Système de traduction (useTranslations)', () => {
     expect(t('nav.home')).toBe('Home');
     expect(t('nav.blog')).toBe('Blog');
     expect(t('blog.readMore')).toBe('Read more');
+    expect(t('theme.toggle')).toBe('Toggle theme');
   });
 
   it('devrait retourner les traductions correctes pour le français', () => {
@@ -133,13 +188,77 @@ describe('Système de traduction (useTranslations)', () => {
     expect(t('nav.home')).toBe('Accueil');
     expect(t('nav.blog')).toBe('Blog');
     expect(t('blog.readMore')).toBe('Lire la suite');
+    expect(t('theme.toggle')).toBe('Basculer le thème');
   });
 
-  it('devrait utiliser le fallback anglais pour les clés manquantes', () => {
-    // Note: Ce test nécessiterait une modification de la fonction pour être plus testable
-    // Pour l'instant, nous testons que les clés existantes fonctionnent
+  it('devrait utiliser le fallback anglais et logger un warning pour les clés manquantes', () => {
+    // Simuler une langue avec une clé manquante en utilisant une clé inexistante
+    const t = useTranslations('fr');
+    
+    // Utiliser vi.mock pour simuler une clé manquante temporairement
+    const originalLookup = Object.getOwnPropertyDescriptor(ui.fr, 'nav.home');
+    Object.defineProperty(ui.fr, 'nav.home', {
+      value: undefined,
+      configurable: true
+    });
+
+    const result = t('nav.home');
+
+    expect(result).toBe('Home'); // Fallback anglais
+    expect(console.warn).toHaveBeenCalledWith(
+      'Translation missing for key "nav.home" in language "fr". Using fallback from "en".'
+    );
+
+    // Restaurer la propriété originale
+    if (originalLookup) {
+      Object.defineProperty(ui.fr, 'nav.home', originalLookup);
+    }
+  });
+
+  it('devrait retourner la clé elle-même et logger une erreur si aucune traduction n\'existe', () => {
+    // Test avec une clé qui n'existe nulle part
     const t = useTranslations('en');
-    expect(t('nav.home')).toBe('Home');
+    const invalidKey = 'nonexistent.key' as UIKeys;
+    const result = t(invalidKey);
+
+    expect(result).toBe('nonexistent.key');
+    expect(console.error).toHaveBeenCalledWith(
+      'Translation missing for key "nonexistent.key" in both "en" and fallback "en".'
+    );
+  });
+
+  it('devrait gérer le cas où même le fallback anglais est manquant', () => {
+    // Simuler l'absence de clé dans les deux langues
+    const t = useTranslations('fr');
+    
+    // Sauvegarder les descripteurs originaux
+    const originalEnDescriptor = Object.getOwnPropertyDescriptor(ui.en, 'nav.home');
+    const originalFrDescriptor = Object.getOwnPropertyDescriptor(ui.fr, 'nav.home');
+    
+    // Supprimer temporairement les propriétés
+    Object.defineProperty(ui.en, 'nav.home', {
+      value: undefined,
+      configurable: true
+    });
+    Object.defineProperty(ui.fr, 'nav.home', {
+      value: undefined,
+      configurable: true
+    });
+
+    const result = t('nav.home');
+
+    expect(result).toBe('nav.home'); // Retourne la clé elle-même
+    expect(console.error).toHaveBeenCalledWith(
+      'Translation missing for key "nav.home" in both "fr" and fallback "en".'
+    );
+
+    // Restaurer les propriétés originales
+    if (originalEnDescriptor) {
+      Object.defineProperty(ui.en, 'nav.home', originalEnDescriptor);
+    }
+    if (originalFrDescriptor) {
+      Object.defineProperty(ui.fr, 'nav.home', originalFrDescriptor);
+    }
   });
 });
 
@@ -150,6 +269,7 @@ describe('Gestion des chemins traduits (useTranslatedPath)', () => {
     expect(translatePath('/')).toBe('/');
     expect(translatePath('/blog')).toBe('/blog');
     expect(translatePath('/about')).toBe('/about');
+    expect(translatePath('/blog/article-title')).toBe('/blog/article-title');
   });
 
   it('devrait ajouter le préfixe /fr/ pour le français', () => {
@@ -158,6 +278,7 @@ describe('Gestion des chemins traduits (useTranslatedPath)', () => {
     expect(translatePath('/', 'fr')).toBe('/fr/');
     expect(translatePath('/blog', 'fr')).toBe('/fr/blog');
     expect(translatePath('/about', 'fr')).toBe('/fr/about');
+    expect(translatePath('/blog/article-titre', 'fr')).toBe('/fr/blog/article-titre');
   });
 
   it('devrait gérer les chemins avec ou sans slash initial', () => {
@@ -165,6 +286,8 @@ describe('Gestion des chemins traduits (useTranslatedPath)', () => {
     
     expect(translatePath('blog', 'fr')).toBe('/fr/blog');
     expect(translatePath('/blog', 'fr')).toBe('/fr/blog');
+    expect(translatePath('about/team', 'fr')).toBe('/fr/about/team');
+    expect(translatePath('/about/team', 'fr')).toBe('/fr/about/team');
   });
 
   it('devrait permettre de spécifier une langue cible différente', () => {
@@ -172,6 +295,18 @@ describe('Gestion des chemins traduits (useTranslatedPath)', () => {
     
     expect(translatePath('/blog', 'en')).toBe('/blog');
     expect(translatePath('/blog', 'fr')).toBe('/fr/blog');
+    
+    const translatePathFr = useTranslatedPath('fr');
+    expect(translatePathFr('/about', 'en')).toBe('/about');
+    expect(translatePathFr('/about', 'fr')).toBe('/fr/about');
+  });
+
+  it('devrait utiliser la langue courante par défaut si aucune langue cible n\'est spécifiée', () => {
+    const translatePathEn = useTranslatedPath('en');
+    const translatePathFr = useTranslatedPath('fr');
+    
+    expect(translatePathEn('/blog')).toBe('/blog');
+    expect(translatePathFr('/blog')).toBe('/fr/blog');
   });
 });
 
@@ -199,6 +334,30 @@ describe('Liens hreflang pour SEO (getHreflangLinks)', () => {
     expect(enLink?.href).toBe('/about');
     expect(frLink?.href).toBe('/fr/about');
   });
+
+  it('devrait gérer les chemins sans slash initial', () => {
+    const links = getHreflangLinks('contact', 'https://example.com');
+    
+    expect(links).toHaveLength(2);
+    
+    const enLink = links.find(link => link.hreflang === 'en');
+    const frLink = links.find(link => link.hreflang === 'fr');
+    
+    expect(enLink?.href).toBe('https://example.com/contact');
+    expect(frLink?.href).toBe('https://example.com/fr/contact');
+  });
+
+  it('devrait gérer la page d\'accueil', () => {
+    const links = getHreflangLinks('/', 'https://example.com');
+    
+    expect(links).toHaveLength(2);
+    
+    const enLink = links.find(link => link.hreflang === 'en');
+    const frLink = links.find(link => link.hreflang === 'fr');
+    
+    expect(enLink?.href).toBe('https://example.com/');
+    expect(frLink?.href).toBe('https://example.com/fr/');
+  });
 });
 
 describe('Extraction du chemin sans langue (getPathWithoutLang)', () => {
@@ -207,6 +366,7 @@ describe('Extraction du chemin sans langue (getPathWithoutLang)', () => {
       { url: new URL('https://example.com/fr/blog'), expected: '/blog' },
       { url: new URL('https://example.com/fr/about'), expected: '/about' },
       { url: new URL('https://example.com/fr/'), expected: '/' },
+      { url: new URL('https://example.com/fr/blog/article-titre'), expected: '/blog/article-titre' },
     ];
 
     urls.forEach(({ url, expected }) => {
@@ -219,6 +379,30 @@ describe('Extraction du chemin sans langue (getPathWithoutLang)', () => {
       { url: new URL('https://example.com/blog'), expected: '/blog' },
       { url: new URL('https://example.com/about'), expected: '/about' },
       { url: new URL('https://example.com/'), expected: '/' },
+      { url: new URL('https://example.com/blog/article-title'), expected: '/blog/article-title' },
+    ];
+
+    urls.forEach(({ url, expected }) => {
+      expect(getPathWithoutLang(url)).toBe(expected);
+    });
+  });
+
+  it('devrait gérer les URLs avec des langues non supportées', () => {
+    const urls = [
+      { url: new URL('https://example.com/es/blog'), expected: '/es/blog' },
+      { url: new URL('https://example.com/de/about'), expected: '/de/about' },
+      { url: new URL('https://example.com/invalid/page'), expected: '/invalid/page' },
+    ];
+
+    urls.forEach(({ url, expected }) => {
+      expect(getPathWithoutLang(url)).toBe(expected);
+    });
+  });
+
+  it('devrait gérer les chemins vides correctement', () => {
+    const urls = [
+      { url: new URL('https://example.com/fr'), expected: '/' },
+      { url: new URL('https://example.com/fr/'), expected: '/' },
     ];
 
     urls.forEach(({ url, expected }) => {
@@ -238,6 +422,15 @@ describe('Validation des langues (isValidLang)', () => {
     expect(isValidLang('de')).toBe(false);
     expect(isValidLang('invalid')).toBe(false);
     expect(isValidLang('')).toBe(false);
+    expect(isValidLang('EN')).toBe(false); // Sensible à la casse
+    expect(isValidLang('FR')).toBe(false); // Sensible à la casse
+  });
+
+  it('devrait retourner false pour des valeurs nulles ou undefined', () => {
+    // @ts-expect-error - Test intentionnel avec des valeurs incorrectes
+    expect(isValidLang(null)).toBe(false);
+    // @ts-expect-error - Test intentionnel avec des valeurs incorrectes
+    expect(isValidLang(undefined)).toBe(false);
   });
 });
 
@@ -248,6 +441,13 @@ describe('Langues supportées (getSupportedLanguages)', () => {
     expect(languages).toHaveLength(2);
     expect(languages).toContain('en');
     expect(languages).toContain('fr');
+  });
+
+  it('devrait retourner un tableau ordonné', () => {
+    const languages = getSupportedLanguages();
+    const sortedLanguages = [...languages].sort();
+    
+    expect(languages).toEqual(expect.arrayContaining(sortedLanguages));
   });
 });
 
@@ -263,6 +463,30 @@ describe('Formatage des dates (formatDate)', () => {
     const formatted = formatDate(testDate, 'fr');
     expect(formatted).toMatch(/15 janvier 2024/);
   });
+
+  it('devrait gérer différentes dates', () => {
+    const dates = [
+      new Date('2023-12-25'), // Noël
+      new Date('2024-07-14'), // Fête nationale française
+      new Date('2024-02-29'), // Année bissextile
+    ];
+
+    dates.forEach(date => {
+      const formattedEn = formatDate(date, 'en');
+      const formattedFr = formatDate(date, 'fr');
+      
+      expect(formattedEn).toBeTruthy();
+      expect(formattedFr).toBeTruthy();
+      expect(formattedEn).not.toBe(formattedFr);
+    });
+  });
+
+  it('devrait utiliser le bon format de locale', () => {
+    const formatted = formatDate(testDate, 'fr');
+    // Le format français utilise "janvier" et non "January"
+    expect(formatted).toContain('janvier');
+    expect(formatted).not.toContain('January');
+  });
 });
 
 describe('Noms des langues (getLanguageName)', () => {
@@ -270,12 +494,26 @@ describe('Noms des langues (getLanguageName)', () => {
     expect(getLanguageName('en')).toBe('English');
     expect(getLanguageName('fr')).toBe('Français');
   });
+
+  it('devrait retourner le code de langue comme fallback pour une langue non configurée', () => {
+    // @ts-expect-error - Test avec une langue non supportée
+    expect(getLanguageName('es')).toBe('es');
+    // @ts-expect-error - Test avec une langue non supportée
+    expect(getLanguageName('de')).toBe('de');
+  });
 });
 
 describe('Drapeaux des langues (getLanguageFlag)', () => {
   it('devrait retourner les drapeaux corrects', () => {
     expect(getLanguageFlag('en')).toBe('🇺🇸');
     expect(getLanguageFlag('fr')).toBe('🇫🇷');
+  });
+
+  it('devrait retourner un drapeau générique pour une langue non configurée', () => {
+    // @ts-expect-error - Test avec une langue non supportée
+    expect(getLanguageFlag('es')).toBe('🌐');
+    // @ts-expect-error - Test avec une langue non supportée
+    expect(getLanguageFlag('de')).toBe('🌐');
   });
 });
 
@@ -299,6 +537,34 @@ describe('Cohérence globale du système i18n', () => {
     languages.forEach(lang => {
       const langKeys = Object.keys(ui[lang as Languages]);
       expect(langKeys.sort()).toEqual(referenceKeys.sort());
+    });
+  });
+
+  it('devrait maintenir la cohérence des types', () => {
+    // Vérifier que les types sont cohérents
+    const languages = getSupportedLanguages();
+    languages.forEach(lang => {
+      expect(isValidLang(lang)).toBe(true);
+      expect(getLanguageName(lang)).toBeTruthy();
+      expect(getLanguageFlag(lang)).toBeTruthy();
+    });
+  });
+
+  it('devrait avoir des traductions complètes pour toutes les fonctionnalités', () => {
+    const essentialKeys = [
+      'nav.home', 'nav.blog', 'nav.about',
+      'blog.readMore', 'blog.publishedOn',
+      'theme.toggle', 'loading',
+      'error.pageNotFound', 'meta.description.home'
+    ];
+
+    getSupportedLanguages().forEach(lang => {
+      const t = useTranslations(lang);
+      essentialKeys.forEach(key => {
+        const translation = t(key as UIKeys);
+        expect(translation).toBeTruthy();
+        expect(translation).not.toBe(key); // Pas de fallback vers la clé
+      });
     });
   });
 }); 

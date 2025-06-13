@@ -18,6 +18,11 @@ export default defineConfig({
     
     vite: {
         plugins: [tailwindcss()],
+        server: {
+            watch: {
+                ignored: ['**/coverage/**', '**/node_modules/**']
+            }
+        }
     },
     
     integrations: [sitemap()]
