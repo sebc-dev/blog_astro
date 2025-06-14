@@ -2,12 +2,14 @@ import { defineCollection, z } from 'astro:content';
 
 // Regex pour valider le format slug : lettres minuscules, chiffres, traits d'union
 // Commence et finit par un caractère alphanumérique, peut contenir des traits d'union au milieu
+// eslint-disable-next-line no-unused-vars
 const SLUG_REGEX = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 // Store pour tracking des translationId utilisés (pour validation d'unicité)
 const usedTranslationIds = new Set<string>();
 
 // Fonction de validation personnalisée pour l'unicité des translationId
+// eslint-disable-next-line no-unused-vars
 const validateUniqueTranslationId = (id: string) => {
   if (usedTranslationIds.has(id)) {
     throw new Error(`Translation ID "${id}" is already used. Each translationId must be unique across the collection.`);
