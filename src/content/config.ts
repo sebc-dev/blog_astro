@@ -26,8 +26,15 @@ const blogCollection = defineCollection({
     pubDate: z.date(),
     author: z.string(),
     lang: z.enum(['en', 'fr']),
-    translationId: z.string().uuid(),
-    canonicalSlug: z.string().regex(/^[a-z0-9-]+$/),
+    translationId: z.string()
+      .uuid()
+      .refine(validateUniqueTranslationId, {
+        message: 'translationId must be unique within the collection',
+      }),
+    canonicalSlug: z.string().regex(SLUG_REGEX, {
+      message:
+        'canonicalSlug invalide : minuscules, chiffres, tirets, sans tiret en début/fin ni double tiret',
+    }),
     heroImage: z.string().optional(),
   })
 });
