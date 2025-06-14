@@ -1,0 +1,398 @@
+---
+title: "Mastering CSS Grid Layout: Complete Guide with Practical Examples"
+description: "Learn to create complex and responsive layouts with CSS Grid. Complete guide with practical examples and use cases."
+pubDate: 2024-02-15
+author: "Sophie Bernard"
+lang: "en"
+translationId: "css-grid-layout-guide"
+canonicalSlug: "css-grid-comprehensive-guide"
+heroImage: "/images/css-grid-layout.jpg"
+---
+
+# Mastering CSS Grid Layout: Complete Guide with Practical Examples
+
+CSS Grid Layout revolutionizes how we create web layouts. Here's a complete guide to mastering this powerful technology and creating modern interfaces.
+
+## Introduction to CSS Grid
+
+CSS Grid is a two-dimensional layout system that allows you to create complex grids with ease. Unlike Flexbox which is one-dimensional, Grid excels at creating two-dimensional layouts.
+
+### Fundamental Concepts
+
+```css
+.container {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  grid-template-rows: auto 1fr auto;
+  gap: 20px;
+}
+```
+
+## Essential Terminology
+
+### Grid Container and Grid Items
+```html
+<div class="grid-container">
+  <div class="grid-item">1</div>
+  <div class="grid-item">2</div>
+  <div class="grid-item">3</div>
+</div>
+```
+
+### Grid Lines
+- **Vertical**: Columns numbered from 1 to n+1
+- **Horizontal**: Rows numbered from 1 to n+1
+
+### Grid Tracks
+- **Columns**: Space between two vertical lines
+- **Rows**: Space between two horizontal lines
+
+## Container Properties
+
+### Defining Columns
+```css
+.grid {
+  /* Fixed columns */
+  grid-template-columns: 200px 200px 200px;
+  
+  /* Flexible columns */
+  grid-template-columns: 1fr 2fr 1fr;
+  
+  /* Mixed fixed and flexible */
+  grid-template-columns: 200px 1fr 100px;
+  
+  /* Repetition */
+  grid-template-columns: repeat(3, 1fr);
+  
+  /* Auto-fit and auto-fill */
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+```
+
+### Defining Rows
+```css
+.grid {
+  /* Explicit rows */
+  grid-template-rows: 100px auto 50px;
+  
+  /* Implicit rows */
+  grid-auto-rows: minmax(100px, auto);
+}
+```
+
+### Spacing (Gap)
+```css
+.grid {
+  /* Uniform spacing */
+  gap: 20px;
+  
+  /* Different spacing */
+  row-gap: 10px;
+  column-gap: 20px;
+  
+  /* Legacy syntax (compatibility) */
+  grid-gap: 20px;
+}
+```
+
+## Item Placement
+
+### Basic Placement
+```css
+.item {
+  /* By line number */
+  grid-column: 1 / 3;  /* From line 1 to 3 */
+  grid-row: 2 / 4;     /* From line 2 to 4 */
+  
+  /* Span (extend) */
+  grid-column: span 2; /* Extend across 2 columns */
+  grid-row: span 3;    /* Extend across 3 rows */
+  
+  /* Shorthand */
+  grid-area: 2 / 1 / 4 / 3; /* row-start / col-start / row-end / col-end */
+}
+```
+
+### Named Placement
+```css
+.grid {
+  grid-template-areas:
+    "header header header"
+    "sidebar content ads"
+    "footer footer footer";
+}
+
+.header { grid-area: header; }
+.sidebar { grid-area: sidebar; }
+.content { grid-area: content; }
+.ads { grid-area: ads; }
+.footer { grid-area: footer; }
+```
+
+## Practical Examples
+
+### Classic Page Layout
+```css
+.page-layout {
+  display: grid;
+  grid-template-columns: 250px 1fr 200px;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    "header header header"
+    "sidebar main ads"
+    "footer footer footer";
+  min-height: 100vh;
+  gap: 20px;
+}
+
+.header { 
+  grid-area: header;
+  background: #333;
+  color: white;
+  padding: 1rem;
+}
+
+.sidebar {
+  grid-area: sidebar;
+  background: #f0f0f0;
+  padding: 1rem;
+}
+
+.main {
+  grid-area: main;
+  padding: 1rem;
+}
+
+.ads {
+  grid-area: ads;
+  background: #ffe6e6;
+  padding: 1rem;
+}
+
+.footer {
+  grid-area: footer;
+  background: #333;
+  color: white;
+  padding: 1rem;
+}
+```
+
+### Responsive Gallery
+```css
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  padding: 20px;
+}
+
+.gallery-item {
+  aspect-ratio: 1;
+  background: #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Special items that take more space */
+.gallery-item.large {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+.gallery-item.wide {
+  grid-column: span 2;
+}
+
+.gallery-item.tall {
+  grid-row: span 2;
+}
+```
+
+### Dashboard Layout
+```css
+.dashboard {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(3, minmax(200px, auto));
+  gap: 20px;
+  padding: 20px;
+}
+
+.widget-large {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+.widget-wide {
+  grid-column: span 2;
+}
+
+.widget-tall {
+  grid-row: span 2;
+}
+
+.widget {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+```
+
+## Responsive Design with Grid
+
+### Mobile First
+```css
+.responsive-grid {
+  display: grid;
+  gap: 20px;
+  
+  /* Mobile: 1 column */
+  grid-template-columns: 1fr;
+}
+
+/* Tablet: 2 columns */
+@media (min-width: 768px) {
+  .responsive-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Desktop: 3 columns */
+@media (min-width: 1024px) {
+  .responsive-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Large desktop: 4 columns */
+@media (min-width: 1200px) {
+  .responsive-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+```
+
+### Auto-responsive with minmax()
+```css
+.auto-responsive {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+/* Automatically adapts:
+   - 1 column on mobile
+   - 2-3 columns on tablet
+   - 4+ columns on desktop
+*/
+```
+
+## Advanced Techniques
+
+### Subgrid (CSS Grid Level 2)
+```css
+.parent-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.child-grid {
+  display: grid;
+  grid-column: span 2;
+  grid-template-columns: subgrid; /* Inherits from parent grid */
+}
+```
+
+### Alignment and Justification
+```css
+.grid-container {
+  /* Align all items */
+  justify-items: center;    /* horizontal */
+  align-items: center;      /* vertical */
+  place-items: center;      /* shorthand */
+  
+  /* Align grid within container */
+  justify-content: center;  /* horizontal */
+  align-content: center;    /* vertical */
+  place-content: center;    /* shorthand */
+}
+
+.grid-item {
+  /* Align specific item */
+  justify-self: start;
+  align-self: end;
+  place-self: start end;
+}
+```
+
+### Grid with CSS Custom Properties
+```css
+:root {
+  --columns: 3;
+  --gap: 20px;
+  --min-item-width: 250px;
+}
+
+.dynamic-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--columns), 1fr);
+  gap: var(--gap);
+}
+
+/* Responsive with CSS variables */
+@media (max-width: 768px) {
+  :root {
+    --columns: 1;
+    --gap: 15px;
+  }
+}
+```
+
+## Compatibility and Fallbacks
+
+### Browser Support
+```css
+.fallback-layout {
+  /* Fallback for older browsers */
+  display: flex;
+  flex-wrap: wrap;
+}
+
+/* Progressive enhancement */
+@supports (display: grid) {
+  .fallback-layout {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+}
+```
+
+## Development Tools
+
+### Firefox Grid Inspector
+- Grid line visualization
+- Named area inspection
+- Overlap debugging
+
+### Chrome DevTools
+- Grid overlay
+- Property inspection
+- Real-time modification
+
+## Conclusion
+
+CSS Grid Layout offers unmatched power and flexibility for creating modern layouts:
+
+### Key Advantages
+- **Two-dimensional**: Complete control over rows and columns
+- **Native responsive**: `auto-fit`, `auto-fill`, `minmax()`
+- **Semantic**: Named areas for clarity
+- **Powerful**: Complex layouts with minimal code
+
+### When to Use Grid vs Flexbox
+- **Grid**: Two-dimensional layouts, precise placement
+- **Flexbox**: One-dimensional alignment, space distribution
+
+Mastering CSS Grid will allow you to create modern, responsive, and maintainable web interfaces with remarkable efficiency! 

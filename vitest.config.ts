@@ -7,7 +7,7 @@ export default defineConfig({
     setupFiles: ["./src/test/setup.ts"],
     coverage: {
       provider: "v8",
-      reporter: ["text", "json", "html", "lcov"],
+      reporter: ["text", "html", "lcov"],
       include: ["src/**/*.ts"],
       exclude: [
         "src/test/**/*.ts",
@@ -15,9 +15,19 @@ export default defineConfig({
         "src/**/__fixtures__/**/*.ts",
         "src/test-helpers/**/*.ts",
         "src/**/__tests__/**/*.ts",
-        "src/test/setup.ts", // déjà référencé mais exécuté
+        "src/content/config.ts",
       ],
+      thresholds: {
+        global: {
+          branches: 80,
+          functions: 80,
+          lines: 80,
+          statements: 80
+        }
+      }
     },
+    // Tests post-build pour sites statiques
+    testTimeout: process.env.CI ? 10000 : 5000,
   },
   resolve: {
     alias: {

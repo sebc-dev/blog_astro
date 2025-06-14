@@ -1,6 +1,6 @@
 ---
 description: Guide complet des bonnes pratiques TypeScript pour projets Astro - architecture, typage strict, performance et patterns modernes.
-globs: ["*.astro", "*.ts", "*.tsx"]
+globs: *.astro
 alwaysApply: false
 ---
 
