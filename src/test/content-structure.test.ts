@@ -13,7 +13,8 @@ describe('Content Structure Validation', () => {
       const configContent = readFileSync(configPath, 'utf-8');
       expect(configContent).toContain('defineCollection');
       expect(configContent).toContain('blog');
-      expect(configContent).toContain("z.enum(['en', 'fr'])");
+      // Vérifier la présence de l'enum lang avec les valeurs en et fr, indépendamment du style de guillemets
+      expect(configContent).toMatch(/z\.enum\(\s*\[[\s'"]*en[\s'",]*fr[\s'"]*\]\s*\)/);
     });
   });
 
