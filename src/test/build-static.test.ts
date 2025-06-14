@@ -4,9 +4,9 @@
  */
 
 import { describe, test, expect, beforeAll, afterAll } from 'vitest';
-import { readFile, access } from 'fs/promises';
-import { join, resolve } from 'path';
-import { spawn } from 'child_process';
+import { readFile, access } from 'node:fs/promises';
+import { join, resolve } from 'node:path';
+import { spawn } from 'node:child_process';
 
 // Configuration pour les tests de build
 const BUILD_CONFIG = {
@@ -195,8 +195,8 @@ describe('Build Static Tests - Phase 2', () => {
     });
 
     test('bundle JavaScript total < 3KB', async () => {
-      const { readdirSync, statSync } = await import('fs');
-      const { join } = await import('path');
+      const { readdirSync, statSync } = await import('node:fs');
+      // `join` est déjà disponible dans la portée – supprimer cette ligne superflue
       
       const distPath = resolve(BUILD_CONFIG.buildDir);
       

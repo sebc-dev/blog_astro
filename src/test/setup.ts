@@ -1,5 +1,6 @@
 // Configuration globale pour les tests Vitest
 import { beforeEach } from "vitest";
+import '@testing-library/jest-dom/vitest';
 
 // Nettoyage avant chaque test
 beforeEach(() => {

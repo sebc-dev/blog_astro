@@ -1,6 +1,10 @@
 ---
-
-import { getLangFromUrl, useTranslations, useTranslatedPath, getPathWithoutLang } from '../i18n/utils';
+import {
+  getLangFromUrl,
+  useTranslations,
+  useTranslatedPath,
+  getPathWithoutLang,
+} from "../i18n/utils";
 
 interface NavLink {
   href: string;
@@ -11,7 +15,6 @@ interface Props {
   siteName?: string;
   navLinks?: NavLink[];
 }
-
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
@@ -27,30 +30,27 @@ const {
   ],
 } = Astro.props;
 
-
-const translatedNavLinks = navLinks.map(link => ({
+const translatedNavLinks = navLinks.map((link) => ({
   href: translatePath(link.href),
   label: t(link.key as any),
-  isActive: Astro.url.pathname === translatePath(link.href)
+  isActive: Astro.url.pathname === translatePath(link.href),
 }));
-
 
 const currentPath = getPathWithoutLang(Astro.url);
 const languageUrls = {
   en: {
     url: currentPath,
-    isActive: lang === 'en',
-    label: 'English',
-    flag: '🇺🇸'
+    isActive: lang === "en",
+    label: "English",
+    flag: "🇺🇸",
   },
   fr: {
     url: `/fr${currentPath}`,
-    isActive: lang === 'fr', 
-    label: 'Français',
-    flag: '🇫🇷'
-  }
+    isActive: lang === "fr",
+    label: "Français",
+    flag: "🇫🇷",
+  },
 };
-
 
 const criticalCSS = `
   .header-critical {
@@ -90,7 +90,7 @@ const criticalCSS = `
 // Préparation des attributs SEO
 const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
   hreflang: langCode,
-  href: data.url
+  href: data.url,
 }));
 ---
 
@@ -116,21 +116,23 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
     </div>
 
     <!-- Navigation Statique (Zero-JS) -->
-    <nav class="navbar-center" aria-label={t('nav.home')}>
+    <nav class="navbar-center" aria-label={t("nav.home")}>
       <ul class="flex gap-6" role="menubar">
-        {translatedNavLinks.map((link) => (
-          <li role="none">
-            <a
-              href={link.href}
-              class={`nav-link transition-colors duration-200 px-3 py-2 rounded-md ${link.isActive ? 'text-primary font-semibold underline underline-offset-4' : 'text-base-content hover:text-primary hover:underline hover:underline-offset-4'}`}
-              role="menuitem"
-              aria-current={link.isActive ? 'page' : undefined}
-              rel="prefetch"
-            >
-              {link.label}
-            </a>
-          </li>
-        ))}
+        {
+          translatedNavLinks.map((link) => (
+            <li role="none">
+              <a
+                href={link.href}
+                class={`nav-link rounded-md px-3 py-2 transition-colors duration-200 ${link.isActive ? "text-primary font-semibold underline underline-offset-4" : "text-base-content hover:text-primary hover:underline hover:underline-offset-4"}`}
+                role="menuitem"
+                aria-current={link.isActive ? "page" : undefined}
+                rel="prefetch"
+              >
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
       </ul>
     </nav>
 
@@ -142,38 +144,61 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
           class="btn btn-ghost btn-sm"
           aria-haspopup="true"
           aria-expanded="false"
-          aria-label={t('languageSwitcher.label')}
+          aria-label={t("languageSwitcher.label")}
           data-dropdown="lang-desktop"
         >
           <span>{languageUrls[lang].flag} {lang.toUpperCase()}</span>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
             <path d="M6 9l6 6 6-6"></path>
           </svg>
         </button>
-        <ul class="dropdown-content menu bg-base-100 rounded-box border border-base-300 z-[1] w-32 p-2 shadow-lg">
-          {Object.entries(languageUrls).map(([langCode, data]) => (
-            <li>
-              <a
-                href={data.url}
-                class={`text-sm ${data.isActive ? 'bg-primary text-primary-content font-semibold' : ''}`}
-                hreflang={langCode}
-                rel="prefetch"
-              >
-                {data.flag} {data.label}
-              </a>
-            </li>
-          ))}
+        <ul
+          class="dropdown-content menu bg-base-100 rounded-box border-base-300 z-[1] w-32 border p-2 shadow-lg"
+        >
+          {
+            Object.entries(languageUrls).map(([langCode, data]) => (
+              <li>
+                <a
+                  href={data.url}
+                  class={`text-sm ${data.isActive ? "bg-primary text-primary-content font-semibold" : ""}`}
+                  hreflang={langCode}
+                  rel="prefetch"
+                >
+                  {data.flag} {data.label}
+                </a>
+              </li>
+            ))
+          }
         </ul>
       </div>
 
       <!-- Theme Toggle DaisyUI natif -->
-      <label class="swap swap-rotate" aria-label={t('theme.toggle')}>
+      <label class="swap swap-rotate" aria-label={t("theme.toggle")}>
         <input type="checkbox" class="theme-controller" value="dark" />
-        <svg class="swap-off fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-          <path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"/>
+        <svg
+          class="swap-off h-6 w-6 fill-current"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+        >
+          <path
+            d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"
+          ></path>
         </svg>
-        <svg class="swap-on fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-          <path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"/>
+        <svg
+          class="swap-on h-6 w-6 fill-current"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+        >
+          <path
+            d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"
+          ></path>
         </svg>
       </label>
     </div>
@@ -181,11 +206,7 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
 </header>
 
 <!-- Header Mobile -->
-<header
-  id="mobile-header"
-  class="header-critical lg:hidden"
-  role="banner"
->
+<header id="mobile-header" class="header-critical lg:hidden" role="banner">
   <div class="flex items-center justify-between px-4 py-3">
     <!-- Logo Mobile -->
     <a
@@ -206,12 +227,30 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
       data-menu-toggle
     >
       <!-- Icône Hamburger -->
-      <svg class="menu-icon hamburger w-6 h-6 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+      <svg
+        class="menu-icon hamburger h-6 w-6 transition-all duration-300"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M4 6h16M4 12h16M4 18h16"></path>
       </svg>
       <!-- Icône Croix -->
-      <svg class="menu-icon cross w-6 h-6 absolute inset-0 m-auto transition-all duration-300 opacity-0 rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+      <svg
+        class="menu-icon cross absolute inset-0 m-auto h-6 w-6 rotate-90 opacity-0 transition-all duration-300"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M6 18L18 6M6 6l12 12"></path>
       </svg>
     </button>
   </div>
@@ -221,59 +260,76 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
 <div
   id="mobile-menu"
   class="fixed inset-0 z-40 lg:hidden"
-  style="transform: translateX(100%); transition: transform 0.3s ease;"
   aria-hidden="true"
 >
   <div class="fixed inset-0 bg-black/50" data-menu-overlay></div>
-  <div class="fixed inset-0 bg-base-100 shadow-xl">
-    <div class="flex flex-col h-full">
+  <div class="bg-base-100 fixed inset-0 shadow-xl">
+    <div class="flex h-full flex-col">
       <!-- Navigation Mobile Statique -->
-      <nav class="flex-1 px-4 py-6 mt-16" aria-label={t('nav.home')}>
+      <nav class="mt-16 flex-1 px-4 py-6" aria-label={t("nav.home")}>
         <ul class="space-y-4">
-          {translatedNavLinks.map((link) => (
-            <li>
-              <a
-                href={link.href}
-                class={`block px-4 py-3 transition-colors text-lg ${link.isActive ? 'text-primary font-semibold underline underline-offset-4' : 'text-base-content hover:text-primary hover:underline hover:underline-offset-4'}`}
-                rel="prefetch"
-                data-menu-link
-              >
-                {link.label}
-              </a>
-            </li>
-          ))}
+          {
+            translatedNavLinks.map((link) => (
+              <li>
+                <a
+                  href={link.href}
+                  class={`block px-4 py-3 text-lg transition-colors ${link.isActive ? "text-primary font-semibold underline underline-offset-4" : "text-base-content hover:text-primary hover:underline hover:underline-offset-4"}`}
+                  rel="prefetch"
+                  data-menu-link
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))
+          }
         </ul>
       </nav>
 
       <!-- Contrôles Mobile -->
-      <div class="p-4 border-t space-y-4">
+      <div class="space-y-4 border-t p-4">
         <!-- Changement de langue mobile -->
         <div class="flex items-center justify-between">
-          <span class="text-sm font-medium">{t('languageSwitcher.label')}</span>
+          <span class="text-sm font-medium">{t("languageSwitcher.label")}</span>
           <div class="flex gap-2">
-            {Object.entries(languageUrls).map(([langCode, data]) => (
-              <a
-                href={data.url}
-                class={`btn btn-sm ${data.isActive ? 'btn-primary' : 'btn-outline'}`}
-                hreflang={langCode}
-                rel="prefetch"
-              >
-                {data.flag}
-              </a>
-            ))}
+            {
+              Object.entries(languageUrls).map(([langCode, data]) => (
+                <a
+                  href={data.url}
+                  class={`btn btn-sm ${data.isActive ? "btn-primary" : "btn-outline"}`}
+                  hreflang={langCode}
+                  rel="prefetch"
+                >
+                  {data.flag}
+                </a>
+              ))
+            }
           </div>
         </div>
 
         <!-- Theme Toggle Mobile -->
         <div class="flex items-center justify-between">
-          <span class="text-sm font-medium">{t('theme.toggle')}</span>
+          <span class="text-sm font-medium">{t("theme.toggle")}</span>
           <label class="swap swap-rotate">
             <input type="checkbox" class="theme-controller" value="dark" />
-            <svg class="swap-off w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"/>
+            <svg
+              class="swap-off h-6 w-6"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path
+                d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"
+              ></path>
             </svg>
-            <svg class="swap-on w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"/>
+            <svg
+              class="swap-on h-6 w-6"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path
+                d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"
+              ></path>
             </svg>
           </label>
         </div>
@@ -284,149 +340,161 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
 
 <script>
   (() => {
-    'use strict';
-    
+    "use strict";
+
     // Configuration
     const ANIMATION_DURATION = 300;
     const SCROLL_THRESHOLD = 50; // Pixel de scroll avant activation de l'effet
-    
+
     // Cache des éléments DOM
     const elements = {
-      mobileMenu: document.getElementById('mobile-menu') as HTMLElement,
-      mobileMenuToggle: document.getElementById('mobile-menu-toggle') as HTMLElement,
-      overlay: document.querySelector('[data-menu-overlay]') as HTMLElement,
-      closeBtn: document.querySelector('[data-menu-close]') as HTMLElement,
-      menuLinks: document.querySelectorAll('[data-menu-link]') as NodeListOf<HTMLElement>,
-      dropdownButtons: document.querySelectorAll('[data-dropdown]') as NodeListOf<HTMLElement>,
-      desktopHeader: document.getElementById('desktop-header') as HTMLElement,
-      mobileHeader: document.getElementById('mobile-header') as HTMLElement
+      mobileMenu: document.getElementById("mobile-menu") as HTMLElement,
+      mobileMenuToggle: document.getElementById(
+        "mobile-menu-toggle",
+      ) as HTMLElement,
+      overlay: document.querySelector("[data-menu-overlay]") as HTMLElement,
+      closeBtn: document.querySelector("[data-menu-close]") as HTMLElement,
+      menuLinks: document.querySelectorAll(
+        "[data-menu-link]",
+      ) as NodeListOf<HTMLElement>,
+      dropdownButtons: document.querySelectorAll(
+        "[data-dropdown]",
+      ) as NodeListOf<HTMLElement>,
+      desktopHeader: document.getElementById("desktop-header") as HTMLElement,
+      mobileHeader: document.getElementById("mobile-header") as HTMLElement,
     };
-    
+
     // Gestion optimisée de l'effet de scroll
     let ticking = false;
     let lastScrollY = 0;
-    
+
     function updateHeaderOnScroll() {
       const currentScrollY = window.scrollY;
       const shouldBlur = currentScrollY > SCROLL_THRESHOLD;
-      
+
       // Appliquer l'effet aux deux headers
-      [elements.desktopHeader, elements.mobileHeader].forEach(header => {
+      [elements.desktopHeader, elements.mobileHeader].forEach((header) => {
         if (header) {
-          header.classList.toggle('scrolled', shouldBlur);
+          header.classList.toggle("scrolled", shouldBlur);
         }
       });
-      
+
       lastScrollY = currentScrollY;
       ticking = false;
     }
-    
+
     function onScroll() {
       if (!ticking) {
         requestAnimationFrame(updateHeaderOnScroll);
         ticking = true;
       }
     }
-    
+
     // Initialiser l'effet de scroll
-    window.addEventListener('scroll', onScroll, { passive: true });
-    
+    window.addEventListener("scroll", onScroll, { passive: true });
+
     // Vérifier l'état initial au chargement
     updateHeaderOnScroll();
-    
+
     // État du menu
     let isMenuOpen = false;
-    
+
     // Gestion du menu mobile
     function toggleMenu() {
       isMenuOpen = !isMenuOpen;
-      
+
       if (isMenuOpen) {
         openMenu();
       } else {
         closeMenu();
       }
     }
-    
+
     function openMenu() {
       const { mobileMenu, mobileMenuToggle } = elements;
-      
-      mobileMenu.style.transform = 'translateX(0)';
-      mobileMenu.setAttribute('aria-hidden', 'false');
-      mobileMenuToggle.setAttribute('aria-expanded', 'true');
-      mobileMenuToggle.classList.add('menu-open');
-      document.body.style.overflow = 'hidden';
-      
+
+      mobileMenu.style.transform = "translateX(0)";
+      mobileMenu.setAttribute("aria-hidden", "false");
+      mobileMenuToggle.setAttribute("aria-expanded", "true");
+      mobileMenuToggle.classList.add("menu-open");
+      document.body.style.overflow = "hidden";
+
       // Focus sur le premier lien
       setTimeout(() => {
         elements.menuLinks[0]?.focus();
       }, ANIMATION_DURATION);
     }
-    
+
     function closeMenu() {
       const { mobileMenu, mobileMenuToggle } = elements;
-      
-      mobileMenu.style.transform = 'translateX(100%)';
-      mobileMenu.setAttribute('aria-hidden', 'true');
-      mobileMenuToggle.setAttribute('aria-expanded', 'false');
-      mobileMenuToggle.classList.remove('menu-open');
-      document.body.style.overflow = '';
-      
+
+      mobileMenu.style.transform = "translateX(100%)";
+      mobileMenu.setAttribute("aria-hidden", "true");
+      mobileMenuToggle.setAttribute("aria-expanded", "false");
+      mobileMenuToggle.classList.remove("menu-open");
+      document.body.style.overflow = "";
+
       // Focus de retour
       mobileMenuToggle.focus();
       isMenuOpen = false;
     }
-    
+
     // Event Listeners
-    elements.mobileMenuToggle?.addEventListener('click', toggleMenu);
-    elements.overlay?.addEventListener('click', closeMenu);
-    elements.closeBtn?.addEventListener('click', closeMenu);
-    
+    elements.mobileMenuToggle?.addEventListener("click", toggleMenu);
+    elements.overlay?.addEventListener("click", closeMenu);
+    elements.closeBtn?.addEventListener("click", closeMenu);
+
     // Fermer le menu avec Escape
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && isMenuOpen) {
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && isMenuOpen) {
         closeMenu();
       }
     });
-    
+
     // Fermer le menu lors du clic sur un lien
-    elements.menuLinks.forEach(link => {
-      link.addEventListener('click', closeMenu);
+    elements.menuLinks.forEach((link) => {
+      link.addEventListener("click", closeMenu);
     });
-    
+
     // Gestion des dropdowns
-    elements.dropdownButtons.forEach(button => {
-      button.addEventListener('click', (e) => {
+    elements.dropdownButtons.forEach((button) => {
+      button.addEventListener("click", (e) => {
         e.preventDefault();
-        const isExpanded = button.getAttribute('aria-expanded') === 'true';
-        
+        const isExpanded = button.getAttribute("aria-expanded") === "true";
+
         // Fermer tous les dropdowns
-        elements.dropdownButtons.forEach(btn => {
-          btn.setAttribute('aria-expanded', 'false');
+        elements.dropdownButtons.forEach((btn) => {
+          btn.setAttribute("aria-expanded", "false");
         });
-        
+
         // Toggle celui-ci
         if (!isExpanded) {
-          button.setAttribute('aria-expanded', 'true');
+          button.setAttribute("aria-expanded", "true");
         }
       });
     });
-    
+
     // Fermer les dropdowns en cliquant ailleurs
-    document.addEventListener('click', (e: MouseEvent) => {
-      if (!e.target || !(e.target instanceof HTMLElement) || !e.target.closest('.dropdown')) {
-        elements.dropdownButtons.forEach(btn => {
-          btn.setAttribute('aria-expanded', 'false');
+    document.addEventListener("click", (e: MouseEvent) => {
+      if (
+        !e.target ||
+        !(e.target instanceof HTMLElement) ||
+        !e.target.closest(".dropdown")
+      ) {
+        elements.dropdownButtons.forEach((btn) => {
+          btn.setAttribute("aria-expanded", "false");
         });
       }
     });
-    
-    const themeToggles = document.querySelectorAll('.theme-controller');
+
+    const themeToggles = document.querySelectorAll(".theme-controller");
     themeToggles.forEach((toggle, index) => {
-      toggle.addEventListener('change', () => {
+      toggle.addEventListener("change", () => {
         themeToggles.forEach((otherToggle, otherIndex) => {
           if (index !== otherIndex) {
-            (otherToggle as HTMLInputElement).checked = (toggle as HTMLInputElement).checked;
+            (otherToggle as HTMLInputElement).checked = (
+              toggle as HTMLInputElement
+            ).checked;
           }
         });
       });
@@ -435,21 +503,25 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
 </script>
 
 <!-- Preload des pages importantes (Site statique) -->
-{translatedNavLinks.slice(0, 3).map(link => (
-  <link rel="prefetch" href={link.href} />
-))}
+{
+  translatedNavLinks
+    .slice(0, 3)
+    .map((link) => <link rel="prefetch" href={link.href} />)
+}
 
 <!-- Links alternatifs pour SEO -->
-{hreflangLinks.map(link => (
-  <link rel="alternate" hreflang={link.hreflang} href={link.href} />
-))}
+{
+  hreflangLinks.map((link) => (
+    <link rel="alternate" hreflang={link.hreflang} href={link.href} />
+  ))
+}
 
 <style>
   /* Styles non-critiques (chargés de façon asynchrone) */
   .dropdown-content {
     animation: dropdown-appear 0.2s ease-out;
   }
-  
+
   @keyframes dropdown-appear {
     from {
       opacity: 0;
@@ -460,40 +532,45 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
       transform: translateY(0);
     }
   }
-  
+
   /* Animation des icônes de menu */
   .menu-icon {
     transform-origin: center;
   }
-  
+
+  .mobile-menu-closed {
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+  }
+
   /* État menu fermé */
   .hamburger {
     opacity: 1;
     transform: rotate(0deg);
   }
-  
+
   .cross {
     opacity: 0;
     transform: rotate(90deg);
   }
-  
+
   /* État menu ouvert */
   [data-menu-toggle].menu-open .hamburger {
     opacity: 0;
     transform: rotate(-90deg);
   }
-  
+
   [data-menu-toggle].menu-open .cross {
     opacity: 1;
     transform: rotate(0deg);
   }
-  
+
   /* Optimisation pour les transitions */
   [data-menu-toggle],
   [data-menu-close] {
     transition: all 0.15s ease;
   }
-  
+
   /* Focus visible pour l'accessibilité */
   button:focus-visible,
   a:focus-visible {
@@ -501,7 +578,7 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
     outline-offset: 2px;
     border-radius: 4px;
   }
-  
+
   /* Optimisation des animations */
   @media (prefers-reduced-motion: reduce) {
     #mobile-menu {

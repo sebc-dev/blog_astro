@@ -113,4 +113,84 @@ describe('Content Structure Validation', () => {
       expect(parts[2].trim().length).toBeGreaterThan(0);
     });
   });
+
+  describe('Schema Validation', () => {
+    // Regex pour valider le format slug (identique à celui dans config.ts)
+    const SLUG_REGEX = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+    it('should have valid canonicalSlug format in English posts', () => {
+      const firstPostPath = join(CONTENT_DIR, 'blog', 'en', 'first-post.mdx');
+      const content = readFileSync(firstPostPath, 'utf-8');
+      
+      const slugMatch = content.match(/canonicalSlug: "([^"]+)"/);
+      expect(slugMatch).toBeDefined();
+      
+      const slug = slugMatch![1];
+      expect(slug).toMatch(SLUG_REGEX);
+      expect(slug.length).toBeGreaterThan(0);
+    });
+
+    it('should have valid canonicalSlug format in French posts', () => {
+      const premierArticlePath = join(CONTENT_DIR, 'blog', 'fr', 'premier-article.mdx');
+      const content = readFileSync(premierArticlePath, 'utf-8');
+      
+      const slugMatch = content.match(/canonicalSlug: "([^"]+)"/);
+      expect(slugMatch).toBeDefined();
+      
+      const slug = slugMatch![1];
+      expect(slug).toMatch(SLUG_REGEX);
+      expect(slug.length).toBeGreaterThan(0);
+    });
+
+    it('should have non-empty translationId', () => {
+      const firstPostPath = join(CONTENT_DIR, 'blog', 'en', 'first-post.mdx');
+      const content = readFileSync(firstPostPath, 'utf-8');
+      
+      const translationIdMatch = content.match(/translationId: "([^"]+)"/);
+      expect(translationIdMatch).toBeDefined();
+      
+      const translationId = translationIdMatch![1];
+      expect(translationId.length).toBeGreaterThan(0);
+      expect(translationId.trim()).toBe(translationId); // Pas d'espaces au début/fin
+    });
+
+    it('should reject invalid canonicalSlug formats', () => {
+      // Test des formats invalides selon notre regex
+      const invalidSlugs = [
+        'My Post Title',           // espaces
+        'my_post_title',          // underscores
+        'my-post-title-',         // se termine par un trait d'union
+        '-my-post-title',         // commence par un trait d'union
+        'My-Post-Title',          // majuscules
+        'my--post--title',        // traits d'union doubles
+        'my.post.title',          // points
+        'my/post/title',          // slashes
+        'my@post#title',          // caractères spéciaux
+        ''                        // vide
+      ];
+
+      invalidSlugs.forEach(slug => {
+        expect(slug).not.toMatch(SLUG_REGEX);
+      });
+    });
+
+    it('should accept valid canonicalSlug formats', () => {
+      // Test des formats valides selon notre regex
+      const validSlugs = [
+        'welcome-to-our-blog',
+        'bienvenue-sur-notre-blog',
+        'first-post',
+        'my-awesome-article',
+        'tech-guide-2024',
+        'simple',
+        '123-test',
+        'post-1',
+        'a-very-long-slug-with-many-words-separated-by-hyphens'
+      ];
+
+      validSlugs.forEach(slug => {
+        expect(slug).toMatch(SLUG_REGEX);
+      });
+    });
+  });
 }); 

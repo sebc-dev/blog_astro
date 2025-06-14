@@ -15,7 +15,6 @@ export default defineConfig({
         "src/**/__fixtures__/**/*.ts",
         "src/test-helpers/**/*.ts",
         "src/**/__tests__/**/*.ts",
-        "src/test/setup.ts",
         "src/content/config.ts",
       ],
       thresholds: {

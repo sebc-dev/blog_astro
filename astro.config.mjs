@@ -6,7 +6,7 @@ import sitemap from '@astrojs/sitemap';
 // https://astro.build/config
 export default defineConfig({
     output: 'static',
-    site: 'https://votre-domaine.com',
+    site: process.env.ASTRO_SITE ?? 'https://example.com',
     
     i18n: {
         defaultLocale: 'en',           // Anglais par défaut
