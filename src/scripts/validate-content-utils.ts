@@ -13,6 +13,9 @@ export interface ValidationResult {
   errors: string[];
 }
 
+
+const MAX_TRANSLATION_COUNT = 2;
+
 /**
  * Regex pour valider le format slug : lettres minuscules, chiffres, traits d'union
  * Commence et finit par un caractère alphanumérique, peut contenir des traits d'union au milieu
@@ -39,7 +42,7 @@ export function validateTranslationIdUniqueness(posts: BlogPost[]): ValidationRe
   // Identifier les doublons (plus de 2 traductions)
   const errors: string[] = [];
   for (const [translationId, paths] of translationIds.entries()) {
-    if (paths.length > 2) {
+    if (paths.length > MAX_TRANSLATION_COUNT) {
       errors.push(`translationId "${translationId}" found in ${paths.length} posts: ${paths.join(', ')}`);
     }
   }

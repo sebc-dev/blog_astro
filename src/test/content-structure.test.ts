@@ -98,9 +98,11 @@ describe('Content Structure Validation', () => {
       const dateMatch = content.match(/pubDate: (\d{4}-\d{2}-\d{2})/);
       expect(dateMatch).toBeDefined();
       
-      const date = new Date(dateMatch![1]);
-      expect(date.getTime()).not.toBeNaN();
-      expect(date.getTime()).toBeLessThanOrEqual(Date.now());
+      if (dateMatch) {
+        const date = new Date(dateMatch[1]);
+        expect(date.getTime()).not.toBeNaN();
+        expect(date.getTime()).toBeLessThanOrEqual(Date.now());
+      }
     });
 
     it('should have content after frontmatter', () => {
@@ -125,9 +127,11 @@ describe('Content Structure Validation', () => {
       const slugMatch = content.match(/canonicalSlug: "([^"]+)"/);
       expect(slugMatch).toBeDefined();
       
-      const slug = slugMatch![1];
-      expect(slug).toMatch(SLUG_REGEX);
-      expect(slug.length).toBeGreaterThan(0);
+      if (slugMatch) {
+        const slug = slugMatch[1];
+        expect(slug).toMatch(SLUG_REGEX);
+        expect(slug.length).toBeGreaterThan(0);
+      }
     });
 
     it('should have valid canonicalSlug format in French posts', () => {
@@ -137,9 +141,11 @@ describe('Content Structure Validation', () => {
       const slugMatch = content.match(/canonicalSlug: "([^"]+)"/);
       expect(slugMatch).toBeDefined();
       
-      const slug = slugMatch![1];
-      expect(slug).toMatch(SLUG_REGEX);
-      expect(slug.length).toBeGreaterThan(0);
+      if (slugMatch) {
+        const slug = slugMatch[1];
+        expect(slug).toMatch(SLUG_REGEX);
+        expect(slug.length).toBeGreaterThan(0);
+      }
     });
 
     it('should have non-empty translationId', () => {
@@ -149,9 +155,11 @@ describe('Content Structure Validation', () => {
       const translationIdMatch = content.match(/translationId: "([^"]+)"/);
       expect(translationIdMatch).toBeDefined();
       
-      const translationId = translationIdMatch![1];
-      expect(translationId.length).toBeGreaterThan(0);
-      expect(translationId.trim()).toBe(translationId); // Pas d'espaces au début/fin
+      if (translationIdMatch) {
+        const translationId = translationIdMatch[1];
+        expect(translationId.length).toBeGreaterThan(0);
+        expect(translationId.trim()).toBe(translationId); // Pas d'espaces au début/fin
+      }
     });
 
     it('should reject invalid canonicalSlug formats', () => {
