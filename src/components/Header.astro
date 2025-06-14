@@ -4,6 +4,7 @@ import {
   useTranslations,
   useTranslatedPath,
   getPathWithoutLang,
+  generateLanguageUrls,
 } from "../i18n/utils";
 
 interface NavLink {
@@ -37,20 +38,7 @@ const translatedNavLinks = navLinks.map((link) => ({
 }));
 
 const currentPath = getPathWithoutLang(Astro.url);
-const languageUrls = {
-  en: {
-    url: currentPath,
-    isActive: lang === "en",
-    label: "English",
-    flag: "🇺🇸",
-  },
-  fr: {
-    url: `/fr${currentPath}`,
-    isActive: lang === "fr",
-    label: "Français",
-    flag: "🇫🇷",
-  },
-};
+const languageUrls = generateLanguageUrls(currentPath, lang);
 
 const criticalCSS = `
   .header-critical {

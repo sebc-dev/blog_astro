@@ -166,4 +166,32 @@ export function getLanguageFlag(lang: Languages): string {
   };
   
   return flags[lang] || '🌐';
+}
+
+/**
+ * Génère les URLs de langue pour le changement de langue
+ * @param currentPath - Chemin actuel sans préfixe de langue
+ * @param currentLang - Langue actuelle
+ * @returns Objet avec les URLs de toutes les langues supportées
+ */
+export function generateLanguageUrls(currentPath: string, currentLang: Languages) {
+  const supportedLanguages = getSupportedLanguages();
+  
+  return supportedLanguages.reduce((acc, lang) => {
+    const translatePathForLang = useTranslatedPath(lang);
+    
+    acc[lang] = {
+      url: translatePathForLang(currentPath, lang),
+      isActive: currentLang === lang,
+      label: getLanguageName(lang),
+      flag: getLanguageFlag(lang),
+    };
+    
+    return acc;
+  }, {} as Record<Languages, {
+    url: string;
+    isActive: boolean;
+    label: string;
+    flag: string;
+  }>);
 } 

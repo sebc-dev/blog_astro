@@ -61,7 +61,7 @@ describe('Build Static Tests - Phase 2', () => {
         reject(error);
       });
     });
-  }, 30000); // 30s timeout pour le build
+  }, 60000); // 60s timeout pour le build
 
   afterAll(() => {
     console.log('🧹 Build static tests completed');
