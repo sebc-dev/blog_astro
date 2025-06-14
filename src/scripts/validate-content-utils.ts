@@ -36,7 +36,7 @@ export function validateTranslationIdUniqueness(posts: BlogPost[]): ValidationRe
     if (!translationIds.has(translationId)) {
       translationIds.set(translationId, []);
     }
-    translationIds.get(translationId)!.push(postPath);
+    translationIds.get(translationId)?.push(postPath);
   });
   
   // Identifier les doublons (plus de 2 traductions)
