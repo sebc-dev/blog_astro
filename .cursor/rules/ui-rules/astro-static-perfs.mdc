@@ -1,0 +1,310 @@
+---
+description: Convention de code d'optimisation de performances pour les composant Astro 
+globs: 
+alwaysApply: false
+---
+# Règles d'Optimisation Sites Statiques Astro
+
+Vous êtes un expert en optimisation de sites statiques Astro. Suivez ces règles strictement pour maximiser les performances.
+
+## Principe Fondamental : Build-Time First
+
+### TOUJOURS privilégier le build-time au runtime
+- Calculs, traductions, routage = BUILD-TIME (95%)
+- JavaScript client = INTERACTIVITÉ uniquement (5%)
+- Bundle JS total MAX 3KB
+
+### Pattern Astro Optimal
+
+```astro
+---
+// BUILD-TIME : Tous les calculs ici
+import { getLangFromUrl, useTranslations, useTranslatedPath } from '../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const translatePath = useTranslatedPath(lang);
+
+// Pré-calcul complet au build
+const navigation = navLinks.map(link => ({
+  href: translatePath(link.href),
+  label: t(link.key as any),
+  isActive: Astro.url.pathname === translatePath(link.href)
+}));
+---
+
+<!-- HTML statique pur -->
+<nav aria-label={t('nav.main')}>
+  {navigation.map(item => (
+    <a href={item.href} class={item.isActive ? 'active' : ''}>
+      {item.label}
+    </a>
+  ))}
+</nav>
+
+<!-- Script minimal (<2KB) -->
+<script>
+  (() => {
+    'use strict';
+    // Interactivité minimale uniquement
+  })();
+</script>
+```
+
+## Règles JavaScript Strictes
+
+### AUTORISÉ (Interactivité pure)
+- Menu mobile toggle
+- Theme switcher
+- Dropdowns
+- Focus management
+- Scroll handlers
+
+### INTERDIT (Logique métier)
+- Gestion des langues côté client
+- Fetch de traductions
+- Manipulation DOM pour contenu
+- State management complexe
+- API calls non-critiques
+
+### Pattern Script Minimal
+
+```javascript
+// ✅ CORRECT : Script optimisé
+(() => {
+  'use strict';
+  
+  const elements = {
+    toggle: document.getElementById('menu-toggle'),
+    menu: document.getElementById('menu')
+  };
+  
+  function toggleMenu() {
+    const isOpen = elements.menu.classList.contains('open');
+    elements.menu.classList.toggle('open', !isOpen);
+    elements.toggle.setAttribute('aria-expanded', !isOpen);
+  }
+  
+  elements.toggle?.addEventListener('click', toggleMenu);
+})();
+
+// ❌ INTERDIT : Logique complexe
+import { LanguageManager } from './complex-system.js';
+const manager = new LanguageManager();
+manager.initialize();
+```
+
+## Règles d'Internationalisation
+
+### Structure Obligatoire
+
+```typescript
+// Props avec clés typées
+interface NavLink {
+  href: string;
+  key: keyof typeof ui['en']; // Type-safe
+}
+
+// ❌ JAMAIS de textes séparés
+interface NavLink {
+  href: string;
+  labelFR: string;
+  labelEN: string;
+}
+```
+
+### URLs Multilingues
+
+```astro
+<!-- ✅ CORRECT : URLs selon config Astro -->
+<!-- EN: /about, FR: /fr/about -->
+<a href={translatePath('/about')}>{t('nav.about')}</a>
+
+<!-- ❌ INTERDIT : Query params ou hash -->
+<a href="/about?lang=fr">À propos</a>
+<a href="/about#fr">À propos</a>
+```
+
+## Règles de Performance
+
+### CSS Critique Inline Obligatoire
+
+```astro
+<!-- Styles critiques (< 1KB) inline -->
+<style is:inline>
+  .header-critical {
+    position: fixed;
+    top: 0;
+    z-index: 50;
+    background: rgba(255,255,255,0.95);
+  }
+</style>
+
+<!-- CSS non-critique en async -->
+<link rel="stylesheet" href="/styles.css" media="print" onload="this.media='all'">
+```
+
+### Preload Intelligent
+
+```astro
+<!-- Pages importantes uniquement -->
+{navigation.slice(0, 3).map(item => (
+  <link rel="prefetch" href={item.href} />
+))}
+
+<!-- Ressources critiques -->
+<link rel="preload" href="/fonts/main.woff2" as="font" type="font/woff2" crossorigin>
+```
+
+## Règles d'Accessibilité
+
+### ARIA Statique Obligatoire
+
+```astro
+<!-- ✅ Attributs pré-générés -->
+<nav aria-label={t('nav.main')}>
+  <a aria-current={item.isActive ? 'page' : undefined}>
+    {item.label}
+  </a>
+</nav>
+
+<!-- ❌ JAMAIS d'ARIA dynamique pour contenu statique -->
+<script>
+  element.setAttribute('aria-current', 'page');
+</script>
+```
+
+## Anti-Patterns Interdits
+
+### Hydratation Inutile
+```astro
+<!-- ❌ INTERDIT -->
+<Header client:load />
+
+<!-- ✅ CORRECT -->
+<Header />
+```
+
+### State Management Client
+```javascript
+// ❌ INTERDIT : Store pour données statiques
+const languageStore = writable('en');
+
+// ✅ CORRECT : Build-time
+const lang = getLangFromUrl(Astro.url);
+```
+
+### API Calls Client
+```javascript
+// ❌ INTERDIT : Fetch côté client
+const translations = await fetch('/api/translations');
+
+// ✅ CORRECT : Build-time
+const t = useTranslations(lang);
+```
+
+## Métriques de Validation
+
+### Limites Strictes
+- **JavaScript Total** : < 3KB
+- **CSS Critique** : < 1KB inline
+- **LCP** : < 200ms
+- **CLS** : < 0.05
+
+### Lighthouse Minimum
+- Performance : 98+
+- Accessibility : 100
+- Best Practices : 100
+- SEO : 100
+
+## Checklist Obligatoire
+
+Avant chaque commit, vérifier :
+- [ ] Build-time processing > 90%
+- [ ] JavaScript < 3KB
+- [ ] CSS critique inline
+- [ ] Traductions via système unifié
+- [ ] URLs multilingues correctes
+- [ ] ARIA statique complet
+- [ ] Tests Lighthouse passés
+
+## Structure de Fichiers Recommandée
+
+```
+src/
+├── components/
+│   └── Header.astro              # Statique optimisé
+├── i18n/
+│   ├── ui.ts                     # Traductions centralisées
+│   └── utils.ts                  # Helpers build-time
+├── scripts/
+│   └── minimal-interactions.ts   # < 2KB total
+└── styles/
+    ├── critical.css              # Inline
+    └── non-critical.css           # Async
+```
+
+## Exemples de Code
+
+### Component Optimal
+
+```astro
+---
+import { getLangFromUrl, useTranslations, useTranslatedPath } from '../i18n/utils';
+
+interface Props {
+  navLinks: { href: string; key: string; }[];
+}
+
+const { navLinks } = Astro.props;
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const translatePath = useTranslatedPath(lang);
+
+// BUILD-TIME : Tout pré-calculé
+const navigation = navLinks.map(link => ({
+  href: translatePath(link.href),
+  label: t(link.key as any),
+  isActive: Astro.url.pathname === translatePath(link.href)
+}));
+
+const languageUrls = {
+  en: getPathWithoutLang(Astro.url),
+  fr: `/fr${getPathWithoutLang(Astro.url)}`
+};
+---
+
+<style is:inline>
+  .nav { position: fixed; top: 0; }
+</style>
+
+<nav aria-label={t('nav.main')}>
+  {navigation.map(item => (
+    <a 
+      href={item.href}
+      class={item.isActive ? 'active' : ''}
+      aria-current={item.isActive ? 'page' : undefined}
+    >
+      {item.label}
+    </a>
+  ))}
+</nav>
+
+<script>
+  (() => {
+    'use strict';
+    // Interactivité minimale
+    const toggle = document.getElementById('menu-toggle');
+    toggle?.addEventListener('click', () => {
+      document.getElementById('menu')?.classList.toggle('open');
+    });
+  })();
+</script>
+```
+
+---
+
+**OBJECTIF : Site statique ultra-performant (Lighthouse 100) avec UX moderne et code maintenable**
+
+
+Appliquez ces règles systématiquement pour garantir des performances optimales.

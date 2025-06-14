@@ -1,23 +1,21 @@
 ---
-// Header.astro - Version modernisée avec i18n générique
 
-import { getLangFromUrl, useTranslations, useTranslatedPath } from '../i18n/utils';
+import { getLangFromUrl, useTranslations, useTranslatedPath, getPathWithoutLang } from '../i18n/utils';
 
-// Récupération de la langue depuis l'URL
-const lang = getLangFromUrl(Astro.url);
-const t = useTranslations(lang);
-const translatePath = useTranslatedPath(lang);
-
-// Interface pour définir la structure d'un lien de navigation
 interface NavLink {
   href: string;
-  key: string; // Clé de traduction au lieu de labels séparés
+  key: string;
 }
 
 interface Props {
   siteName?: string;
   navLinks?: NavLink[];
 }
+
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const translatePath = useTranslatedPath(lang);
 
 const {
   siteName = "sebc.dev",
@@ -29,617 +27,418 @@ const {
   ],
 } = Astro.props;
 
-// Génération des liens traduits
+
 const translatedNavLinks = navLinks.map(link => ({
-  ...link,
   href: translatePath(link.href),
-  label: t(link.key as any)
+  label: t(link.key as any),
+  isActive: Astro.url.pathname === translatePath(link.href)
 }));
 
-// URLs pour le changement de langue
-const currentPath = Astro.url.pathname.replace(/^\/[a-z]{2}/, '') || '/';
-const enUrl = lang === 'en' ? Astro.url.pathname : currentPath;
-const frUrl = lang === 'fr' ? Astro.url.pathname : `/fr${currentPath}`;
+
+const currentPath = getPathWithoutLang(Astro.url);
+const languageUrls = {
+  en: {
+    url: currentPath,
+    isActive: lang === 'en',
+    label: 'English',
+    flag: '🇺🇸'
+  },
+  fr: {
+    url: `/fr${currentPath}`,
+    isActive: lang === 'fr', 
+    label: 'Français',
+    flag: '🇫🇷'
+  }
+};
+
+
+const criticalCSS = `
+  .header-critical {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+  @media (prefers-color-scheme: dark) {
+    .header-critical {
+      background: rgba(0, 0, 0, 0.95);
+      border-bottom-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+`;
+
+// Préparation des attributs SEO
+const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
+  hreflang: langCode,
+  href: data.url
+}));
 ---
 
-<!-- Header Desktop (visible sur grand écran uniquement) -->
+<!-- CSS Critique Inline (zéro temps de chargement) -->
+<style is:inline set:html={criticalCSS}></style>
+
+<!-- Header Desktop -->
 <header
   id="desktop-header"
-  class="bg-base-100/95 border-base-300/20 fixed top-0 right-0 left-0 z-50 hidden border-b backdrop-blur-sm transition-all duration-300 lg:block"
+  class="header-critical hidden lg:block"
+  role="banner"
 >
   <div class="navbar mx-auto max-w-7xl px-4">
-    <!-- Logo à gauche -->
+    <!-- Logo avec préload de la page d'accueil -->
     <div class="navbar-start">
       <a
         href={translatePath("/")}
         class="from-primary to-secondary bg-gradient-to-r bg-clip-text font-mono text-xl font-bold text-transparent"
+        rel="prefetch"
       >
         {siteName}
       </a>
     </div>
 
-    <!-- Navigation principale (desktop) -->
-    <div class="navbar-center">
-      <ul class="menu menu-horizontal px-1">
-        {
-          translatedNavLinks.map((link) => (
-            <li>
-              <a
-                href={link.href}
-                class="nav-link hover:bg-primary hover:text-primary-content transition-colors duration-200"
-                aria-current={Astro.url.pathname === link.href ? 'page' : undefined}
-              >
-                {link.label}
-              </a>
-            </li>
-          ))
-        }
+    <!-- Navigation Statique (Zero-JS) -->
+    <nav class="navbar-center" aria-label={t('nav.home')}>
+      <ul class="menu menu-horizontal px-1" role="menubar">
+        {translatedNavLinks.map((link) => (
+          <li role="none">
+            <a
+              href={link.href}
+              class={`nav-link transition-colors duration-200 ${link.isActive ? 'bg-primary text-primary-content' : 'hover:bg-primary hover:text-primary-content'}`}
+              role="menuitem"
+              aria-current={link.isActive ? 'page' : undefined}
+              rel="prefetch"
+            >
+              {link.label}
+            </a>
+          </li>
+        ))}
       </ul>
-    </div>
+    </nav>
 
-    <!-- Droite : Sélecteur langue et theme toggle -->
+    <!-- Contrôles (Langue + Thème) -->
     <div class="navbar-end flex items-center gap-2">
-      <!-- Sélecteur de langue -->
+      <!-- Sélecteur de langue statique -->
       <div class="dropdown dropdown-end">
         <button
           class="btn btn-ghost btn-sm"
           aria-haspopup="true"
           aria-expanded="false"
-          aria-controls="desktop-lang-menu"
           aria-label={t('languageSwitcher.label')}
+          data-dropdown="lang-desktop"
         >
-          <span id="current-lang">{lang.toUpperCase()}</span>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="12"
-            height="12"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
+          <span>{languageUrls[lang].flag} {lang.toUpperCase()}</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M6 9l6 6 6-6"></path>
           </svg>
         </button>
-        <ul
-          id="desktop-lang-menu"
-          tabindex="0"
-          class="dropdown-content menu bg-base-100 rounded-box border-base-300 z-[1] w-24 border p-2 shadow-lg"
-          role="menu"
-        >
-          <li role="none">
-            <a
-              href={enUrl}
-              class="lang-option"
-              role="menuitem"
-              aria-current={lang === 'en' ? 'true' : 'false'}
-            >
-              🇺🇸 EN
-            </a>
-          </li>
-          <li role="none">
-            <a
-              href={frUrl}
-              class="lang-option"
-              role="menuitem"
-              aria-current={lang === 'fr' ? 'true' : 'false'}
-            >
-              🇫🇷 FR
-            </a>
-          </li>
+        <ul class="dropdown-content menu bg-base-100 rounded-box border border-base-300 z-[1] w-32 p-2 shadow-lg">
+          {Object.entries(languageUrls).map(([langCode, data]) => (
+            <li>
+              <a
+                href={data.url}
+                class={`text-sm ${data.isActive ? 'bg-primary text-primary-content font-semibold' : ''}`}
+                hreflang={langCode}
+                rel="prefetch"
+              >
+                {data.flag} {data.label}
+              </a>
+            </li>
+          ))}
         </ul>
       </div>
 
-      <!-- Theme Toggle avec icônes intégrées -->
-      <label
-        class="theme-switch relative inline-flex cursor-pointer items-center"
-        aria-label={t('theme.toggle')}
-      >
-        <input
-          type="checkbox"
-          value="dark"
-          class="theme-controller sr-only"
-          id="theme-toggle"
-        />
-        <div
-          class="theme-switch-track relative h-6 w-12 rounded-full bg-gradient-to-r from-gray-300 to-gray-400 transition-all duration-300 ease-in-out"
-        >
-          <div
-            class="theme-switch-thumb absolute top-0.5 left-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-md transition-all duration-300 ease-in-out"
-          >
-            <!-- Icône soleil (mode clair) -->
-            <svg
-              class="theme-icon-sun h-3 w-3 text-gray-600 transition-all duration-300 ease-in-out"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              aria-label={t('theme.light')}
-            >
-              <circle cx="12" cy="12" r="5" fill="currentColor"></circle>
-              <g stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                <line x1="12" y1="1" x2="12" y2="3"></line>
-                <line x1="12" y1="21" x2="12" y2="23"></line>
-                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                <line x1="1" y1="12" x2="3" y2="12"></line>
-                <line x1="21" y1="12" x2="23" y2="12"></line>
-                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-              </g>
-            </svg>
-            <!-- Icône lune (mode sombre) -->
-            <svg
-              class="theme-icon-moon absolute top-1/2 left-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 text-gray-500 opacity-0 transition-all duration-300 ease-in-out"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              aria-label={t('theme.dark')}
-            >
-              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-            </svg>
-          </div>
-        </div>
+      <!-- Theme Toggle DaisyUI natif -->
+      <label class="swap swap-rotate" aria-label={t('theme.toggle')}>
+        <input type="checkbox" class="theme-controller" value="dark" />
+        <svg class="swap-off fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"/>
+        </svg>
+        <svg class="swap-on fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"/>
+        </svg>
       </label>
     </div>
   </div>
 </header>
 
-<!-- Header Mobile (visible sur petit écran uniquement) -->
+<!-- Header Mobile -->
 <header
   id="mobile-header"
-  class="bg-base-100/95 border-base-300/20 fixed top-0 right-0 left-0 z-50 border-b backdrop-blur-sm transition-all duration-300 lg:hidden"
+  class="header-critical lg:hidden"
+  role="banner"
 >
-  <div
-    class="flex items-center justify-between px-4 py-2"
-    style="height: 64px;"
-  >
-    <!-- Logo -->
+  <div class="flex items-center justify-between px-4 py-3">
+    <!-- Logo Mobile -->
     <a
       href={translatePath("/")}
       class="from-primary to-secondary bg-gradient-to-r bg-clip-text font-mono text-xl font-bold text-transparent"
+      rel="prefetch"
     >
       {siteName}
     </a>
 
-    <!-- Bouton hamburger -->
+    <!-- Bouton Menu Mobile -->
     <button
       id="mobile-menu-toggle"
-      class="btn btn-square btn-ghost relative"
-      aria-label="Toggle mobile menu"
+      class="btn btn-square btn-ghost"
+      aria-label="Menu"
       aria-expanded="false"
-      aria-controls="mobile-menu-content"
+      aria-controls="mobile-menu"
+      data-menu-toggle
     >
-      <div class="hamburger-icon">
-        <span class="hamburger-line"></span>
-        <span class="hamburger-line"></span>
-        <span class="hamburger-line"></span>
-      </div>
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
     </button>
   </div>
 </header>
 
-<!-- Menu mobile overlay (visible uniquement sur mobile) -->
+<!-- Menu Mobile (Optimisé pour le statique) -->
 <div
-  id="mobile-overlay"
-  class="pointer-events-none fixed inset-0 z-40 bg-black/50 opacity-0 backdrop-blur-sm transition-opacity duration-300 lg:hidden"
+  id="mobile-menu"
+  class="fixed inset-0 z-40 lg:hidden"
+  style="transform: translateX(100%); transition: transform 0.3s ease;"
+  aria-hidden="true"
 >
-  <div
-    id="mobile-menu-content"
-    class="bg-base-100 fixed top-0 right-0 flex h-full w-full translate-x-full transform flex-col transition-transform duration-300"
-  >
-    <!-- Navigation mobile -->
-    <div class="flex h-full flex-col justify-center px-6">
-      <!-- Liens de navigation -->
-      <nav class="flex flex-1 items-center justify-center">
-        <ul class="menu w-full max-w-md" role="menu">
-          {
-            translatedNavLinks.map((link) => (
-              <li class="mb-4" role="none">
-                <a
-                  href={link.href}
-                  class="mobile-nav-link hover:bg-primary hover:text-primary-content block py-4 text-center text-xl font-medium transition-colors duration-200"
-                  role="menuitem"
-                  aria-current={Astro.url.pathname === link.href ? 'page' : undefined}
-                >
-                  {link.label}
-                </a>
-              </li>
-            ))
-          }
+  <div class="fixed inset-0 bg-black/50" data-menu-overlay></div>
+  <div class="fixed right-0 top-0 h-full w-full bg-base-100 shadow-xl max-w-sm">
+    <div class="flex flex-col h-full">
+      <!-- Header du menu mobile -->
+      <div class="flex items-center justify-between p-4 border-b">
+        <span class="font-semibold">{t('nav.home')}</span>
+        <button
+          class="btn btn-ghost btn-sm"
+          aria-label={t('nav.home')}
+          data-menu-close
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Navigation Mobile Statique -->
+      <nav class="flex-1 px-4 py-6" aria-label={t('nav.home')}>
+        <ul class="space-y-2">
+          {translatedNavLinks.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                class={`block px-4 py-3 rounded-lg transition-colors ${link.isActive ? 'bg-primary text-primary-content' : 'hover:bg-base-200'}`}
+                rel="prefetch"
+                data-menu-link
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
         </ul>
       </nav>
 
-      <!-- Contrôles en bas du menu -->
-      <div class="flex items-center justify-center gap-6 pb-8">
-        <!-- Sélecteur de langue mobile -->
-        <div class="dropdown dropdown-top">
-          <button
-            class="btn btn-ghost btn-sm"
-            aria-haspopup="true"
-            aria-expanded="false"
-            aria-controls="mobile-lang-menu"
-            aria-label={t('languageSwitcher.label')}
-          >
-            <span id="mobile-current-lang">{lang.toUpperCase()}</span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="rotate-180 transform"
-            >
-              <path d="M6 9l6 6 6-6"></path>
-            </svg>
-          </button>
-          <ul
-            id="mobile-lang-menu"
-            tabindex="0"
-            class="dropdown-content menu bg-base-100 rounded-box border-base-300 z-[1] w-24 border p-2 shadow-lg"
-            role="menu"
-          >
-            <li role="none">
+      <!-- Contrôles Mobile -->
+      <div class="p-4 border-t space-y-4">
+        <!-- Changement de langue mobile -->
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-medium">{t('languageSwitcher.label')}</span>
+          <div class="flex gap-2">
+            {Object.entries(languageUrls).map(([langCode, data]) => (
               <a
-                href={enUrl}
-                class="mobile-lang-option"
-                role="menuitem"
-                aria-current={lang === 'en' ? 'true' : 'false'}
+                href={data.url}
+                class={`btn btn-sm ${data.isActive ? 'btn-primary' : 'btn-outline'}`}
+                hreflang={langCode}
+                rel="prefetch"
               >
-                🇺🇸 EN
+                {data.flag}
               </a>
-            </li>
-            <li role="none">
-              <a
-                href={frUrl}
-                class="mobile-lang-option"
-                role="menuitem"
-                aria-current={lang === 'fr' ? 'true' : 'false'}
-              >
-                🇫🇷 FR
-              </a>
-            </li>
-          </ul>
+            ))}
+          </div>
         </div>
 
-        <!-- Theme Toggle mobile -->
-        <label
-          class="theme-switch relative inline-flex cursor-pointer items-center"
-          aria-label={t('theme.toggle')}
-        >
-          <input
-            type="checkbox"
-            value="dark"
-            class="theme-controller sr-only"
-            id="mobile-theme-toggle"
-          />
-          <div
-            class="theme-switch-track relative h-6 w-12 rounded-full bg-gradient-to-r from-gray-300 to-gray-400 transition-all duration-300 ease-in-out"
-          >
-            <div
-              class="theme-switch-thumb absolute top-0.5 left-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-md transition-all duration-300 ease-in-out"
-            >
-              <!-- Icône soleil (mode clair) -->
-              <svg
-                class="theme-icon-sun h-3 w-3 text-gray-600 transition-all duration-300 ease-in-out"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                aria-label={t('theme.light')}
-              >
-                <circle cx="12" cy="12" r="5" fill="currentColor"></circle>
-                <g
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                >
-                  <line x1="12" y1="1" x2="12" y2="3"></line>
-                  <line x1="12" y1="21" x2="12" y2="23"></line>
-                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                  <line x1="1" y1="12" x2="3" y2="12"></line>
-                  <line x1="21" y1="12" x2="23" y2="12"></line>
-                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                </g>
-              </svg>
-              <!-- Icône lune (mode sombre) -->
-              <svg
-                class="theme-icon-moon absolute top-1/2 left-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 text-gray-500 opacity-0 transition-all duration-300 ease-in-out"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                aria-label={t('theme.dark')}
-              >
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
-                ></path>
-              </svg>
-            </div>
-          </div>
-        </label>
+        <!-- Theme Toggle Mobile -->
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-medium">{t('theme.toggle')}</span>
+          <label class="swap swap-rotate">
+            <input type="checkbox" class="theme-controller" value="dark" />
+            <svg class="swap-off w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"/>
+            </svg>
+            <svg class="swap-on w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"/>
+            </svg>
+          </label>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-  // Script simplifié pour le menu mobile et le thème uniquement
-  // Plus besoin de la gestion complexe des langues
-
-  class HeaderManager {
-    private mobileMenuToggle: HTMLElement | null;
-    private mobileOverlay: HTMLElement | null;
-    private mobileMenuContent: HTMLElement | null;
-    private isMenuOpen = false;
-
-    constructor() {
-      this.mobileMenuToggle = document.getElementById('mobile-menu-toggle');
-      this.mobileOverlay = document.getElementById('mobile-overlay');
-      this.mobileMenuContent = document.getElementById('mobile-menu-content');
-
-      this.init();
-    }
-
-    private init(): void {
-      this.bindEvents();
-      this.initializeTheme();
-    }
-
-    private bindEvents(): void {
-      // Menu mobile toggle
-      this.mobileMenuToggle?.addEventListener('click', () => {
-        this.toggleMobileMenu();
-      });
-
-      // Fermer le menu en cliquant sur l'overlay
-      this.mobileOverlay?.addEventListener('click', (e) => {
-        if (e.target === this.mobileOverlay) {
-          this.closeMobileMenu();
-        }
-      });
-
-      // Fermer le menu avec Escape
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && this.isMenuOpen) {
-          this.closeMobileMenu();
-        }
-      });
-
-      // Fermer les dropdowns quand on clique ailleurs
-      document.addEventListener('click', (e) => {
-        const target = e.target as HTMLElement;
-        if (!target.closest('.dropdown')) {
-          this.closeAllDropdowns();
-        }
-      });
-    }
-
-    private toggleMobileMenu(): void {
-      if (this.isMenuOpen) {
-        this.closeMobileMenu();
+  (() => {
+    'use strict';
+    
+    // Configuration
+    const ANIMATION_DURATION = 300;
+    
+    // Cache des éléments DOM
+    const elements = {
+      mobileMenu: document.getElementById('mobile-menu') as HTMLElement,
+      mobileMenuToggle: document.getElementById('mobile-menu-toggle') as HTMLElement,
+      overlay: document.querySelector('[data-menu-overlay]') as HTMLElement,
+      closeBtn: document.querySelector('[data-menu-close]') as HTMLElement,
+      menuLinks: document.querySelectorAll('[data-menu-link]') as NodeListOf<HTMLElement>,
+      dropdownButtons: document.querySelectorAll('[data-dropdown]') as NodeListOf<HTMLElement>
+    };
+    
+    // État du menu
+    let isMenuOpen = false;
+    
+    // Gestion du menu mobile
+    function toggleMenu() {
+      isMenuOpen = !isMenuOpen;
+      
+      if (isMenuOpen) {
+        openMenu();
       } else {
-        this.openMobileMenu();
+        closeMenu();
       }
     }
-
-    private openMobileMenu(): void {
-      this.isMenuOpen = true;
-      this.mobileMenuToggle?.classList.add('menu-open');
-      this.mobileMenuToggle?.setAttribute('aria-expanded', 'true');
-      this.mobileOverlay?.classList.add('pointer-events-auto', 'opacity-100');
-      this.mobileMenuContent?.classList.add('translate-x-0');
-      this.mobileMenuContent?.classList.remove('translate-x-full');
+    
+    function openMenu() {
+      const { mobileMenu, mobileMenuToggle } = elements;
+      
+      mobileMenu.style.transform = 'translateX(0)';
+      mobileMenu.setAttribute('aria-hidden', 'false');
+      mobileMenuToggle.setAttribute('aria-expanded', 'true');
       document.body.style.overflow = 'hidden';
+      
+      // Focus sur le premier lien
+      setTimeout(() => {
+        elements.menuLinks[0]?.focus();
+      }, ANIMATION_DURATION);
     }
-
-    private closeMobileMenu(): void {
-      this.isMenuOpen = false;
-      this.mobileMenuToggle?.classList.remove('menu-open');
-      this.mobileMenuToggle?.setAttribute('aria-expanded', 'false');
-      this.mobileOverlay?.classList.remove('pointer-events-auto', 'opacity-100');
-      this.mobileMenuContent?.classList.remove('translate-x-0');
-      this.mobileMenuContent?.classList.add('translate-x-full');
+    
+    function closeMenu() {
+      const { mobileMenu, mobileMenuToggle } = elements;
+      
+      mobileMenu.style.transform = 'translateX(100%)';
+      mobileMenu.setAttribute('aria-hidden', 'true');
+      mobileMenuToggle.setAttribute('aria-expanded', 'false');
       document.body.style.overflow = '';
+      
+      // Focus de retour
+      mobileMenuToggle.focus();
+      isMenuOpen = false;
     }
-
-    private closeAllDropdowns(): void {
-      const dropdowns = document.querySelectorAll('.dropdown [aria-expanded="true"]');
-      dropdowns.forEach(dropdown => {
-        dropdown.setAttribute('aria-expanded', 'false');
-      });
-    }
-
-    private initializeTheme(): void {
-      // DaisyUI gère déjà le thème via les classes CSS
-      // On s'assure juste que les contrôles sont synchronisés
-      const themeToggle = document.getElementById('theme-toggle') as HTMLInputElement;
-      const mobileThemeToggle = document.getElementById('mobile-theme-toggle') as HTMLInputElement;
-
-      if (themeToggle && mobileThemeToggle) {
-        // Synchroniser les deux toggles
-        themeToggle.addEventListener('change', () => {
-          mobileThemeToggle.checked = themeToggle.checked;
+    
+    // Event Listeners
+    elements.mobileMenuToggle?.addEventListener('click', toggleMenu);
+    elements.overlay?.addEventListener('click', closeMenu);
+    elements.closeBtn?.addEventListener('click', closeMenu);
+    
+    // Fermer le menu avec Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && isMenuOpen) {
+        closeMenu();
+      }
+    });
+    
+    // Fermer le menu lors du clic sur un lien
+    elements.menuLinks.forEach(link => {
+      link.addEventListener('click', closeMenu);
+    });
+    
+    // Gestion des dropdowns
+    elements.dropdownButtons.forEach(button => {
+      button.addEventListener('click', (e) => {
+        e.preventDefault();
+        const isExpanded = button.getAttribute('aria-expanded') === 'true';
+        
+        // Fermer tous les dropdowns
+        elements.dropdownButtons.forEach(btn => {
+          btn.setAttribute('aria-expanded', 'false');
         });
-
-        mobileThemeToggle.addEventListener('change', () => {
-          themeToggle.checked = mobileThemeToggle.checked;
+        
+        // Toggle celui-ci
+        if (!isExpanded) {
+          button.setAttribute('aria-expanded', 'true');
+        }
+      });
+    });
+    
+    // Fermer les dropdowns en cliquant ailleurs
+    document.addEventListener('click', (e: MouseEvent) => {
+      if (!e.target || !(e.target instanceof HTMLElement) || !e.target.closest('.dropdown')) {
+        elements.dropdownButtons.forEach(btn => {
+          btn.setAttribute('aria-expanded', 'false');
         });
       }
-    }
-  }
-
-  // Initialisation automatique
-  if (typeof window !== 'undefined') {
-    document.addEventListener('DOMContentLoaded', () => {
-      new HeaderManager();
     });
-  }
+    
+    const themeToggles = document.querySelectorAll('.theme-controller');
+    themeToggles.forEach((toggle, index) => {
+      toggle.addEventListener('change', () => {
+        themeToggles.forEach((otherToggle, otherIndex) => {
+          if (index !== otherIndex) {
+            (otherToggle as HTMLInputElement).checked = (toggle as HTMLInputElement).checked;
+          }
+        });
+      });
+    });
+  })();
 </script>
 
+<!-- Preload des pages importantes (Site statique) -->
+{translatedNavLinks.slice(0, 3).map(link => (
+  <link rel="prefetch" href={link.href} />
+))}
+
+<!-- Links alternatifs pour SEO -->
+{hreflangLinks.map(link => (
+  <link rel="alternate" hreflang={link.hreflang} href={link.href} />
+))}
+
 <style>
-/* Styles conservés de l'original mais simplifiés */
-#mobile-menu-content {
-  box-shadow: -4px 0 15px rgba(0, 0, 0, 0.1);
+  /* Styles non-critiques (chargés de façon asynchrone) */
+  .dropdown-content {
+    animation: dropdown-appear 0.2s ease-out;
   }
-
-#desktop-header,
-#mobile-header {
-  transition:
-  background-color 0.3s ease,
-  border-color 0.3s ease;
+  
+  @keyframes dropdown-appear {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
-
-.navbar svg {
-  opacity: 0.8;
-  transition: opacity 0.2s ease;
+  
+  /* Optimisation pour les transitions */
+  [data-menu-toggle],
+  [data-menu-close] {
+    transition: all 0.15s ease;
   }
-
-.navbar svg:hover {
-  opacity: 1;
+  
+  /* Focus visible pour l'accessibilité */
+  button:focus-visible,
+  a:focus-visible {
+    outline: 2px solid hsl(var(--p));
+    outline-offset: 2px;
+    border-radius: 4px;
   }
-
-.mobile-nav-link {
-  border-radius: 0.75rem;
-  min-height: 3.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  }
-
-/* Styles pour le switch de thème */
-.theme-icon-sun {
-  opacity: 1;
-  transform: rotate(0deg) scale(1);
-  z-index: 2;
-  }
-
-.theme-icon-moon {
-  opacity: 0;
-  transform: rotate(-180deg) scale(0.8);
-  z-index: 1;
-  visibility: hidden;
-  }
-
-.theme-switch input:checked + .theme-switch-track {
-  background: linear-gradient(to right, #4b5563, #6b7280);
-  }
-
-.theme-switch input:checked + .theme-switch-track .theme-switch-thumb {
-  transform: translateX(1.5rem);
-  }
-
-.theme-switch input:checked + .theme-switch-track .theme-icon-sun {
-  opacity: 0;
-  transform: rotate(180deg) scale(0.8);
-  visibility: hidden;
-  z-index: 1;
-  }
-
-.theme-switch input:checked + .theme-switch-track .theme-icon-moon {
-  opacity: 1;
-  transform: rotate(0deg) scale(1);
-  visibility: visible;
-  z-index: 2;
-  }
-
-#mobile-theme-toggle:checked + .theme-switch-track .theme-switch-thumb {
-  transform: translateX(1.25rem);
-  }
-
-.theme-icon-sun,
-.theme-icon-moon {
-  transform-origin: center;
-  }
-
-.theme-switch:hover .theme-switch-track {
-  box-shadow: 0 0 0 2px rgba(156, 163, 175, 0.3);
-  }
-
-.theme-switch-thumb {
-  transition:
-  transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-  box-shadow 0.2s ease;
-  }
-
-.theme-switch input:focus + .theme-switch-track .theme-switch-thumb {
-  box-shadow: 0 0 0 2px rgba(156, 163, 175, 0.5);
-  }
-
-/* Styles pour le hamburger menu */
-.hamburger-icon {
-  width: 24px;
-  height: 18px;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  }
-
-.hamburger-line {
-  width: 100%;
-  height: 2px;
-  background-color: currentColor;
-  border-radius: 1px;
-  transition: all 0.3s ease;
-  transform-origin: center;
-  display: block;
-  }
-
-#mobile-menu-toggle {
-  color: inherit;
-  }
-
-#mobile-menu-toggle.menu-open {
-  color: hsl(var(--p));
-  }
-
-#mobile-menu-toggle.menu-open .hamburger-line:nth-child(1) {
-  transform: translateY(8px) rotate(45deg);
-  }
-
-#mobile-menu-toggle.menu-open .hamburger-line:nth-child(2) {
-  opacity: 0;
-  transform: scaleX(0);
-  }
-
-#mobile-menu-toggle.menu-open .hamburger-line:nth-child(3) {
-  transform: translateY(-8px) rotate(-45deg);
-  }
-
-#mobile-menu-toggle:focus-visible {
-  outline: 2px solid hsl(var(--p));
-  outline-offset: 2px;
-  }
-
-/* Amélioration des dropdowns */
-.dropdown-content {
-  animation: dropdown-appear 0.2s ease-out;
-  }
-
-@keyframes dropdown-appear {
-  from {
-  opacity: 0;
-  transform: translateY(-10px);
-  }
-  to {
-  opacity: 1;
-  transform: translateY(0);
-  }
-  }
-
-/* Indique la page actuelle */
-[aria-current="page"] {
-  background-color: hsl(var(--p));
-  color: hsl(var(--pc));
-  }
-
-[aria-current="true"] {
-  font-weight: bold;
-  color: hsl(var(--p));
+  
+  /* Optimisation des animations */
+  @media (prefers-reduced-motion: reduce) {
+    #mobile-menu {
+      transition: none !important;
+    }
+    .dropdown-content {
+      animation: none !important;
+    }
   }
 </style>
