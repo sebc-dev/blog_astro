@@ -1,11 +1,17 @@
 ---
-// Header.astro
+// Header.astro - Version modernisée avec i18n générique
+
+import { getLangFromUrl, useTranslations, useTranslatedPath } from '../i18n/utils';
+
+// Récupération de la langue depuis l'URL
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const translatePath = useTranslatedPath(lang);
 
 // Interface pour définir la structure d'un lien de navigation
 interface NavLink {
   href: string;
-  label: string;
-  labelEN: string;
+  key: string; // Clé de traduction au lieu de labels séparés
 }
 
 interface Props {
@@ -16,12 +22,24 @@ interface Props {
 const {
   siteName = "sebc.dev",
   navLinks = [
-    { href: "/", label: "Accueil", labelEN: "Home" },
-    { href: "/about", label: "À propos", labelEN: "About" },
-    { href: "/services", label: "Services", labelEN: "Services" },
-    { href: "/contact", label: "Contact", labelEN: "Contact" },
+    { href: "/", key: "nav.home" },
+    { href: "/about", key: "nav.about" },
+    { href: "/services", key: "nav.services" },
+    { href: "/contact", key: "nav.contact" },
   ],
 } = Astro.props;
+
+// Génération des liens traduits
+const translatedNavLinks = navLinks.map(link => ({
+  ...link,
+  href: translatePath(link.href),
+  label: t(link.key as any)
+}));
+
+// URLs pour le changement de langue
+const currentPath = Astro.url.pathname.replace(/^\/[a-z]{2}/, '') || '/';
+const enUrl = lang === 'en' ? Astro.url.pathname : currentPath;
+const frUrl = lang === 'fr' ? Astro.url.pathname : `/fr${currentPath}`;
 ---
 
 <!-- Header Desktop (visible sur grand écran uniquement) -->
@@ -33,7 +51,7 @@ const {
     <!-- Logo à gauche -->
     <div class="navbar-start">
       <a
-        href="/"
+        href={translatePath("/")}
         class="from-primary to-secondary bg-gradient-to-r bg-clip-text font-mono text-xl font-bold text-transparent"
       >
         {siteName}
@@ -44,13 +62,12 @@ const {
     <div class="navbar-center">
       <ul class="menu menu-horizontal px-1">
         {
-          navLinks.map((link) => (
+          translatedNavLinks.map((link) => (
             <li>
               <a
                 href={link.href}
                 class="nav-link hover:bg-primary hover:text-primary-content transition-colors duration-200"
-                data-fr={link.label}
-                data-en={link.labelEN}
+                aria-current={Astro.url.pathname === link.href ? 'page' : undefined}
               >
                 {link.label}
               </a>
@@ -69,8 +86,9 @@ const {
           aria-haspopup="true"
           aria-expanded="false"
           aria-controls="desktop-lang-menu"
+          aria-label={t('languageSwitcher.label')}
         >
-          <span id="current-lang">FR</span>
+          <span id="current-lang">{lang.toUpperCase()}</span>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="12"
@@ -89,15 +107,35 @@ const {
           id="desktop-lang-menu"
           tabindex="0"
           class="dropdown-content menu bg-base-100 rounded-box border-base-300 z-[1] w-24 border p-2 shadow-lg"
+          role="menu"
         >
-          <li><a href="#" class="lang-option" data-lang="fr">🇫🇷 FR</a></li>
-          <li><a href="#" class="lang-option" data-lang="en">🇺🇸 EN</a></li>
+          <li role="none">
+            <a
+              href={enUrl}
+              class="lang-option"
+              role="menuitem"
+              aria-current={lang === 'en' ? 'true' : 'false'}
+            >
+              🇺🇸 EN
+            </a>
+          </li>
+          <li role="none">
+            <a
+              href={frUrl}
+              class="lang-option"
+              role="menuitem"
+              aria-current={lang === 'fr' ? 'true' : 'false'}
+            >
+              🇫🇷 FR
+            </a>
+          </li>
         </ul>
       </div>
 
       <!-- Theme Toggle avec icônes intégrées -->
       <label
         class="theme-switch relative inline-flex cursor-pointer items-center"
+        aria-label={t('theme.toggle')}
       >
         <input
           type="checkbox"
@@ -117,6 +155,7 @@ const {
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
               fill="currentColor"
+              aria-label={t('theme.light')}
             >
               <circle cx="12" cy="12" r="5" fill="currentColor"></circle>
               <g stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -136,6 +175,7 @@ const {
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
               fill="currentColor"
+              aria-label={t('theme.dark')}
             >
               <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
             </svg>
@@ -157,7 +197,7 @@ const {
   >
     <!-- Logo -->
     <a
-      href="/"
+      href={translatePath("/")}
       class="from-primary to-secondary bg-gradient-to-r bg-clip-text font-mono text-xl font-bold text-transparent"
     >
       {siteName}
@@ -168,6 +208,8 @@ const {
       id="mobile-menu-toggle"
       class="btn btn-square btn-ghost relative"
       aria-label="Toggle mobile menu"
+      aria-expanded="false"
+      aria-controls="mobile-menu-content"
     >
       <div class="hamburger-icon">
         <span class="hamburger-line"></span>
@@ -191,15 +233,15 @@ const {
     <div class="flex h-full flex-col justify-center px-6">
       <!-- Liens de navigation -->
       <nav class="flex flex-1 items-center justify-center">
-        <ul class="menu w-full max-w-md">
+        <ul class="menu w-full max-w-md" role="menu">
           {
-            navLinks.map((link) => (
-              <li class="mb-4">
+            translatedNavLinks.map((link) => (
+              <li class="mb-4" role="none">
                 <a
                   href={link.href}
                   class="mobile-nav-link hover:bg-primary hover:text-primary-content block py-4 text-center text-xl font-medium transition-colors duration-200"
-                  data-fr={link.label}
-                  data-en={link.labelEN}
+                  role="menuitem"
+                  aria-current={Astro.url.pathname === link.href ? 'page' : undefined}
                 >
                   {link.label}
                 </a>
@@ -218,8 +260,9 @@ const {
             aria-haspopup="true"
             aria-expanded="false"
             aria-controls="mobile-lang-menu"
+            aria-label={t('languageSwitcher.label')}
           >
-            <span id="mobile-current-lang">FR</span>
+            <span id="mobile-current-lang">{lang.toUpperCase()}</span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="12"
@@ -239,12 +282,27 @@ const {
             id="mobile-lang-menu"
             tabindex="0"
             class="dropdown-content menu bg-base-100 rounded-box border-base-300 z-[1] w-24 border p-2 shadow-lg"
+            role="menu"
           >
-            <li>
-              <a href="#" class="mobile-lang-option" data-lang="fr">🇫🇷 FR</a>
+            <li role="none">
+              <a
+                href={enUrl}
+                class="mobile-lang-option"
+                role="menuitem"
+                aria-current={lang === 'en' ? 'true' : 'false'}
+              >
+                🇺🇸 EN
+              </a>
             </li>
-            <li>
-              <a href="#" class="mobile-lang-option" data-lang="en">🇺🇸 EN</a>
+            <li role="none">
+              <a
+                href={frUrl}
+                class="mobile-lang-option"
+                role="menuitem"
+                aria-current={lang === 'fr' ? 'true' : 'false'}
+              >
+                🇫🇷 FR
+              </a>
             </li>
           </ul>
         </div>
@@ -252,6 +310,7 @@ const {
         <!-- Theme Toggle mobile -->
         <label
           class="theme-switch relative inline-flex cursor-pointer items-center"
+          aria-label={t('theme.toggle')}
         >
           <input
             type="checkbox"
@@ -271,6 +330,7 @@ const {
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="currentColor"
+                aria-label={t('theme.light')}
               >
                 <circle cx="12" cy="12" r="5" fill="currentColor"></circle>
                 <g
@@ -294,6 +354,7 @@ const {
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="currentColor"
+                aria-label={t('theme.dark')}
               >
                 <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
                 ></path>
@@ -307,232 +368,278 @@ const {
 </div>
 
 <script>
-  // Import pour déclencher l'auto-initialisation du header
-  import "../scripts/header/index.ts";
+  // Script simplifié pour le menu mobile et le thème uniquement
+  // Plus besoin de la gestion complexe des langues
+
+  class HeaderManager {
+    private mobileMenuToggle: HTMLElement | null;
+    private mobileOverlay: HTMLElement | null;
+    private mobileMenuContent: HTMLElement | null;
+    private isMenuOpen = false;
+
+    constructor() {
+      this.mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+      this.mobileOverlay = document.getElementById('mobile-overlay');
+      this.mobileMenuContent = document.getElementById('mobile-menu-content');
+
+      this.init();
+    }
+
+    private init(): void {
+      this.bindEvents();
+      this.initializeTheme();
+    }
+
+    private bindEvents(): void {
+      // Menu mobile toggle
+      this.mobileMenuToggle?.addEventListener('click', () => {
+        this.toggleMobileMenu();
+      });
+
+      // Fermer le menu en cliquant sur l'overlay
+      this.mobileOverlay?.addEventListener('click', (e) => {
+        if (e.target === this.mobileOverlay) {
+          this.closeMobileMenu();
+        }
+      });
+
+      // Fermer le menu avec Escape
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && this.isMenuOpen) {
+          this.closeMobileMenu();
+        }
+      });
+
+      // Fermer les dropdowns quand on clique ailleurs
+      document.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement;
+        if (!target.closest('.dropdown')) {
+          this.closeAllDropdowns();
+        }
+      });
+    }
+
+    private toggleMobileMenu(): void {
+      if (this.isMenuOpen) {
+        this.closeMobileMenu();
+      } else {
+        this.openMobileMenu();
+      }
+    }
+
+    private openMobileMenu(): void {
+      this.isMenuOpen = true;
+      this.mobileMenuToggle?.classList.add('menu-open');
+      this.mobileMenuToggle?.setAttribute('aria-expanded', 'true');
+      this.mobileOverlay?.classList.add('pointer-events-auto', 'opacity-100');
+      this.mobileMenuContent?.classList.add('translate-x-0');
+      this.mobileMenuContent?.classList.remove('translate-x-full');
+      document.body.style.overflow = 'hidden';
+    }
+
+    private closeMobileMenu(): void {
+      this.isMenuOpen = false;
+      this.mobileMenuToggle?.classList.remove('menu-open');
+      this.mobileMenuToggle?.setAttribute('aria-expanded', 'false');
+      this.mobileOverlay?.classList.remove('pointer-events-auto', 'opacity-100');
+      this.mobileMenuContent?.classList.remove('translate-x-0');
+      this.mobileMenuContent?.classList.add('translate-x-full');
+      document.body.style.overflow = '';
+    }
+
+    private closeAllDropdowns(): void {
+      const dropdowns = document.querySelectorAll('.dropdown [aria-expanded="true"]');
+      dropdowns.forEach(dropdown => {
+        dropdown.setAttribute('aria-expanded', 'false');
+      });
+    }
+
+    private initializeTheme(): void {
+      // DaisyUI gère déjà le thème via les classes CSS
+      // On s'assure juste que les contrôles sont synchronisés
+      const themeToggle = document.getElementById('theme-toggle') as HTMLInputElement;
+      const mobileThemeToggle = document.getElementById('mobile-theme-toggle') as HTMLInputElement;
+
+      if (themeToggle && mobileThemeToggle) {
+        // Synchroniser les deux toggles
+        themeToggle.addEventListener('change', () => {
+          mobileThemeToggle.checked = themeToggle.checked;
+        });
+
+        mobileThemeToggle.addEventListener('change', () => {
+          themeToggle.checked = mobileThemeToggle.checked;
+        });
+      }
+    }
+  }
+
+  // Initialisation automatique
+  if (typeof window !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', () => {
+      new HeaderManager();
+    });
+  }
 </script>
 
 <style>
-  /* Styles additionnels pour les transitions smooth */
-  #mobile-menu-content {
-    box-shadow: -4px 0 15px rgba(0, 0, 0, 0.1);
+/* Styles conservés de l'original mais simplifiés */
+#mobile-menu-content {
+  box-shadow: -4px 0 15px rgba(0, 0, 0, 0.1);
   }
 
-  /* Animation pour les headers */
-  #desktop-header,
-  #mobile-header {
-    transition:
-      background-color 0.3s ease,
-      border-color 0.3s ease;
+#desktop-header,
+#mobile-header {
+  transition:
+  background-color 0.3s ease,
+  border-color 0.3s ease;
   }
 
-  /* Amélioration du contraste pour les icônes */
-  .navbar svg {
-    opacity: 0.8;
-    transition: opacity 0.2s ease;
+.navbar svg {
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
   }
 
-  .navbar svg:hover {
-    opacity: 1;
+.navbar svg:hover {
+  opacity: 1;
   }
 
-  /* Style pour le menu mobile */
-  .mobile-nav-link {
-    border-radius: 0.75rem;
-    min-height: 3.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.mobile-nav-link {
+  border-radius: 0.75rem;
+  min-height: 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   }
 
-  /* Animation d'entrée pour les liens du menu mobile */
-  .mobile-menu-open .mobile-nav-link {
-    animation: slideInFromRight 0.3s ease-out forwards;
+/* Styles pour le switch de thème */
+.theme-icon-sun {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+  z-index: 2;
   }
 
-  .mobile-menu-open .mobile-nav-link:nth-child(1) {
-    animation-delay: 0.1s;
+.theme-icon-moon {
+  opacity: 0;
+  transform: rotate(-180deg) scale(0.8);
+  z-index: 1;
+  visibility: hidden;
   }
 
-  .mobile-menu-open .mobile-nav-link:nth-child(2) {
-    animation-delay: 0.2s;
+.theme-switch input:checked + .theme-switch-track {
+  background: linear-gradient(to right, #4b5563, #6b7280);
   }
 
-  .mobile-menu-open .mobile-nav-link:nth-child(3) {
-    animation-delay: 0.3s;
+.theme-switch input:checked + .theme-switch-track .theme-switch-thumb {
+  transform: translateX(1.5rem);
   }
 
-  .mobile-menu-open .mobile-nav-link:nth-child(4) {
-    animation-delay: 0.4s;
+.theme-switch input:checked + .theme-switch-track .theme-icon-sun {
+  opacity: 0;
+  transform: rotate(180deg) scale(0.8);
+  visibility: hidden;
+  z-index: 1;
   }
 
-  @keyframes slideInFromRight {
-    from {
-      opacity: 0;
-      transform: translateX(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
+.theme-switch input:checked + .theme-switch-track .theme-icon-moon {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+  visibility: visible;
+  z-index: 2;
   }
 
-  /* Animation pour les contrôles en bas du menu mobile */
-  .mobile-menu-open .flex.items-center.justify-center.gap-6 {
-    animation: slideInFromBottom 0.4s ease-out forwards;
-    animation-delay: 0.2s;
-    opacity: 0;
+#mobile-theme-toggle:checked + .theme-switch-track .theme-switch-thumb {
+  transform: translateX(1.25rem);
   }
 
-  @keyframes slideInFromBottom {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+.theme-icon-sun,
+.theme-icon-moon {
+  transform-origin: center;
   }
 
-  /* Styles pour les contrôles du menu mobile */
-  .mobile-menu-open .dropdown-top .dropdown-content {
-    bottom: 100%;
-    top: auto;
-    margin-bottom: 0.5rem;
+.theme-switch:hover .theme-switch-track {
+  box-shadow: 0 0 0 2px rgba(156, 163, 175, 0.3);
   }
 
-  /* Amélioration du contraste pour les contrôles mobiles */
-  #mobile-theme-toggle:checked + .theme-switch-track .theme-switch-thumb {
-    transform: translateX(1.5rem); /* Même taille que desktop pour cohérence */
+.theme-switch-thumb {
+  transition:
+  transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+  box-shadow 0.2s ease;
   }
 
-  /* Amélioration des dropdowns */
-  .dropdown-content {
-    animation: dropdown-appear 0.2s ease-out;
+.theme-switch input:focus + .theme-switch-track .theme-switch-thumb {
+  box-shadow: 0 0 0 2px rgba(156, 163, 175, 0.5);
   }
 
-  @keyframes dropdown-appear {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+/* Styles pour le hamburger menu */
+.hamburger-icon {
+  width: 24px;
+  height: 18px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   }
 
-  /* Styles pour le switch de thème personnalisé */
-  /* État par défaut (thème clair) : soleil visible, lune cachée */
-  .theme-icon-sun {
-    opacity: 1;
-    transform: rotate(0deg) scale(1);
-    z-index: 2;
+.hamburger-line {
+  width: 100%;
+  height: 2px;
+  background-color: currentColor;
+  border-radius: 1px;
+  transition: all 0.3s ease;
+  transform-origin: center;
+  display: block;
   }
 
-  .theme-icon-moon {
-    opacity: 0;
-    transform: rotate(-180deg) scale(0.8);
-    z-index: 1;
-    visibility: hidden;
+#mobile-menu-toggle {
+  color: inherit;
   }
 
-  /* État coché (thème sombre) : lune visible, soleil caché */
-  .theme-switch input:checked + .theme-switch-track {
-    background: linear-gradient(to right, #4b5563, #6b7280);
+#mobile-menu-toggle.menu-open {
+  color: hsl(var(--p));
   }
 
-  .theme-switch input:checked + .theme-switch-track .theme-switch-thumb {
-    transform: translateX(1.5rem); /* 24px pour desktop */
+#mobile-menu-toggle.menu-open .hamburger-line:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
   }
 
-  .theme-switch input:checked + .theme-switch-track .theme-icon-sun {
-    opacity: 0;
-    transform: rotate(180deg) scale(0.8);
-    visibility: hidden;
-    z-index: 1;
+#mobile-menu-toggle.menu-open .hamburger-line:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
   }
 
-  .theme-switch input:checked + .theme-switch-track .theme-icon-moon {
-    opacity: 1;
-    transform: rotate(0deg) scale(1);
-    visibility: visible;
-    z-index: 2;
+#mobile-menu-toggle.menu-open .hamburger-line:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
   }
 
-  /* Version mobile du switch - taille différente */
-  #mobile-theme-toggle:checked + .theme-switch-track .theme-switch-thumb {
-    transform: translateX(1.25rem); /* 20px pour mobile */
+#mobile-menu-toggle:focus-visible {
+  outline: 2px solid hsl(var(--p));
+  outline-offset: 2px;
   }
 
-  /* Animation de rotation pour les icônes */
-  .theme-icon-sun,
-  .theme-icon-moon {
-    transform-origin: center;
+/* Amélioration des dropdowns */
+.dropdown-content {
+  animation: dropdown-appear 0.2s ease-out;
   }
 
-  /* Effet hover sur le switch */
-  .theme-switch:hover .theme-switch-track {
-    box-shadow: 0 0 0 2px rgba(156, 163, 175, 0.3);
+@keyframes dropdown-appear {
+  from {
+  opacity: 0;
+  transform: translateY(-10px);
+  }
+  to {
+  opacity: 1;
+  transform: translateY(0);
+  }
   }
 
-  /* Animation de pulsation lors du changement */
-  .theme-switch-thumb {
-    transition:
-      transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-      box-shadow 0.2s ease;
+/* Indique la page actuelle */
+[aria-current="page"] {
+  background-color: hsl(var(--p));
+  color: hsl(var(--pc));
   }
 
-  .theme-switch input:focus + .theme-switch-track .theme-switch-thumb {
-    box-shadow: 0 0 0 2px rgba(156, 163, 175, 0.5);
-  }
-
-  /* Styles pour le hamburger menu */
-  .hamburger-icon {
-    width: 24px;
-    height: 18px;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
-
-  .hamburger-line {
-    width: 100%;
-    height: 2px;
-    background-color: currentColor;
-    border-radius: 1px;
-    transition: all 0.3s ease;
-    transform-origin: center;
-    display: block;
-  }
-
-  /* Couleur par défaut du bouton hamburger - même que le texte */
-  #mobile-menu-toggle {
-    color: inherit;
-  }
-
-  /* Animation vers la croix quand le menu est ouvert */
-  #mobile-menu-toggle.menu-open {
-    color: hsl(var(--p));
-  }
-
-  #mobile-menu-toggle.menu-open .hamburger-line:nth-child(1) {
-    transform: translateY(8px) rotate(45deg);
-  }
-
-  #mobile-menu-toggle.menu-open .hamburger-line:nth-child(2) {
-    opacity: 0;
-    transform: scaleX(0);
-  }
-
-  #mobile-menu-toggle.menu-open .hamburger-line:nth-child(3) {
-    transform: translateY(-8px) rotate(-45deg);
-  }
-
-  /* Focus state pour l'accessibilité */
-  #mobile-menu-toggle:focus-visible {
-    outline: 2px solid hsl(var(--p));
-    outline-offset: 2px;
+[aria-current="true"] {
+  font-weight: bold;
+  color: hsl(var(--p));
   }
 </style>
