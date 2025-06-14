@@ -318,12 +318,37 @@ describe('Static Site Performance E2E', () => {
 - **CSS critique validé < 1KB** ✅
 - **Aucune régression** ✅
 
-### 🎯 Phase 2 : Tests de Build Statique (EN COURS - Priorité Haute)  
-**Durée estimée** : 2-3 jours
-- [ ] Setup tests post-build (analyse fichiers dist/)
-- [ ] Tests génération HTML multilingue
-- [ ] Tests optimisation assets statiques
-- [ ] Tests SEO et accessibilité dans HTML généré
+### ✅ Phase 2 : Tests de Build Statique - Étape 1 (TERMINÉE)
+**Durée réelle** : 1 jour
+- [x] ✅ Setup tests post-build (`src/test/build-static.test.ts`)
+- [x] ✅ Configuration multilingue corrigée (page FR + MainLayout dynamique)
+- [x] ✅ Tests génération HTML multilingue (6 tests validés)
+- [x] ✅ Tests traitement i18n au build-time
+- [x] ✅ Validation structure HTML et navigation statique
+
+**📊 Résultats Étape 1** :
+- **6 tests build statique** validés ✅
+- **Génération multilingue** : `/index.html` + `/fr/index.html` ✅
+- **Structure HTML correcte** dans les deux langues ✅
+- **Navigation i18n statique** fonctionnelle ✅
+- **URLs multilingues** selon config Astro ✅
+- **Liens hreflang SEO** générés automatiquement ✅
+
+**📊 Résultats Étape 2** :
+- **8 tests optimisation assets** validés ✅
+- **CSS critique inline** : **668B** ✅ (< 1KB seuil)
+- **Bundle JavaScript** : **0B** ✅ (site statique optimal)
+- **Liens prefetch/preload** : Présents et fonctionnels ✅
+- **Meta tags optimisés** : `viewport`, `charset`, `generator`, SVG favicon ✅
+- **HTML optimisé** : **31KB** ✅ (< 50KB seuil)
+- **Performance globale** : Tous seuils respectés ✅
+
+### ✅ Phase 2 - Étape 2 : Optimisation Assets (TERMINÉE)
+**Durée réelle** : 1 jour
+- [x] ✅ Tests optimisation CSS critique inline
+- [x] ✅ Tests taille bundle JavaScript < 3KB
+- [x] ✅ Tests preload/prefetch links et performance assets
+- [x] ✅ Tests conformité métriques selon règles Astro statique
 
 ### Phase 3 : Tests E2E Sites Statiques (Priorité Moyenne)
 **Durée estimée** : 2-3 jours
@@ -439,7 +464,7 @@ export default {
 
 ---
 
-**Statut** : ✅ Phase 1 TERMINÉE - Phase 2 EN COURS - Site Statique Optimisé
+**Statut** : ✅ Phase 1 TERMINÉE - ✅ Phase 2 TERMINÉE (Étapes 1&2) - Phase 3 PRÊTE
 **Dernière mise à jour** : Décembre 2024
 **Responsable** : Équipe de développement
 
@@ -462,8 +487,28 @@ export default {
 - Performance validée : CSS Header < 1KB ✅
 - Aucune perte de couverture lors refactorisation ✅
 
-### 🚀 Prêt pour Phase 2
-La Phase 1 étant terminée avec succès, le projet est maintenant prêt pour la **Phase 2 : Tests de Build Statique** qui se concentrera sur la validation de la génération HTML multilingue et l'optimisation des assets.
+---
+
+## 🎉 BILAN PHASE 2 - ÉTAPE 1 (TERMINÉE)
+
+### ✅ Accomplissements
+- **Fichier de tests créé** : `src/test/build-static.test.ts`
+- **Configuration i18n corrigée** : Page française + MainLayout dynamique
+- **6 tests build statique validés** : Génération HTML + traitement i18n
+- **Génération multilingue fonctionnelle** : Build produit `/index.html` + `/fr/index.html`
+- **Structure HTML statique conforme** : Navigation, ARIA, hreflang automatiques
+- **Problème résolu** : Astro génère maintenant les deux versions linguistiques
+
+### 📈 Métriques Atteintes Étape 1
+- Tests de build : **6/6 validés** ✅
+- Génération multilingue : **Fonctionnelle** ✅
+- Structure HTML : **Conforme dans les 2 langues** ✅
+- URLs i18n : **Selon config Astro** (`/` + `/fr/`) ✅
+- Liens hreflang SEO : **Générés automatiquement** ✅
+- Navigation statique : **Traduite et fonctionnelle** ✅
+
+### 🚀 Prêt pour Phase 3
+La Phase 2 (complète) étant terminée avec succès, nous passons maintenant à la **Phase 3 : Tests E2E Sites Statiques** qui se concentrera sur les tests end-to-end des interactions utilisateur sur le site statique généré.
 
 ---
 

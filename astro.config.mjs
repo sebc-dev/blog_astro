@@ -20,7 +20,14 @@ export default defineConfig({
         plugins: [tailwindcss()],
         server: {
             watch: {
-                ignored: ['**/coverage/**', '**/node_modules/**']
+                ignored: [
+                        '**/coverage/**',
+                    '**/node_modules/**',
+                    '**/vitest.config.ts',
+                    '**/test/**',
+                    '**/test-helpers/**',
+                    '**/__tests__/**',
+                ]
             }
         }
     },

@@ -16,7 +16,7 @@ export default defineConfig({
         "src/test-helpers/**/*.ts",
         "src/**/__tests__/**/*.ts",
         "src/test/setup.ts",
-        "src/content/config.ts", // Configuration Astro Content Collections - pas de logique à tester
+        "src/content/config.ts",
       ],
       thresholds: {
         global: {
