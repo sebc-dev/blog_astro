@@ -27,7 +27,7 @@ export default defineConfig({
       }
     },
     // Tests post-build pour sites statiques
-    testTimeout: 10000, // Plus de temps pour tests de build
+    testTimeout: process.env.CI ? 10000 : 5000,
   },
   resolve: {
     alias: {
