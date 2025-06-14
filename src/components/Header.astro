@@ -59,15 +59,30 @@ const criticalCSS = `
     left: 0;
     right: 0;
     z-index: 50;
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(8px);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
   }
+  
+  .header-critical.scrolled {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(20px);
+  }
+  
   @media (prefers-color-scheme: dark) {
     .header-critical {
-      background: rgba(0, 0, 0, 0.95);
-      border-bottom-color: rgba(255, 255, 255, 0.1);
+      background: rgba(0, 0, 0, 0.85);
+    }
+    
+    .header-critical.scrolled {
+      background: rgba(0, 0, 0, 0.50);
+      backdrop-filter: blur(5px);
+    }
+  }
+  
+  @media (prefers-reduced-motion: reduce) {
+    .header-critical {
+      transition: none !important;
     }
   }
 `;
@@ -102,12 +117,12 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
 
     <!-- Navigation Statique (Zero-JS) -->
     <nav class="navbar-center" aria-label={t('nav.home')}>
-      <ul class="menu menu-horizontal px-1" role="menubar">
+      <ul class="flex gap-6" role="menubar">
         {translatedNavLinks.map((link) => (
           <li role="none">
             <a
               href={link.href}
-              class={`nav-link transition-colors duration-200 ${link.isActive ? 'bg-primary text-primary-content' : 'hover:bg-primary hover:text-primary-content'}`}
+              class={`nav-link transition-colors duration-200 px-3 py-2 rounded-md ${link.isActive ? 'text-primary font-semibold underline underline-offset-4' : 'text-base-content hover:text-primary hover:underline hover:underline-offset-4'}`}
               role="menuitem"
               aria-current={link.isActive ? 'page' : undefined}
               rel="prefetch"
@@ -184,14 +199,19 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
     <!-- Bouton Menu Mobile -->
     <button
       id="mobile-menu-toggle"
-      class="btn btn-square btn-ghost"
+      class="btn btn-square btn-ghost relative"
       aria-label="Menu"
       aria-expanded="false"
       aria-controls="mobile-menu"
       data-menu-toggle
     >
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <!-- Icône Hamburger -->
+      <svg class="menu-icon hamburger w-6 h-6 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+      <!-- Icône Croix -->
+      <svg class="menu-icon cross w-6 h-6 absolute inset-0 m-auto transition-all duration-300 opacity-0 rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
       </svg>
     </button>
   </div>
@@ -205,30 +225,16 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
   aria-hidden="true"
 >
   <div class="fixed inset-0 bg-black/50" data-menu-overlay></div>
-  <div class="fixed right-0 top-0 h-full w-full bg-base-100 shadow-xl max-w-sm">
+  <div class="fixed inset-0 bg-base-100 shadow-xl">
     <div class="flex flex-col h-full">
-      <!-- Header du menu mobile -->
-      <div class="flex items-center justify-between p-4 border-b">
-        <span class="font-semibold">{t('nav.home')}</span>
-        <button
-          class="btn btn-ghost btn-sm"
-          aria-label={t('nav.home')}
-          data-menu-close
-        >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
-        </button>
-      </div>
-
       <!-- Navigation Mobile Statique -->
-      <nav class="flex-1 px-4 py-6" aria-label={t('nav.home')}>
-        <ul class="space-y-2">
+      <nav class="flex-1 px-4 py-6 mt-16" aria-label={t('nav.home')}>
+        <ul class="space-y-4">
           {translatedNavLinks.map((link) => (
             <li>
               <a
                 href={link.href}
-                class={`block px-4 py-3 rounded-lg transition-colors ${link.isActive ? 'bg-primary text-primary-content' : 'hover:bg-base-200'}`}
+                class={`block px-4 py-3 transition-colors text-lg ${link.isActive ? 'text-primary font-semibold underline underline-offset-4' : 'text-base-content hover:text-primary hover:underline hover:underline-offset-4'}`}
                 rel="prefetch"
                 data-menu-link
               >
@@ -282,6 +288,7 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
     
     // Configuration
     const ANIMATION_DURATION = 300;
+    const SCROLL_THRESHOLD = 50; // Pixel de scroll avant activation de l'effet
     
     // Cache des éléments DOM
     const elements = {
@@ -290,8 +297,42 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
       overlay: document.querySelector('[data-menu-overlay]') as HTMLElement,
       closeBtn: document.querySelector('[data-menu-close]') as HTMLElement,
       menuLinks: document.querySelectorAll('[data-menu-link]') as NodeListOf<HTMLElement>,
-      dropdownButtons: document.querySelectorAll('[data-dropdown]') as NodeListOf<HTMLElement>
+      dropdownButtons: document.querySelectorAll('[data-dropdown]') as NodeListOf<HTMLElement>,
+      desktopHeader: document.getElementById('desktop-header') as HTMLElement,
+      mobileHeader: document.getElementById('mobile-header') as HTMLElement
     };
+    
+    // Gestion optimisée de l'effet de scroll
+    let ticking = false;
+    let lastScrollY = 0;
+    
+    function updateHeaderOnScroll() {
+      const currentScrollY = window.scrollY;
+      const shouldBlur = currentScrollY > SCROLL_THRESHOLD;
+      
+      // Appliquer l'effet aux deux headers
+      [elements.desktopHeader, elements.mobileHeader].forEach(header => {
+        if (header) {
+          header.classList.toggle('scrolled', shouldBlur);
+        }
+      });
+      
+      lastScrollY = currentScrollY;
+      ticking = false;
+    }
+    
+    function onScroll() {
+      if (!ticking) {
+        requestAnimationFrame(updateHeaderOnScroll);
+        ticking = true;
+      }
+    }
+    
+    // Initialiser l'effet de scroll
+    window.addEventListener('scroll', onScroll, { passive: true });
+    
+    // Vérifier l'état initial au chargement
+    updateHeaderOnScroll();
     
     // État du menu
     let isMenuOpen = false;
@@ -313,6 +354,7 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
       mobileMenu.style.transform = 'translateX(0)';
       mobileMenu.setAttribute('aria-hidden', 'false');
       mobileMenuToggle.setAttribute('aria-expanded', 'true');
+      mobileMenuToggle.classList.add('menu-open');
       document.body.style.overflow = 'hidden';
       
       // Focus sur le premier lien
@@ -327,6 +369,7 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
       mobileMenu.style.transform = 'translateX(100%)';
       mobileMenu.setAttribute('aria-hidden', 'true');
       mobileMenuToggle.setAttribute('aria-expanded', 'false');
+      mobileMenuToggle.classList.remove('menu-open');
       document.body.style.overflow = '';
       
       // Focus de retour
@@ -418,6 +461,33 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
     }
   }
   
+  /* Animation des icônes de menu */
+  .menu-icon {
+    transform-origin: center;
+  }
+  
+  /* État menu fermé */
+  .hamburger {
+    opacity: 1;
+    transform: rotate(0deg);
+  }
+  
+  .cross {
+    opacity: 0;
+    transform: rotate(90deg);
+  }
+  
+  /* État menu ouvert */
+  [data-menu-toggle].menu-open .hamburger {
+    opacity: 0;
+    transform: rotate(-90deg);
+  }
+  
+  [data-menu-toggle].menu-open .cross {
+    opacity: 1;
+    transform: rotate(0deg);
+  }
+  
   /* Optimisation pour les transitions */
   [data-menu-toggle],
   [data-menu-close] {
@@ -439,6 +509,9 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
     }
     .dropdown-content {
       animation: none !important;
+    }
+    .menu-icon {
+      transition: none !important;
     }
   }
 </style>

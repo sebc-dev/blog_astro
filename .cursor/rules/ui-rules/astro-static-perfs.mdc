@@ -1,6 +1,6 @@
 ---
-description: Convention de code d'optimisation de performances pour les composant Astro 
-globs: 
+description: 
+globs: *.astro
 alwaysApply: false
 ---
 # Règles d'Optimisation Sites Statiques Astro
