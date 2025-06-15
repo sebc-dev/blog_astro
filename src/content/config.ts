@@ -10,12 +10,12 @@ const usedTranslationIds = new Set<string>();
 
 // Fonction de validation personnalisée pour l'unicité des translationId
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const validateUniqueTranslationId = (id: string) => {
+const validateUniqueTranslationId = (id: string): boolean => {
   if (usedTranslationIds.has(id)) {
     throw new Error(`Translation ID "${id}" is already used. Each translationId must be unique across the collection.`);
   }
   usedTranslationIds.add(id);
-  return id;
+  return true;
 };
 
 const blogCollection = defineCollection({
