@@ -6,60 +6,13 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { 
-  useTranslations, 
-  useTranslatedPath
-} from '../i18n/utils';
-import type { UIKeys } from '../i18n/ui';
+import { useTranslatedPath } from '../i18n/utils';
 import { generateCriticalCSS } from '../scripts/header-styles';
-
-// Types pour la logique Header
-interface NavLink {
-  href: string;
-  key: UIKeys;
-}
-
-interface TranslatedNavLink {
-  href: string;
-  label: string;
-  isActive: boolean;
-}
-
-// Fonction utilitaire testée: transformation des liens de navigation
-function mapNavLinks(
-  navLinks: NavLink[], 
-  lang: 'en' | 'fr', 
-  translatePath: (path: string) => string, 
-  currentUrl: URL
-): TranslatedNavLink[] {
-  const t = useTranslations(lang);
-  
-  return navLinks.map(link => ({
-    href: translatePath(link.href),
-    label: t(link.key),
-    isActive: currentUrl.pathname === translatePath(link.href)
-  }));
-}
-
-// Fonction utilitaire testée: génération des URLs de langue
-function generateLanguageUrls(currentPath: string, lang: 'en' | 'fr') {
-  return {
-    en: {
-      url: currentPath,
-      isActive: lang === 'en',
-      label: 'English',
-      flag: '🇺🇸'
-    },
-    fr: {
-      url: currentPath.startsWith('/fr')
-        ? currentPath
-        : `/fr${currentPath}`,
-      isActive: lang === 'fr', 
-      label: 'Français',
-      flag: '🇫🇷'
-    }
-  };
-}
+import { 
+  mapNavLinks, 
+  generateLanguageUrls, 
+  type NavLink
+} from '../components/header/utils';
 
 // Note: La fonction generateCriticalCSS est maintenant importée depuis ../scripts/header-styles
 

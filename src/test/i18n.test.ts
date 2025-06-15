@@ -457,12 +457,22 @@ describe('Formatage des dates (formatDate)', () => {
 
   it('devrait formater les dates en anglais', () => {
     const formatted = formatDate(testDate, 'en');
-    expect(formatted).toMatch(/January 15, 2024/);
+    // Vérifier la structure plutôt que le contenu exact
+    expect(formatted).toContain('2024');
+    expect(formatted).toContain('15');
+    expect(formatted).toContain('January');
+    // Test de la structure complète
+    expect(formatted).toMatch(/^[A-Za-z]+ \d{1,2}, \d{4}$/);
   });
 
   it('devrait formater les dates en français', () => {
     const formatted = formatDate(testDate, 'fr');
-    expect(formatted).toMatch(/15 janvier 2024/);
+    // Vérifier la structure plutôt que le contenu exact
+    expect(formatted).toContain('2024');
+    expect(formatted).toContain('15');
+    expect(formatted).toContain('janvier');
+    // Test de la structure complète pour le français
+    expect(formatted).toMatch(/^\d{1,2} [a-zA-Zâêîôûàèùç]+ \d{4}$/);
   });
 
   it('devrait gérer différentes dates', () => {
@@ -487,6 +497,46 @@ describe('Formatage des dates (formatDate)', () => {
     // Le format français utilise "janvier" et non "January"
     expect(formatted).toContain('janvier');
     expect(formatted).not.toContain('January');
+  });
+
+  it('devrait maintenir un formatage consistant (test de snapshot)', () => {
+    // Test de snapshot plus robuste avec date fixe et timezone normalisée
+    const fixedDate = new Date('2024-01-15T12:00:00.000Z');
+    
+    // Test pour l'anglais
+    const formattedEn = formatDate(fixedDate, 'en');
+    expect(formattedEn).toMatchSnapshot('formatDate-en-2024-01-15');
+    
+    // Test pour le français
+    const formattedFr = formatDate(fixedDate, 'fr');
+    expect(formattedFr).toMatchSnapshot('formatDate-fr-2024-01-15');
+    
+    // Vérification que les formats sont différents
+    expect(formattedEn).not.toBe(formattedFr);
+  });
+
+  it('devrait gérer différentes dates de manière cohérente', () => {
+    const testDates = [
+      { date: new Date('2024-01-01T12:00:00.000Z'), label: 'Nouvel An' },
+      { date: new Date('2024-07-14T12:00:00.000Z'), label: 'Fête nationale française' },
+      { date: new Date('2024-12-25T12:00:00.000Z'), label: 'Noël' },
+    ];
+
+    testDates.forEach(({ date, label }) => {
+      const formattedEn = formatDate(date, 'en');
+      const formattedFr = formatDate(date, 'fr');
+      
+      // Vérifier que le formatage produit quelque chose
+      expect(formattedEn, `Date en anglais pour ${label}`).toBeTruthy();
+      expect(formattedFr, `Date en français pour ${label}`).toBeTruthy();
+      
+      // Vérifier que les formats sont différents
+      expect(formattedEn, `Formats différents pour ${label}`).not.toBe(formattedFr);
+      
+      // Vérifier la présence de l'année
+      expect(formattedEn, `Année présente en anglais pour ${label}`).toContain('2024');
+      expect(formattedFr, `Année présente en français pour ${label}`).toContain('2024');
+    });
   });
 });
 

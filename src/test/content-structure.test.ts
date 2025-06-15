@@ -1,9 +1,25 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'path';
 import { SLUG_REGEX } from '../scripts/validate-content-utils.js';
 
 const CONTENT_DIR = join(process.cwd(), 'src', 'content');
+
+// Blog directory constants
+const BLOG_DIR_EN = join(CONTENT_DIR, 'blog', 'en');
+const BLOG_DIR_FR = join(CONTENT_DIR, 'blog', 'fr');
+
+// Post filename constants
+const POST_FIRST_EN = 'first-post.mdx';
+const POST_ASTRO_GUIDE_EN = 'astro-guide.mdx';
+const POST_PREMIER_FR = 'premier-article.mdx';
+const POST_GUIDE_ASTRO_FR = 'guide-astro.mdx';
+
+// Complete post path constants
+const FIRST_POST_PATH = join(BLOG_DIR_EN, POST_FIRST_EN);
+const ASTRO_GUIDE_PATH = join(BLOG_DIR_EN, POST_ASTRO_GUIDE_EN);
+const PREMIER_ARTICLE_PATH = join(BLOG_DIR_FR, POST_PREMIER_FR);
+const GUIDE_ASTRO_PATH = join(BLOG_DIR_FR, POST_GUIDE_ASTRO_FR);
 
 describe('Content Structure Validation', () => {
   describe('Configuration', () => {
@@ -21,36 +37,27 @@ describe('Content Structure Validation', () => {
 
   describe('Blog Structure', () => {
     it('should have English blog directory', () => {
-      const enBlogPath = join(CONTENT_DIR, 'blog', 'en');
-      expect(existsSync(enBlogPath)).toBe(true);
+      expect(existsSync(BLOG_DIR_EN)).toBe(true);
     });
 
     it('should have French blog directory', () => {
-      const frBlogPath = join(CONTENT_DIR, 'blog', 'fr');
-      expect(existsSync(frBlogPath)).toBe(true);
+      expect(existsSync(BLOG_DIR_FR)).toBe(true);
     });
 
     it('should have English blog posts', () => {
-      const firstPostPath = join(CONTENT_DIR, 'blog', 'en', 'first-post.mdx');
-      const astroGuidePath = join(CONTENT_DIR, 'blog', 'en', 'astro-guide.mdx');
-      
-      expect(existsSync(firstPostPath)).toBe(true);
-      expect(existsSync(astroGuidePath)).toBe(true);
+      expect(existsSync(FIRST_POST_PATH)).toBe(true);
+      expect(existsSync(ASTRO_GUIDE_PATH)).toBe(true);
     });
 
     it('should have French blog posts', () => {
-      const premierArticlePath = join(CONTENT_DIR, 'blog', 'fr', 'premier-article.mdx');
-      const guideAstroPath = join(CONTENT_DIR, 'blog', 'fr', 'guide-astro.mdx');
-      
-      expect(existsSync(premierArticlePath)).toBe(true);
-      expect(existsSync(guideAstroPath)).toBe(true);
+      expect(existsSync(PREMIER_ARTICLE_PATH)).toBe(true);
+      expect(existsSync(GUIDE_ASTRO_PATH)).toBe(true);
     });
   });
 
   describe('Content Validation', () => {
     it('should have valid frontmatter in English posts', () => {
-      const firstPostPath = join(CONTENT_DIR, 'blog', 'en', 'first-post.mdx');
-      const content = readFileSync(firstPostPath, 'utf-8');
+      const content = readFileSync(FIRST_POST_PATH, 'utf-8');
       
       // Vérifier la présence des champs obligatoires
       expect(content).toContain('title:');
@@ -63,8 +70,7 @@ describe('Content Structure Validation', () => {
     });
 
     it('should have valid frontmatter in French posts', () => {
-      const premierArticlePath = join(CONTENT_DIR, 'blog', 'fr', 'premier-article.mdx');
-      const content = readFileSync(premierArticlePath, 'utf-8');
+      const content = readFileSync(PREMIER_ARTICLE_PATH, 'utf-8');
       
       // Vérifier la présence des champs obligatoires
       expect(content).toContain('title:');
@@ -77,11 +83,8 @@ describe('Content Structure Validation', () => {
     });
 
     it('should have matching translation IDs', () => {
-      const firstPostPath = join(CONTENT_DIR, 'blog', 'en', 'first-post.mdx');
-      const premierArticlePath = join(CONTENT_DIR, 'blog', 'fr', 'premier-article.mdx');
-      
-      const enContent = readFileSync(firstPostPath, 'utf-8');
-      const frContent = readFileSync(premierArticlePath, 'utf-8');
+      const enContent = readFileSync(FIRST_POST_PATH, 'utf-8');
+      const frContent = readFileSync(PREMIER_ARTICLE_PATH, 'utf-8');
       
       // Extraire les translationId
       const enTranslationId = enContent.match(/translationId: "([^"]+)"/)?.[1];
@@ -93,8 +96,7 @@ describe('Content Structure Validation', () => {
     });
 
     it('should have valid dates', () => {
-      const firstPostPath = join(CONTENT_DIR, 'blog', 'en', 'first-post.mdx');
-      const content = readFileSync(firstPostPath, 'utf-8');
+      const content = readFileSync(FIRST_POST_PATH, 'utf-8');
       
       const dateMatch = content.match(/pubDate: (\d{4}-\d{2}-\d{2})/);
       expect(dateMatch).toBeDefined();
@@ -107,8 +109,7 @@ describe('Content Structure Validation', () => {
     });
 
     it('should have content after frontmatter', () => {
-      const firstPostPath = join(CONTENT_DIR, 'blog', 'en', 'first-post.mdx');
-      const content = readFileSync(firstPostPath, 'utf-8');
+      const content = readFileSync(FIRST_POST_PATH, 'utf-8');
       
       // Vérifier qu'il y a du contenu après le frontmatter
       const parts = content.split('---');
@@ -121,8 +122,7 @@ describe('Content Structure Validation', () => {
     // Regex pour valider le format slug (identique à celui dans config.ts)
 
     it('should have valid canonicalSlug format in English posts', () => {
-      const firstPostPath = join(CONTENT_DIR, 'blog', 'en', 'first-post.mdx');
-      const content = readFileSync(firstPostPath, 'utf-8');
+      const content = readFileSync(FIRST_POST_PATH, 'utf-8');
       
       const slugMatch = content.match(/canonicalSlug: "([^"]+)"/);
       expect(slugMatch).toBeDefined();
@@ -135,8 +135,7 @@ describe('Content Structure Validation', () => {
     });
 
     it('should have valid canonicalSlug format in French posts', () => {
-      const premierArticlePath = join(CONTENT_DIR, 'blog', 'fr', 'premier-article.mdx');
-      const content = readFileSync(premierArticlePath, 'utf-8');
+      const content = readFileSync(PREMIER_ARTICLE_PATH, 'utf-8');
       
       const slugMatch = content.match(/canonicalSlug: "([^"]+)"/);
       expect(slugMatch).toBeDefined();
@@ -149,8 +148,7 @@ describe('Content Structure Validation', () => {
     });
 
     it('should have non-empty translationId', () => {
-      const firstPostPath = join(CONTENT_DIR, 'blog', 'en', 'first-post.mdx');
-      const content = readFileSync(firstPostPath, 'utf-8');
+      const content = readFileSync(FIRST_POST_PATH, 'utf-8');
       
       const translationIdMatch = content.match(/translationId: "([^"]+)"/);
       expect(translationIdMatch).toBeDefined();
