@@ -18,16 +18,11 @@ const lang = getLangFromUrl(Astro.url);
   <body class="relative">
     <!-- Grille de fond avec fondu -->
     <div class="grid-background"></div>
-    
-    <header>
-      <Header />
-    </header>
+    <Header />
     <main>
       <slot />
     </main>
-    <footer>
-      <Footer />
-    </footer>
+    <Footer />
   </body>
 </html>
 
@@ -40,31 +35,33 @@ const lang = getLangFromUrl(Astro.url);
     height: 100vh;
     z-index: -1;
     pointer-events: none;
-    
+
     /* Grille ultra-discrète - à peine visible */
-    background-image: 
+    background-image:
       linear-gradient(currentColor 1px, transparent 1px),
       linear-gradient(90deg, currentColor 1px, transparent 1px);
     background-size: 24px 24px;
     color: oklch(var(--color-base-content) / 0.008);
-    
+
     /* Effet de fondu ultra-doux vers le bas */
-    mask: linear-gradient(to bottom, 
-      rgba(0, 0, 0, 0.15) 0%, 
-      rgba(0, 0, 0, 0.1) 10%, 
-      rgba(0, 0, 0, 0.05) 30%, 
-      rgba(0, 0, 0, 0.01) 60%, 
+    mask: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.05) 0%,
+      rgba(0, 0, 0, 0.05) 10%,
+      rgba(0, 0, 0, 0.05) 30%,
+      rgba(0, 0, 0, 0.01) 60%,
       rgba(0, 0, 0, 0) 80%
     );
-    -webkit-mask: linear-gradient(to bottom, 
-      rgba(0, 0, 0, 0.15) 0%, 
-      rgba(0, 0, 0, 0.1) 10%, 
-      rgba(0, 0, 0, 0.05) 30%, 
-      rgba(0, 0, 0, 0.01) 60%, 
+    -webkit-mask: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.05) 0%,
+      rgba(0, 0, 0, 0.05) 10%,
+      rgba(0, 0, 0, 0.05) 30%,
+      rgba(0, 0, 0, 0.01) 60%,
       rgba(0, 0, 0, 0) 80%
     );
   }
-  
+
   /* Adaptation pour les petits écrans */
   @media (max-width: 768px) {
     .grid-background {
@@ -72,7 +69,7 @@ const lang = getLangFromUrl(Astro.url);
       color: oklch(var(--color-base-content) / 0.005);
     }
   }
-  
+
   /* Mode motion réduit */
   @media (prefers-reduced-motion: reduce) {
     .grid-background {
