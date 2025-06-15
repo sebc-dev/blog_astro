@@ -74,7 +74,7 @@ export function useTranslatedPath(lang: Languages) {
  * @param baseUrl - URL de base du site
  * @returns Array d'objets avec hreflang et href
  */
-export function getHreflangLinks(currentPath: string, baseUrl: string = '') {
+export function getHreflangLinks(currentPath: string, baseUrl = '') {
   const cleanPath = currentPath.startsWith('/') ? currentPath : `/${currentPath}`;
   
   return Object.keys(ui).map((lang) => {
