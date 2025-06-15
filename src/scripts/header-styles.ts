@@ -5,10 +5,10 @@
 
 /**
  * Génère le CSS critique pour le composant Header
- * 
+ *
  * Ce CSS est critique car il définit le positionnement et les styles de base
  * du header qui doivent être appliqués immédiatement pour éviter le layout shift.
- * 
+ *
  * @returns Le CSS critique sous forme de chaîne de caractères
  */
 export function generateCriticalCSS(): string {
@@ -45,5 +45,5 @@ export function generateCriticalCSS(): string {
       transition: none !important;
     }
   }
-`;
-} 
+`.trim();
+}

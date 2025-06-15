@@ -1,7 +1,13 @@
 import { defineCollection, z } from "astro:content";
 import { SLUG_REGEX } from "../scripts/validate-content-utils";
+
 // Store pour tracking des translationId utilisés (pour validation d'unicité)
 const usedTranslationIds = new Set<string>();
+
+// Fonction pour réinitialiser le cache des translationId (utile pour les tests et dev HMR)
+export const resetTranslationIdCache = (): void => {
+  usedTranslationIds.clear();
+};
 
 // Fonction de validation personnalisée pour l'unicité des translationId
 const validateUniqueTranslationId = (id: string): boolean => {

@@ -15,7 +15,6 @@ export default defineConfig({
         "src/**/__fixtures__/**/*.ts",
         "src/test-helpers/**/*.ts",
         "src/**/__tests__/**/*.ts",
-        "src/content/config.ts",
       ],
       thresholds: {
         global: {
@@ -32,6 +31,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": new URL("./src", import.meta.url).pathname,
+      "astro:content": new URL("./src/test/mocks/astro-content.ts", import.meta.url).pathname,
     },
   },
 });

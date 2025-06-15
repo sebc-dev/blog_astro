@@ -21,18 +21,21 @@ export interface TranslatedNavLink {
  * @returns Array of translated navigation links with active state
  */
 export function mapNavLinks(
-  navLinks: NavLink[], 
-  lang: 'en' | 'fr', 
-  translatePath: (path: string) => string, 
-  currentUrl: URL
+  navLinks: NavLink[],
+  lang: "en" | "fr",
+  translatePath: (path: string) => string,
+  currentUrl: URL,
 ): TranslatedNavLink[] {
   const t = useTranslations(lang);
-  
-  return navLinks.map(link => ({
-    href: translatePath(link.href),
-    label: t(link.key),
-    isActive: currentUrl.pathname === translatePath(link.href)
-  }));
+
+  return navLinks.map((link) => {
+    const translated = translatePath(link.href);
+    return {
+      href: translated,
+      label: t(link.key),
+      isActive: currentUrl.pathname === translated,
+    };
+  });
 }
 
 /**
@@ -41,21 +44,20 @@ export function mapNavLinks(
  * @param lang - Current language
  * @returns Object with language URLs and metadata
  */
-export function generateLanguageUrls(currentPath: string, lang: 'en' | 'fr') {
+export function generateLanguageUrls(currentPath: string, lang: "en" | "fr") {
+  if (!currentPath.startsWith("/")) currentPath = `/${currentPath}`;
   return {
     en: {
       url: currentPath,
-      isActive: lang === 'en',
-      label: 'English',
-      flag: '🇺🇸'
+      isActive: lang === "en",
+      label: "English",
+      flag: "🇺🇸",
     },
     fr: {
-      url: currentPath.startsWith('/fr')
-        ? currentPath
-        : `/fr${currentPath}`,
-      isActive: lang === 'fr', 
-      label: 'Français',
-      flag: '🇫🇷'
-    }
+      url: currentPath.startsWith("/fr") ? currentPath : `/fr${currentPath}`,
+      isActive: lang === "fr",
+      label: "Français",
+      flag: "🇫🇷",
+    },
   };
-} 
+}
