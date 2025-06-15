@@ -30,11 +30,14 @@ const sortedPosts = allPosts.sort((a, b) => {
 // Limiter le nombre d'articles
 const limitedPosts = sortedPosts.slice(0, maxArticles);
 
-// Séparer l'article héro des autres
+// Séparer l'article héro des autres pour desktop
 const heroPosts = showHero && limitedPosts.length > 0 ? [limitedPosts[0]] : [];
-const gridPosts = showHero && limitedPosts.length > 1 
+const gridPostsDesktop = showHero && limitedPosts.length > 1 
   ? limitedPosts.slice(1) 
   : limitedPosts;
+
+// Pour mobile : tous les articles dans la grille (pas de hero)
+const gridPostsMobile = limitedPosts;
 
 // Fonction utilitaire pour calculer le temps de lecture estimé
 function calculateReadingTime(content: string): number {
@@ -103,9 +106,9 @@ function getPostTag(post: CollectionEntry<"blog">): string | undefined {
   <div class="container mx-auto max-w-7xl px-4">
     <!-- Contenu principal -->
     <div class="articles-layout">
-      <!-- Article Héro (si activé et articles disponibles) -->
+      <!-- Article Héro (desktop uniquement) -->
       {heroPosts.length > 0 && (
-        <div class="hero-section">
+        <div class="hero-section hidden lg:block">
           {heroPosts.map((post) => (
             <ArticleHero
               title={post.data.title}
@@ -122,11 +125,32 @@ function getPostTag(post: CollectionEntry<"blog">): string | undefined {
         </div>
       )}
 
-      <!-- Grille d'articles -->
-      {gridPosts.length > 0 && (
-        <div class="grid-section pt-16">
+      <!-- Grille d'articles Desktop (sans le premier article qui est en hero) -->
+      {gridPostsDesktop.length > 0 && (
+        <div class="grid-section hidden lg:block pt-16">
           <div class="articles-grid grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {gridPosts.map((post) => (
+            {gridPostsDesktop.map((post) => (
+              <ArticleCard
+                title={post.data.title}
+                description={post.data.description}
+                heroImage={post.data.heroImage}
+                pubDate={post.data.pubDate}
+                author={post.data.author}
+                category={getPostCategory(post)}
+                tag={getPostTag(post)}
+                slug={post.slug}
+                readingTime={estimateReadingTime(post)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      <!-- Grille d'articles Mobile (tous les articles, y compris le premier) -->
+      {gridPostsMobile.length > 0 && (
+        <div class="grid-section lg:hidden">
+          <div class="articles-grid grid gap-6 grid-cols-1 sm:grid-cols-2">
+            {gridPostsMobile.map((post) => (
               <ArticleCard
                 title={post.data.title}
                 description={post.data.description}
@@ -191,21 +215,32 @@ function getPostTag(post: CollectionEntry<"blog">): string | undefined {
   }
 
   /* Responsive breakpoints personnalisés */
-  @media (max-width: 768px) {
-    .articles-grid {
-      grid-template-columns: 1fr; /* 1 colonne sur mobile */
+  /* Mobile : grille complète sans hero */
+  .grid-section.lg\:hidden .articles-grid {
+    gap: 1.5rem;
+  }
+  
+  @media (max-width: 640px) {
+    .grid-section.lg\:hidden .articles-grid {
+      grid-template-columns: 1fr; /* 1 colonne sur petit mobile */
+      gap: 1rem;
     }
   }
 
-  @media (min-width: 769px) and (max-width: 1024px) {
-    .articles-grid {
-      grid-template-columns: repeat(2, 1fr); /* 2 colonnes sur tablette */
+  @media (min-width: 641px) and (max-width: 1023px) {
+    .grid-section.lg\:hidden .articles-grid {
+      grid-template-columns: repeat(2, 1fr); /* 2 colonnes sur grand mobile/tablette */
     }
   }
 
-  @media (min-width: 1025px) {
-    .articles-grid {
+  /* Desktop : grille avec hero séparé */
+  @media (min-width: 1024px) {
+    .grid-section.hidden.lg\:block .articles-grid {
       grid-template-columns: repeat(3, 1fr); /* 3 colonnes sur desktop */
+    }
+    
+    .hero-section {
+      margin-bottom: 2rem;
     }
   }
 

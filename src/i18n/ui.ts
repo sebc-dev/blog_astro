@@ -9,10 +9,9 @@ export const ui = {
     // Navigation
     'nav.home': 'Home',
     'nav.main': 'Main navigation',
-    'nav.blog': 'Blog',
+    'nav.articles': 'Articles',
     'nav.about': 'About',
-    'nav.contact': 'Contact',
-    'nav.services': 'Services',
+    'nav.ressources': 'Ressources',
     
     // Blog
     'blog.read': 'Read',
@@ -77,10 +76,9 @@ export const ui = {
     // Navigation
     'nav.home': 'Accueil',
     'nav.main': 'Navigation principale',
-    'nav.blog': 'Blog',
+    'nav.articles': 'Articles',
     'nav.about': 'À propos',
-    'nav.contact': 'Contact',
-    'nav.services': 'Services',
+    'nav.ressources': 'Ressources',
     
     // Blog
     'blog.read': 'Lire',

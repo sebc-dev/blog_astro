@@ -14,9 +14,9 @@ const {
   siteName = "sebc.dev",
   navLinks = [
     { href: "/", key: "nav.home" },
+    { href: "/articles", key: "nav.articles" },
+    { href: "/ressources", key: "nav.ressources" },
     { href: "/about", key: "nav.about" },
-    { href: "/services", key: "nav.services" },
-    { href: "/contact", key: "nav.contact" },
   ],
 } = Astro.props as HeaderProps;
 
@@ -198,10 +198,10 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
               <li>
                 <a
                   href={link.href}
-                  class={`block px-4 py-3 text-lg transition-colors ${
+                  class={`nav-link block px-4 py-3 text-lg transition-colors ${
                     link.isActive 
-                      ? "text-primary font-semibold underline underline-offset-4" 
-                      : "text-base-content hover:text-primary hover:underline hover:underline-offset-4"
+                      ? "active font-semibold underline underline-offset-4" 
+                      : "hover:underline hover:underline-offset-4"
                   }`}
                   rel="prefetch"
                   data-menu-link
@@ -266,6 +266,30 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
 
 <!-- Styles CSS -->
 <style>
+  /* Styles du header avec variables de thème */
+  .header-critical .nav-link {
+    color: hsl(var(--bc));
+  }
+  
+  .header-critical .nav-link:hover {
+    color: hsl(var(--p));
+  }
+  
+  .header-critical .nav-link.active {
+    color: hsl(var(--p));
+  }
+  
+  .header-critical .btn {
+    background: hsl(var(--b2) / 0.8);
+    border-color: hsl(var(--b3) / 0.5);
+    color: hsl(var(--bc));
+  }
+  
+  .header-critical .btn:hover {
+    background: hsl(var(--b3));
+    border-color: hsl(var(--p) / 0.5);
+  }
+
   /* Styles non-critiques */
   .dropdown-content {
     animation: dropdown-appear 0.2s ease-out;

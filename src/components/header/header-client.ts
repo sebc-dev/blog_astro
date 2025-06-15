@@ -11,6 +11,8 @@ interface HeaderElements {
   menuToggle: HTMLButtonElement | null;
   overlay: HTMLElement | null;
   closeBtn: HTMLElement | null;
+  desktopHeader: HTMLElement | null;
+  mobileHeader: HTMLElement | null;
 }
 
 class HeaderManager {
@@ -29,7 +31,9 @@ class HeaderManager {
       menu: document.getElementById('mobile-menu'),
       menuToggle: document.getElementById('mobile-menu-toggle') as HTMLButtonElement,
       overlay: document.querySelector('[data-menu-overlay]'),
-      closeBtn: document.querySelector('[data-menu-close]')
+      closeBtn: document.querySelector('[data-menu-close]'),
+      desktopHeader: document.getElementById('desktop-header'),
+      mobileHeader: document.getElementById('mobile-header')
     };
   }
 
@@ -37,6 +41,7 @@ class HeaderManager {
     this.initTheme();
     this.initMobileMenu();
     this.initDropdowns();
+    this.initScrollEffect();
   }
 
   // === GESTION DES THÈMES ===
@@ -134,6 +139,35 @@ class HeaderManager {
         this.closeMenu();
       }
     });
+  }
+
+  // === GESTION DU SCROLL EFFET ===
+  private initScrollEffect(): void {
+    let isScrolled = false;
+    const { desktopHeader, mobileHeader } = this.elements;
+    
+    const handleScroll = (): void => {
+      const shouldBeScrolled = window.scrollY > 10;
+      if (shouldBeScrolled !== isScrolled) {
+        isScrolled = shouldBeScrolled;
+        desktopHeader?.classList.toggle('scrolled', isScrolled);
+        mobileHeader?.classList.toggle('scrolled', isScrolled);
+      }
+    };
+    
+    let ticking = false;
+    const onScroll = (): void => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          handleScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    
+    window.addEventListener('scroll', onScroll, { passive: true });
+    handleScroll();
   }
 
   // === GESTION DES DROPDOWNS ===

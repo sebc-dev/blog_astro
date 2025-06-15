@@ -193,7 +193,7 @@ describe('Header - CSS Critique et Performance', () => {
       
       expect(css).toContain('backdrop-filter');
       expect(css).toContain('transition');
-      expect(css).toContain('rgba');
+      expect(css).toMatch(/hsl\(var\(--b1\)|rgba/); // Support hsl() ou rgba
     });
 
     it('devrait inclure tous les états visuels nécessaires', () => {
