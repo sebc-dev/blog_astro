@@ -15,7 +15,10 @@ const lang = getLangFromUrl(Astro.url);
     <meta name="generator" content={Astro.generator} />
     <slot name="head" />
   </head>
-  <body>
+  <body class="relative">
+    <!-- Grille de fond avec fondu -->
+    <div class="grid-background"></div>
+    
     <header>
       <Header />
     </header>
@@ -27,3 +30,53 @@ const lang = getLangFromUrl(Astro.url);
     </footer>
   </body>
 </html>
+
+<style>
+  .grid-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    z-index: -1;
+    pointer-events: none;
+    
+    /* Grille ultra-discrète - à peine visible */
+    background-image: 
+      linear-gradient(currentColor 1px, transparent 1px),
+      linear-gradient(90deg, currentColor 1px, transparent 1px);
+    background-size: 48px 48px;
+    color: oklch(var(--color-base-content) / 0.008);
+    
+    /* Effet de fondu ultra-doux vers le bas */
+    mask: linear-gradient(to bottom, 
+      rgba(0, 0, 0, 0.15) 0%, 
+      rgba(0, 0, 0, 0.1) 10%, 
+      rgba(0, 0, 0, 0.05) 30%, 
+      rgba(0, 0, 0, 0.01) 60%, 
+      rgba(0, 0, 0, 0) 80%
+    );
+    -webkit-mask: linear-gradient(to bottom, 
+      rgba(0, 0, 0, 0.15) 0%, 
+      rgba(0, 0, 0, 0.1) 10%, 
+      rgba(0, 0, 0, 0.05) 30%, 
+      rgba(0, 0, 0, 0.01) 60%, 
+      rgba(0, 0, 0, 0) 80%
+    );
+  }
+  
+  /* Adaptation pour les petits écrans */
+  @media (max-width: 768px) {
+    .grid-background {
+      background-size: 40px 40px;
+      color: oklch(var(--color-base-content) / 0.005);
+    }
+  }
+  
+  /* Mode motion réduit */
+  @media (prefers-reduced-motion: reduce) {
+    .grid-background {
+      opacity: 0.5;
+    }
+  }
+</style>
