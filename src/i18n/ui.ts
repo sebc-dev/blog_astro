@@ -15,6 +15,7 @@ export const ui = {
     'nav.services': 'Services',
     
     // Blog
+    'blog.read': 'Read',
     'blog.readMore': 'Read more',
     'blog.publishedOn': 'Published on',
     'blog.author': 'Author',
@@ -22,6 +23,27 @@ export const ui = {
     'blog.relatedPosts': 'Related Posts',
     'blog.noPostsFound': 'No posts found',
     'blog.searchPlaceholder': 'Search articles...',
+    
+    // Latest Articles Section
+    'latestArticles.title': 'Latest Articles',
+    'latestArticles.subtitle': 'Discover our latest insights on web development, modern frameworks and best practices.',
+    'latestArticles.noArticles': 'No articles available',
+    'latestArticles.noArticlesDesc': 'Articles will be available soon in this language.',
+    'latestArticles.viewAll': 'View all articles',
+    
+    // Categories
+    'category.framework': 'Framework',
+    'category.language': 'Language',
+    'category.performance': 'Performance',
+    'category.styling': 'Styling',
+    'category.backend': 'Backend',
+    'category.article': 'Article',
+    
+    // Tags
+    'tag.guide': 'Guide',
+    'tag.optimization': 'Optimization',
+    'tag.bestPractices': 'Best Practices',
+    'tag.comparison': 'Comparison',
     
     // Interface générale
     'languageSwitcher.label': 'Switch language',
@@ -61,6 +83,7 @@ export const ui = {
     'nav.services': 'Services',
     
     // Blog
+    'blog.read': 'Lire',
     'blog.readMore': 'Lire la suite',
     'blog.publishedOn': 'Publié le',
     'blog.author': 'Auteur',
@@ -68,6 +91,27 @@ export const ui = {
     'blog.relatedPosts': 'Articles similaires',
     'blog.noPostsFound': 'Aucun article trouvé',
     'blog.searchPlaceholder': 'Rechercher des articles...',
+    
+    // Latest Articles Section
+    'latestArticles.title': 'Derniers Articles',
+    'latestArticles.subtitle': 'Découvrez nos dernières réflexions sur le développement web, les frameworks modernes et les meilleures pratiques.',
+    'latestArticles.noArticles': 'Aucun article disponible',
+    'latestArticles.noArticlesDesc': 'Les articles seront bientôt disponibles dans cette langue.',
+    'latestArticles.viewAll': 'Voir tous les articles',
+    
+    // Categories
+    'category.framework': 'Framework',
+    'category.language': 'Langage',
+    'category.performance': 'Performance',
+    'category.styling': 'Style',
+    'category.backend': 'Backend',
+    'category.article': 'Article',
+    
+    // Tags
+    'tag.guide': 'Guide',
+    'tag.optimization': 'Optimisation',
+    'tag.bestPractices': 'Bonnes Pratiques',
+    'tag.comparison': 'Comparaison',
     
     // Interface générale
     'languageSwitcher.label': 'Changer de langue',

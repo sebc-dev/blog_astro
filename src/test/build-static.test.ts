@@ -7,7 +7,6 @@ import { describe, test, expect, beforeAll, afterAll, vi } from 'vitest';
 import { readFile, access } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { spawn } from 'node:child_process';
-import { resetTranslationIdCache } from '../content/config';
 
 // Configuration pour les tests de build
 const BUILD_CONFIG = {
@@ -42,9 +41,6 @@ async function readHTMLFile(relativePath: string): Promise<string> {
 describe('Build Static Tests - Phase 2', () => {
   beforeAll(async () => {
     console.log('🏗️  Building project for static tests...');
-    
-    // Réinitialiser le cache des translationId avant le build
-    resetTranslationIdCache();
     
     // Utiliser pnpm build pour construire le projet
     const buildProcess = spawn('pnpm', ['build'], { 

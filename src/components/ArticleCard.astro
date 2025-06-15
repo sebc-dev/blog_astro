@@ -1,0 +1,131 @@
+---
+import { getLangFromUrl, useTranslations } from '../i18n/utils';
+
+export interface Props {
+  title: string;
+  description: string;
+  heroImage?: string;
+  pubDate: Date;
+  author: string;
+  category?: string;
+  tag?: string;
+  slug: string;
+  readingTime?: number;
+}
+
+const {
+  title,
+  description,
+  heroImage,
+  pubDate,
+  author,
+  category = "Article",
+  tag,
+  slug,
+  readingTime = 3,
+} = Astro.props;
+
+// Système d'internationalisation
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+// Formatage de la date
+const formattedDate = pubDate.toLocaleDateString("fr-FR", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+});
+
+// Limite l'extrait pour les cartes
+const shortDescription = description.length > 120 
+  ? description.substring(0, 120) + "..." 
+  : description;
+---
+
+<article class="card bg-base-200 shadow-lg hover:shadow-xl transition-all duration-300 group overflow-hidden h-full">
+  <!-- Image de carte -->
+  {
+    heroImage && (
+      <figure class="aspect-video overflow-hidden">
+        <img
+          src={heroImage}
+          alt={title}
+          class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          loading="lazy"
+        />
+      </figure>
+    )
+  }
+
+  <div class="card-body p-4 flex flex-col justify-between">
+    <!-- Métadonnées compactes -->
+    <div class="flex flex-wrap gap-1 mb-3">
+      {
+        category && (
+          <span class="badge badge-primary badge-sm">
+            {category}
+          </span>
+        )
+      }
+      {
+        tag && (
+          <span class="badge badge-outline badge-sm">
+            {tag}
+          </span>
+        )
+      }
+      <span class="text-xs text-base-content/60 ml-auto">
+        {formattedDate}
+      </span>
+    </div>
+
+    <!-- Titre compact -->
+    <h3 class="card-title text-lg font-bold leading-tight mb-3 group-hover:text-primary transition-colors line-clamp-2">
+      <a href={`/blog/${slug}`} class="link-hover">
+        {title}
+      </a>
+    </h3>
+
+    <!-- Extrait court avec ellipsis -->
+    <p class="text-base-content/70 text-sm leading-relaxed mb-4 line-clamp-2 flex-grow">
+      {shortDescription}
+    </p>
+
+    <!-- Footer compact -->
+    <div class="card-actions justify-between items-center mt-auto">
+      <span class="text-xs text-base-content/60">
+        {readingTime} min
+      </span>
+      
+      <a
+        href={`/blog/${slug}`}
+        class="btn btn-primary btn-xs"
+        aria-label={`Lire: ${title}`}
+      >
+        {t('blog.read')}
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M7 17L17 7" />
+          <path d="M7 7h10v10" />
+        </svg>
+      </a>
+    </div>
+  </div>
+</article>
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style> 

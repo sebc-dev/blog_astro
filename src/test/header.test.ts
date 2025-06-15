@@ -7,7 +7,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { useTranslatedPath } from '../i18n/utils';
-import { generateCriticalCSS } from '../scripts/header-styles';
+import { generateCriticalCSS } from '../components/header/header-styles.ts';
 import { 
   mapNavLinks, 
   generateLanguageUrls, 

@@ -5,9 +5,10 @@ import {
   useTranslatedPath,
   getPathWithoutLang,
   generateLanguageUrls,
-} from "../i18n/utils";
-import { generateCriticalCSS } from "../scripts/header-styles";
-import { mapNavLinks, type NavLink } from "./header/utils";
+} from "../../i18n/utils";
+import { generateCriticalCSS } from "./header-styles";
+import { mapNavLinks, type NavLink } from "./utils";
+import './script.ts';
 
 interface Props {
   siteName?: string;
@@ -309,10 +310,6 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
     </div>
   </div>
 </div>
-
-<script is:inline type="module">
-  import './header/script.ts';
-</script>
 
 <!-- Preload des pages importantes (Site statique) -->
 {

@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'path';
 import { SLUG_REGEX } from '../scripts/validate-content-utils.js';
-import { resetTranslationIdCache } from '../content/config';
 
 const CONTENT_DIR = join(process.cwd(), 'src', 'content');
 
@@ -58,9 +57,6 @@ describe('Content Structure Validation', () => {
 
   describe('Content Validation', () => {
     it('should have valid frontmatter in English posts', () => {
-      // Réinitialiser le cache pour ce test spécifique
-      resetTranslationIdCache();
-      
       const content = readFileSync(FIRST_POST_PATH, 'utf-8');
       
       // Vérifier la présence des champs obligatoires
@@ -87,9 +83,6 @@ describe('Content Structure Validation', () => {
     });
 
     it('should have matching translation IDs', () => {
-      // Réinitialiser le cache pour ce test spécifique
-      resetTranslationIdCache();
-      
       const enContent = readFileSync(FIRST_POST_PATH, 'utf-8');
       const frContent = readFileSync(PREMIER_ARTICLE_PATH, 'utf-8');
       
@@ -155,9 +148,6 @@ describe('Content Structure Validation', () => {
     });
 
     it('should have non-empty translationId', () => {
-      // Réinitialiser le cache pour ce test spécifique  
-      resetTranslationIdCache();
-      
       const content = readFileSync(FIRST_POST_PATH, 'utf-8');
       
       const translationIdMatch = content.match(/translationId: "([^"]+)"/);

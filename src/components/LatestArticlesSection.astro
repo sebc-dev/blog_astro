@@ -1,0 +1,256 @@
+---
+import { getCollection } from "astro:content";
+import type { CollectionEntry } from "astro:content";
+import ArticleHero from "./ArticleHero.astro";
+import ArticleCard from "./ArticleCard.astro";
+import { getLangFromUrl, useTranslations, useTranslatedPath } from "../i18n/utils";
+
+interface Props {
+  maxArticles?: number;
+  showHero?: boolean;
+}
+
+const { maxArticles = 7, showHero = true } = Astro.props;
+
+// Détecter la langue depuis l'URL
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const translatePath = useTranslatedPath(lang);
+
+// Récupérer tous les articles de blog dans la langue courante
+const allPosts: CollectionEntry<"blog">[] = await getCollection("blog", ({ data }) => {
+  return data.lang === lang;
+});
+
+// Trier par date de publication (plus récent en premier)
+const sortedPosts = allPosts.sort((a, b) => {
+  return new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime();
+});
+
+// Limiter le nombre d'articles
+const limitedPosts = sortedPosts.slice(0, maxArticles);
+
+// Séparer l'article héro des autres
+const heroPosts = showHero && limitedPosts.length > 0 ? [limitedPosts[0]] : [];
+const gridPosts = showHero && limitedPosts.length > 1 
+  ? limitedPosts.slice(1) 
+  : limitedPosts;
+
+// Fonction utilitaire pour calculer le temps de lecture estimé
+function calculateReadingTime(content: string): number {
+  const wordsPerMinute = lang === 'fr' ? 200 : 220; // Différence de vitesse de lecture
+  const words = content.split(/\s+/).length;
+  return Math.ceil(words / wordsPerMinute);
+}
+
+// Fonction pour estimer le temps de lecture basé sur la longueur du slug et le contenu
+function estimateReadingTime(post: CollectionEntry<"blog">): number {
+  const wordsPerMinute = lang === 'fr' ? 200 : 220; // Différence de vitesse de lecture
+  
+  // Estimation basée sur la description et quelques indices du slug/titre
+  const descWords = post.data.description.split(/\s+/).length;
+  
+  // Estimation basée sur des patterns de longueur d'articles connus
+  const slug = post.slug;
+  let estimatedWords = descWords * 15; // Ratio description/contenu moyen
+  
+  // Ajustements basés sur le type d'article détecté
+  if (slug.includes("guide") || post.data.title.toLowerCase().includes("guide")) {
+    estimatedWords *= 2.5; // Les guides sont plus longs
+  } else if (slug.includes("vs") || post.data.title.toLowerCase().includes("vs")) {
+    estimatedWords *= 1.8; // Les comparaisons sont moyennement longues
+  } else if (slug.includes("api") || post.data.title.toLowerCase().includes("api")) {
+    estimatedWords *= 2.2; // Les articles API sont techniques et longs
+  } else if (post.data.title.toLowerCase().includes("techniques") || 
+             post.data.title.toLowerCase().includes("optimisation") ||
+             post.data.title.toLowerCase().includes("optimization")) {
+    estimatedWords *= 2.0; // Les articles techniques sont plus longs
+  }
+  
+  return Math.max(1, Math.ceil(estimatedWords / wordsPerMinute));
+}
+
+// Fonction pour déterminer la catégorie en fonction du contenu
+function getPostCategory(post: CollectionEntry<"blog">): string {
+  const title = post.data.title.toLowerCase();
+  const description = post.data.description.toLowerCase();
+  
+  if (title.includes("astro") || description.includes("astro")) return t('category.framework');
+  if (title.includes("typescript") || description.includes("typescript")) return t('category.language');
+  if (title.includes("performance") || description.includes("performance")) return t('category.performance');
+  if (title.includes("css") || description.includes("css")) return t('category.styling');
+  if (title.includes("api") || description.includes("api")) return t('category.backend');
+  if (title.includes("react") || title.includes("vue")) return t('category.framework');
+  
+  return t('category.article');
+}
+
+// Fonction pour extraire un tag basé sur le contenu
+function getPostTag(post: CollectionEntry<"blog">): string | undefined {
+  const title = post.data.title.toLowerCase();
+  const description = post.data.description.toLowerCase();
+  
+  if (title.includes("guide") || title.includes("débuter") || title.includes("beginner")) return t('tag.guide');
+  if (title.includes("optimisation") || description.includes("optimiser") || title.includes("optimization")) return t('tag.optimization');
+  if (title.includes("bonnes pratiques") || description.includes("pratiques") || title.includes("best practices")) return t('tag.bestPractices');
+  if (title.includes("vs") || title.includes("comparaison") || title.includes("comparison")) return t('tag.comparison');
+  
+  return undefined;
+}
+---
+
+<section class="latest-articles" aria-label={t('latestArticles.title')}>
+  <div class="container mx-auto max-w-7xl px-4">
+    <!-- Contenu principal -->
+    <div class="articles-layout">
+      <!-- Article Héro (si activé et articles disponibles) -->
+      {heroPosts.length > 0 && (
+        <div class="hero-section">
+          {heroPosts.map((post) => (
+            <ArticleHero
+              title={post.data.title}
+              description={post.data.description}
+              heroImage={post.data.heroImage}
+              pubDate={post.data.pubDate}
+              author={post.data.author}
+              category={getPostCategory(post)}
+              tag={getPostTag(post)}
+              slug={post.slug}
+              readingTime={estimateReadingTime(post)}
+            />
+          ))}
+        </div>
+      )}
+
+      <!-- Grille d'articles -->
+      {gridPosts.length > 0 && (
+        <div class="grid-section pt-16">
+          <div class="articles-grid grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {gridPosts.map((post) => (
+              <ArticleCard
+                title={post.data.title}
+                description={post.data.description}
+                heroImage={post.data.heroImage}
+                pubDate={post.data.pubDate}
+                author={post.data.author}
+                category={getPostCategory(post)}
+                tag={getPostTag(post)}
+                slug={post.slug}
+                readingTime={estimateReadingTime(post)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      <!-- Message si aucun article -->
+      {limitedPosts.length === 0 && (
+        <div class="no-articles text-center py-16">
+          <div class="bg-base-200 rounded-lg p-8 max-w-md mx-auto">
+            <h3 class="text-xl font-semibold mb-2">{t('latestArticles.noArticles')}</h3>
+            <p class="text-base-content/70">
+              {t('latestArticles.noArticlesDesc')}
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+
+    <!-- Lien vers tous les articles (optionnel) -->
+    {limitedPosts.length >= maxArticles && (
+      <div class="text-center mt-12">
+        <a 
+          href={translatePath('/blog')}
+          class="btn btn-primary btn-lg"
+        >
+          {t('latestArticles.viewAll')}
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M7 17L17 7" />
+            <path d="M7 7h10v10" />
+          </svg>
+        </a>
+      </div>
+    )}
+  </div>
+</section>
+
+<style>
+  /* Optimisations pour la grille responsive */
+  .articles-grid {
+    /* Grille adaptative avec tailles équilibrées */
+    grid-template-rows: masonry; /* Grille maçonnée si supportée */
+  }
+
+  /* Responsive breakpoints personnalisés */
+  @media (max-width: 768px) {
+    .articles-grid {
+      grid-template-columns: 1fr; /* 1 colonne sur mobile */
+    }
+  }
+
+  @media (min-width: 769px) and (max-width: 1024px) {
+    .articles-grid {
+      grid-template-columns: repeat(2, 1fr); /* 2 colonnes sur tablette */
+    }
+  }
+
+  @media (min-width: 1025px) {
+    .articles-grid {
+      grid-template-columns: repeat(3, 1fr); /* 3 colonnes sur desktop */
+    }
+  }
+
+  /* Amélioration de l'accessibilité et des performances */
+  .latest-articles {
+    /* Optimisation de la peinture */
+    contain: layout;
+  }
+
+  /* Animation au chargement */
+  .hero-section,
+  .grid-section {
+    animation: fadeInUp 0.6s ease-out;
+  }
+
+  .articles-grid > * {
+    animation: fadeInUp 0.6s ease-out;
+    animation-fill-mode: both;
+  }
+
+  /* Décalage des animations pour effet en cascade */
+  .articles-grid > *:nth-child(1) { animation-delay: 0.1s; }
+  .articles-grid > *:nth-child(2) { animation-delay: 0.2s; }
+  .articles-grid > *:nth-child(3) { animation-delay: 0.3s; }
+  .articles-grid > *:nth-child(4) { animation-delay: 0.4s; }
+  .articles-grid > *:nth-child(5) { animation-delay: 0.5s; }
+  .articles-grid > *:nth-child(6) { animation-delay: 0.6s; }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Support réduit du motion pour accessibilité */
+  @media (prefers-reduced-motion: reduce) {
+    .hero-section,
+    .grid-section,
+    .articles-grid > * {
+      animation: none;
+    }
+  }
+</style> 
