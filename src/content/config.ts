@@ -1,6 +1,5 @@
 import { defineCollection, z } from "astro:content";
-import { SLUG_REGEX } from "../scripts/validate-content-utils"; // chemin à ajuster
-
+import { SLUG_REGEX } from "../scripts/validate-content-utils";
 // Store pour tracking des translationId utilisés (pour validation d'unicité)
 const usedTranslationIds = new Set<string>();
 
