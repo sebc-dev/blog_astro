@@ -90,7 +90,7 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
       <!-- Sélecteur de langue -->
       <div class="dropdown dropdown-end">
         <button
-          class="btn btn-ghost btn-sm"
+          class="btn btn-ghost btn-sm text-bg-base-200"
           aria-haspopup="true"
           aria-expanded="false"
           aria-label={t("languageSwitcher.label")}
@@ -271,7 +271,6 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
   
   .header-critical .btn {
     background: oklch(var(--color-base-200) / 0.8);
-    border-color: oklch(var(--color-base-300) / 0.5);
     color: oklch(var(--color-base-content));
   }
   

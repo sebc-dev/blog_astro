@@ -148,7 +148,7 @@ function getPostTag(post: CollectionEntry<"blog">): string | undefined {
 
       <!-- Grille d'articles Mobile (tous les articles, y compris le premier) -->
       {gridPostsMobile.length > 0 && (
-        <div class="grid-section lg:hidden">
+        <div class="grid-section lg:hidden pt-4">
           <div class="articles-grid grid gap-6 grid-cols-1 sm:grid-cols-2">
             {gridPostsMobile.map((post) => (
               <ArticleCard

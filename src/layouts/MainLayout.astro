@@ -45,7 +45,7 @@ const lang = getLangFromUrl(Astro.url);
     background-image: 
       linear-gradient(currentColor 1px, transparent 1px),
       linear-gradient(90deg, currentColor 1px, transparent 1px);
-    background-size: 48px 48px;
+    background-size: 24px 24px;
     color: oklch(var(--color-base-content) / 0.008);
     
     /* Effet de fondu ultra-doux vers le bas */
@@ -68,7 +68,7 @@ const lang = getLangFromUrl(Astro.url);
   /* Adaptation pour les petits écrans */
   @media (max-width: 768px) {
     .grid-background {
-      background-size: 40px 40px;
+      background-size: 20px 20px;
       color: oklch(var(--color-base-content) / 0.005);
     }
   }
