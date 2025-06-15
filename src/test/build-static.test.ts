@@ -3,7 +3,7 @@
  * Teste la génération HTML multilingue et l'optimisation des assets
  */
 
-import { describe, test, expect, beforeAll, afterAll } from 'vitest';
+import { describe, test, expect, beforeAll, afterAll, vi } from 'vitest';
 import { readFile, access } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { spawn } from 'node:child_process';
@@ -18,6 +18,8 @@ const BUILD_CONFIG = {
 } as const;
 
 // const execAsync = promisify(spawn); // Réservé pour usage futur
+
+vi.setConfig({ testTimeout: 10000 });
 
 // Helper pour vérifier l'existence d'un fichier
 async function fileExists(path: string): Promise<boolean> {

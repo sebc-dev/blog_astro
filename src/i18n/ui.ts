@@ -8,6 +8,7 @@ export const ui = {
   en: {  // LANGUE PAR DÉFAUT
     // Navigation
     'nav.home': 'Home',
+    'nav.main': 'Main navigation',
     'nav.blog': 'Blog',
     'nav.about': 'About',
     'nav.contact': 'Contact',
@@ -53,6 +54,7 @@ export const ui = {
   fr: {
     // Navigation
     'nav.home': 'Accueil',
+    'nav.main': 'Navigation principale',
     'nav.blog': 'Blog',
     'nav.about': 'À propos',
     'nav.contact': 'Contact',

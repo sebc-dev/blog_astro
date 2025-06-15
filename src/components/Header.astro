@@ -104,7 +104,7 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
     </div>
 
     <!-- Navigation Statique (Zero-JS) -->
-    <nav class="navbar-center" aria-label={t("nav.home")}>
+    <nav class="navbar-center" aria-label={t("nav.main")}>
       <ul class="flex gap-6" role="menubar">
         {
           translatedNavLinks.map((link) => (
@@ -253,8 +253,31 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
   <div class="fixed inset-0 bg-black/50" data-menu-overlay></div>
   <div class="bg-base-100 fixed inset-0 shadow-xl">
     <div class="flex h-full flex-col">
+      <!-- Header du menu avec bouton de fermeture -->
+      <div class="flex items-center justify-between border-b px-4 py-3">
+        <span class="font-semibold text-lg">{t("nav.main")}</span>
+        <button
+          class="btn btn-square btn-ghost btn-sm"
+          aria-label="Fermer le menu"
+          data-menu-close
+        >
+          <svg
+            class="h-5 w-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            ></path>
+          </svg>
+        </button>
+      </div>
       <!-- Navigation Mobile Statique -->
-      <nav class="mt-16 flex-1 px-4 py-6" aria-label={t("nav.home")}>
+      <nav class="flex-1 px-4 py-6" aria-label={t("nav.main")}>
         <ul class="space-y-4">
           {
             translatedNavLinks.map((link) => (

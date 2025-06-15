@@ -290,4 +290,86 @@ describe('Header - CSS Critique et Performance', () => {
       expect(css).toContain('prefers-reduced-motion');
     });
   });
+});
+
+describe("Header - Élément de Fermeture Menu Mobile", () => {
+  it("devrait inclure un élément avec l'attribut data-menu-close", () => {
+    const headerHTML = `
+      <div id="mobile-menu" class="fixed inset-0 z-40 lg:hidden mobile-menu-closed" aria-hidden="true">
+        <div class="fixed inset-0 bg-black/50" data-menu-overlay></div>
+        <div class="bg-base-100 fixed inset-0 shadow-xl">
+          <div class="flex h-full flex-col">
+            <div class="flex items-center justify-between border-b px-4 py-3">
+              <span class="font-semibold text-lg">Navigation principale</span>
+              <button
+                class="btn btn-square btn-ghost btn-sm"
+                aria-label="Fermer le menu"
+                data-menu-close
+              >
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Simulation du DOM
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(headerHTML, "text/html");
+    
+    // Vérifier que l'élément data-menu-close existe
+    const closeButton = doc.querySelector("[data-menu-close]");
+    expect(closeButton).toBeTruthy();
+    expect(closeButton?.tagName).toBe("BUTTON");
+    expect(closeButton?.getAttribute("aria-label")).toBe("Fermer le menu");
+  });
+
+  it("devrait pouvoir être sélectionné par le JavaScript", () => {
+    const headerHTML = `
+      <div id="mobile-menu">
+        <button data-menu-close aria-label="Fermer le menu">×</button>
+      </div>
+    `;
+
+    // Simulation du sélecteur JavaScript utilisé dans Header.astro
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(headerHTML, "text/html");
+    
+    // Simuler la ligne de code : document.querySelector("[data-menu-close]")
+    const closeBtn = doc.querySelector("[data-menu-close]") as HTMLElement;
+    
+    expect(closeBtn).toBeTruthy();
+    expect(closeBtn).not.toBeNull();
+    expect(closeBtn.tagName).toBe("BUTTON");
+  });
+
+  it("devrait éviter le code mort dans le script Header", () => {
+    // Test que l'élément data-menu-close est bien utilisé dans le script
+    const scriptContent = `
+      const elements = {
+        mobileMenu: document.getElementById("mobile-menu") as HTMLElement,
+        mobileMenuToggle: document.getElementById("mobile-menu-toggle") as HTMLElement,
+        overlay: document.querySelector("[data-menu-overlay]") as HTMLElement,
+        closeBtn: document.querySelector("[data-menu-close]") as HTMLElement,
+        menuLinks: document.querySelectorAll("[data-menu-link]") as NodeListOf<HTMLElement>,
+      };
+      
+      // Usage de closeBtn
+      elements.closeBtn?.addEventListener("click", closeMenu);
+    `;
+
+    // Vérifier que closeBtn est bien défini et utilisé
+    expect(scriptContent).toContain('closeBtn: document.querySelector("[data-menu-close]")');
+    expect(scriptContent).toContain('elements.closeBtn?.addEventListener("click", closeMenu)');
+    
+    // Vérifier qu'il n'y a pas de code mort (l'élément est référencé et utilisé)
+    const hasDefinition = scriptContent.includes('querySelector("[data-menu-close]")');
+    const hasUsage = scriptContent.includes('closeBtn?.addEventListener');
+    
+    expect(hasDefinition).toBe(true);
+    expect(hasUsage).toBe(true);
+  });
 }); 

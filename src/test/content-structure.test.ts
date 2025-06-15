@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
+import { SLUG_REGEX } from '../scripts/validate-content-utils.js';
 
 const CONTENT_DIR = join(process.cwd(), 'src', 'content');
 
@@ -118,7 +119,6 @@ describe('Content Structure Validation', () => {
 
   describe('Schema Validation', () => {
     // Regex pour valider le format slug (identique à celui dans config.ts)
-    const SLUG_REGEX = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
     it('should have valid canonicalSlug format in English posts', () => {
       const firstPostPath = join(CONTENT_DIR, 'blog', 'en', 'first-post.mdx');
