@@ -7,9 +7,7 @@ const usedTranslationIds = new Set<string>();
 // Fonction de validation personnalisée pour l'unicité des translationId
 const validateUniqueTranslationId = (id: string): boolean => {
   if (usedTranslationIds.has(id)) {
-    throw new Error(
-      `Translation ID "${id}" is already used. Each translationId must be unique across the collection.`,
-    );
+    return false;
   }
   usedTranslationIds.add(id);
   return true;
