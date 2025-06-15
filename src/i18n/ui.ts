@@ -10,7 +10,10 @@ export const ui = {
     'nav.home': 'Home',
     'nav.main': 'Main navigation',
     'nav.articles': 'Articles',
+    'nav.blog': 'Blog',
     'nav.about': 'About',
+    'nav.contact': 'Contact',
+    'nav.services': 'Services',
     'nav.ressources': 'Ressources',
     
     // Blog
@@ -77,7 +80,10 @@ export const ui = {
     'nav.home': 'Accueil',
     'nav.main': 'Navigation principale',
     'nav.articles': 'Articles',
+    'nav.blog': 'Blog',
     'nav.about': 'À propos',
+    'nav.contact': 'Contact',
+    'nav.services': 'Services',
     'nav.ressources': 'Ressources',
     
     // Blog
