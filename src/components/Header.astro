@@ -507,6 +507,8 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
               (otherToggle as HTMLInputElement).checked = (
                 toggle as HTMLInputElement
               ).checked;
+              // Dispatcher manuellement l'événement 'change' pour notifier DaisyUI
+              otherToggle.dispatchEvent(new Event('change', { bubbles: true }));
             }
           });
         });
