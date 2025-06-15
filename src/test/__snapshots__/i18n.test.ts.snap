@@ -1,0 +1,5 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Formatage des dates (formatDate) > devrait maintenir un formatage consistant (test de snapshot) > formatDate-en-2024-01-15 1`] = `"January 15, 2024"`;
+
+exports[`Formatage des dates (formatDate) > devrait maintenir un formatage consistant (test de snapshot) > formatDate-fr-2024-01-15 1`] = `"15 janvier 2024"`;

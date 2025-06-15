@@ -1,16 +1,19 @@
 ---
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
+import { getLangFromUrl } from "../i18n/utils";
+
+// Détecter la langue depuis l'URL
+const lang = getLangFromUrl(Astro.url);
 ---
 
-<html lang="fr">
+<html lang={lang}>
   <head>
     <meta charset="utf-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
     <slot name="head" />
-    <script src="../scripts/stagewise.ts"></script>
   </head>
   <body>
     <header>

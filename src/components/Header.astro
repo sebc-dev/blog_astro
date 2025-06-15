@@ -1,56 +1,81 @@
 ---
-// Header.astro
-
-// Interface pour définir la structure d'un lien de navigation
-interface NavLink {
-  href: string;
-  label: string;
-  labelEN: string;
-}
+import {
+  getLangFromUrl,
+  useTranslations,
+  useTranslatedPath,
+  getPathWithoutLang,
+  generateLanguageUrls,
+} from "../i18n/utils";
+import { generateCriticalCSS } from "../scripts/header-styles";
+import { mapNavLinks, type NavLink } from "./header/utils";
 
 interface Props {
   siteName?: string;
   navLinks?: NavLink[];
 }
 
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const translatePath = useTranslatedPath(lang);
+
 const {
   siteName = "sebc.dev",
   navLinks = [
-    { href: "/", label: "Accueil", labelEN: "Home" },
-    { href: "/about", label: "À propos", labelEN: "About" },
-    { href: "/services", label: "Services", labelEN: "Services" },
-    { href: "/contact", label: "Contact", labelEN: "Contact" },
+    { href: "/", key: "nav.home" },
+    { href: "/about", key: "nav.about" },
+    { href: "/services", key: "nav.services" },
+    { href: "/contact", key: "nav.contact" },
   ],
 } = Astro.props;
+
+const translatedNavLinks = mapNavLinks(navLinks, lang, translatePath, Astro.url);
+
+const currentPath = getPathWithoutLang(Astro.url);
+const languageUrls = generateLanguageUrls(currentPath, lang);
+
+// Utilisation du module utilitaire centralisé pour le CSS critique
+const criticalCSS = generateCriticalCSS();
+
+// Préparation des attributs SEO
+const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
+  hreflang: langCode,
+  href: data.url,
+}));
 ---
 
-<!-- Header Desktop (visible sur grand écran uniquement) -->
+<!-- CSS Critique Inline (zéro temps de chargement) -->
+<style is:inline set:html={criticalCSS}></style>
+
+<!-- Header Desktop -->
 <header
   id="desktop-header"
-  class="bg-base-100/95 border-base-300/20 fixed top-0 right-0 left-0 z-50 hidden border-b backdrop-blur-sm transition-all duration-300 lg:block"
+  class="header-critical hidden lg:block"
+  role="banner"
 >
   <div class="navbar mx-auto max-w-7xl px-4">
-    <!-- Logo à gauche -->
+    <!-- Logo avec préload de la page d'accueil -->
     <div class="navbar-start">
       <a
-        href="/"
+        href={translatePath("/")}
         class="from-primary to-secondary bg-gradient-to-r bg-clip-text font-mono text-xl font-bold text-transparent"
+        rel="prefetch"
       >
         {siteName}
       </a>
     </div>
 
-    <!-- Navigation principale (desktop) -->
-    <div class="navbar-center">
-      <ul class="menu menu-horizontal px-1">
+    <!-- Navigation Statique (Zero-JS) -->
+    <nav class="navbar-center" aria-label={t("nav.main")}>
+      <ul class="flex gap-6" role="menubar">
         {
-          navLinks.map((link) => (
-            <li>
+          translatedNavLinks.map((link) => (
+            <li role="none">
               <a
                 href={link.href}
-                class="nav-link hover:bg-primary hover:text-primary-content transition-colors duration-200"
-                data-fr={link.label}
-                data-en={link.labelEN}
+                class={`nav-link rounded-md px-3 py-2 transition-colors duration-200 ${link.isActive ? "text-primary font-semibold underline underline-offset-4" : "text-base-content hover:text-primary hover:underline hover:underline-offset-4"}`}
+                role="menuitem"
+                aria-current={link.isActive ? "page" : undefined}
+                rel="prefetch"
               >
                 {link.label}
               </a>
@@ -58,148 +83,171 @@ const {
           ))
         }
       </ul>
-    </div>
+    </nav>
 
-    <!-- Droite : Sélecteur langue et theme toggle -->
+    <!-- Contrôles (Langue + Thème) -->
     <div class="navbar-end flex items-center gap-2">
-      <!-- Sélecteur de langue -->
+      <!-- Sélecteur de langue statique -->
       <div class="dropdown dropdown-end">
         <button
           class="btn btn-ghost btn-sm"
           aria-haspopup="true"
           aria-expanded="false"
-          aria-controls="desktop-lang-menu"
+          aria-label={t("languageSwitcher.label")}
+          data-dropdown="lang-desktop"
         >
-          <span id="current-lang">FR</span>
+          <span>{languageUrls[lang].flag} {lang.toUpperCase()}</span>
           <svg
-            xmlns="http://www.w3.org/2000/svg"
             width="12"
             height="12"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
             stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
           >
             <path d="M6 9l6 6 6-6"></path>
           </svg>
         </button>
         <ul
-          id="desktop-lang-menu"
-          tabindex="0"
-          class="dropdown-content menu bg-base-100 rounded-box border-base-300 z-[1] w-24 border p-2 shadow-lg"
+          class="dropdown-content menu bg-base-100 rounded-box border-base-300 z-[1] w-32 border p-2 shadow-lg"
         >
-          <li><a href="#" class="lang-option" data-lang="fr">🇫🇷 FR</a></li>
-          <li><a href="#" class="lang-option" data-lang="en">🇺🇸 EN</a></li>
+          {
+            Object.entries(languageUrls).map(([langCode, data]) => (
+              <li>
+                <a
+                  href={data.url}
+                  class={`text-sm ${data.isActive ? "bg-primary text-primary-content font-semibold" : ""}`}
+                  hreflang={langCode}
+                  rel="prefetch"
+                >
+                  {data.flag} {data.label}
+                </a>
+              </li>
+            ))
+          }
         </ul>
       </div>
 
-      <!-- Theme Toggle avec icônes intégrées -->
-      <label
-        class="theme-switch relative inline-flex cursor-pointer items-center"
-      >
-        <input
-          type="checkbox"
-          value="dark"
-          class="theme-controller sr-only"
-          id="theme-toggle"
-        />
-        <div
-          class="theme-switch-track relative h-6 w-12 rounded-full bg-gradient-to-r from-gray-300 to-gray-400 transition-all duration-300 ease-in-out"
+      <!-- Theme Toggle DaisyUI natif -->
+      <label class="swap swap-rotate" aria-label={t("theme.toggle")}>
+        <input type="checkbox" class="theme-controller" value="dark" />
+        <svg
+          class="swap-off h-6 w-6 fill-current"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
         >
-          <div
-            class="theme-switch-thumb absolute top-0.5 left-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-md transition-all duration-300 ease-in-out"
-          >
-            <!-- Icône soleil (mode clair) -->
-            <svg
-              class="theme-icon-sun h-3 w-3 text-gray-600 transition-all duration-300 ease-in-out"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-            >
-              <circle cx="12" cy="12" r="5" fill="currentColor"></circle>
-              <g stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                <line x1="12" y1="1" x2="12" y2="3"></line>
-                <line x1="12" y1="21" x2="12" y2="23"></line>
-                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                <line x1="1" y1="12" x2="3" y2="12"></line>
-                <line x1="21" y1="12" x2="23" y2="12"></line>
-                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-              </g>
-            </svg>
-            <!-- Icône lune (mode sombre) -->
-            <svg
-              class="theme-icon-moon absolute top-1/2 left-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 text-gray-500 opacity-0 transition-all duration-300 ease-in-out"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-            >
-              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-            </svg>
-          </div>
-        </div>
+          <path
+            d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"
+          ></path>
+        </svg>
+        <svg
+          class="swap-on h-6 w-6 fill-current"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+        >
+          <path
+            d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"
+          ></path>
+        </svg>
       </label>
     </div>
   </div>
 </header>
 
-<!-- Header Mobile (visible sur petit écran uniquement) -->
-<header
-  id="mobile-header"
-  class="bg-base-100/95 border-base-300/20 fixed top-0 right-0 left-0 z-50 border-b backdrop-blur-sm transition-all duration-300 lg:hidden"
->
-  <div
-    class="flex items-center justify-between px-4 py-2"
-    style="height: 64px;"
-  >
-    <!-- Logo -->
+<!-- Header Mobile -->
+<header id="mobile-header" class="header-critical lg:hidden" role="banner">
+  <div class="flex items-center justify-between px-4 py-3">
+    <!-- Logo Mobile -->
     <a
-      href="/"
+      href={translatePath("/")}
       class="from-primary to-secondary bg-gradient-to-r bg-clip-text font-mono text-xl font-bold text-transparent"
+      rel="prefetch"
     >
       {siteName}
     </a>
 
-    <!-- Bouton hamburger -->
+    <!-- Bouton Menu Mobile -->
     <button
       id="mobile-menu-toggle"
       class="btn btn-square btn-ghost relative"
-      aria-label="Toggle mobile menu"
+      aria-label="Menu"
+      aria-expanded="false"
+      aria-controls="mobile-menu"
+      data-menu-toggle
     >
-      <div class="hamburger-icon">
-        <span class="hamburger-line"></span>
-        <span class="hamburger-line"></span>
-        <span class="hamburger-line"></span>
-      </div>
+      <!-- Icône Hamburger -->
+      <svg
+        class="menu-icon hamburger h-6 w-6 transition-all duration-300"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+      <!-- Icône Croix -->
+      <svg
+        class="menu-icon cross absolute inset-0 m-auto h-6 w-6 rotate-90 opacity-0 transition-all duration-300"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
     </button>
   </div>
 </header>
 
-<!-- Menu mobile overlay (visible uniquement sur mobile) -->
+<!-- Menu Mobile (Optimisé pour le statique) -->
 <div
-  id="mobile-overlay"
-  class="pointer-events-none fixed inset-0 z-40 bg-black/50 opacity-0 backdrop-blur-sm transition-opacity duration-300 lg:hidden"
+  id="mobile-menu"
+  class="fixed inset-0 z-40 lg:hidden mobile-menu-closed"
+  aria-hidden="true"
 >
-  <div
-    id="mobile-menu-content"
-    class="bg-base-100 fixed top-0 right-0 flex h-full w-full translate-x-full transform flex-col transition-transform duration-300"
-  >
-    <!-- Navigation mobile -->
-    <div class="flex h-full flex-col justify-center px-6">
-      <!-- Liens de navigation -->
-      <nav class="flex flex-1 items-center justify-center">
-        <ul class="menu w-full max-w-md">
+  <div class="fixed inset-0 bg-black/50" data-menu-overlay></div>
+  <div class="bg-base-100 fixed inset-0 shadow-xl">
+    <div class="flex h-full flex-col">
+      <!-- Header du menu avec bouton de fermeture -->
+      <div class="flex items-center justify-between border-b px-4 py-3">
+        <span class="font-semibold text-lg">{t("nav.main")}</span>
+        <button
+          class="btn btn-square btn-ghost btn-sm"
+          aria-label="Fermer le menu"
+          data-menu-close
+        >
+          <svg
+            class="h-5 w-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            ></path>
+          </svg>
+        </button>
+      </div>
+      <!-- Navigation Mobile Statique -->
+      <nav class="flex-1 px-4 py-6" aria-label={t("nav.main")}>
+        <ul class="space-y-4">
           {
-            navLinks.map((link) => (
-              <li class="mb-4">
+            translatedNavLinks.map((link) => (
+              <li>
                 <a
                   href={link.href}
-                  class="mobile-nav-link hover:bg-primary hover:text-primary-content block py-4 text-center text-xl font-medium transition-colors duration-200"
-                  data-fr={link.label}
-                  data-en={link.labelEN}
+                  class={`block px-4 py-3 text-lg transition-colors ${link.isActive ? "text-primary font-semibold underline underline-offset-4" : "text-base-content hover:text-primary hover:underline hover:underline-offset-4"}`}
+                  rel="prefetch"
+                  data-menu-link
                 >
                   {link.label}
                 </a>
@@ -209,204 +257,79 @@ const {
         </ul>
       </nav>
 
-      <!-- Contrôles en bas du menu -->
-      <div class="flex items-center justify-center gap-6 pb-8">
-        <!-- Sélecteur de langue mobile -->
-        <div class="dropdown dropdown-top">
-          <button
-            class="btn btn-ghost btn-sm"
-            aria-haspopup="true"
-            aria-expanded="false"
-            aria-controls="mobile-lang-menu"
-          >
-            <span id="mobile-current-lang">FR</span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="rotate-180 transform"
-            >
-              <path d="M6 9l6 6 6-6"></path>
-            </svg>
-          </button>
-          <ul
-            id="mobile-lang-menu"
-            tabindex="0"
-            class="dropdown-content menu bg-base-100 rounded-box border-base-300 z-[1] w-24 border p-2 shadow-lg"
-          >
-            <li>
-              <a href="#" class="mobile-lang-option" data-lang="fr">🇫🇷 FR</a>
-            </li>
-            <li>
-              <a href="#" class="mobile-lang-option" data-lang="en">🇺🇸 EN</a>
-            </li>
-          </ul>
+      <!-- Contrôles Mobile -->
+      <div class="space-y-4 border-t p-4">
+        <!-- Changement de langue mobile -->
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-medium">{t("languageSwitcher.label")}</span>
+          <div class="flex gap-2">
+            {
+              Object.entries(languageUrls).map(([langCode, data]) => (
+                <a
+                  href={data.url}
+                  class={`btn btn-sm ${data.isActive ? "btn-primary" : "btn-outline"}`}
+                  hreflang={langCode}
+                  rel="prefetch"
+                >
+                  {data.flag}
+                </a>
+              ))
+            }
+          </div>
         </div>
 
-        <!-- Theme Toggle mobile -->
-        <label
-          class="theme-switch relative inline-flex cursor-pointer items-center"
-        >
-          <input
-            type="checkbox"
-            value="dark"
-            class="theme-controller sr-only"
-            id="mobile-theme-toggle"
-          />
-          <div
-            class="theme-switch-track relative h-6 w-12 rounded-full bg-gradient-to-r from-gray-300 to-gray-400 transition-all duration-300 ease-in-out"
-          >
-            <div
-              class="theme-switch-thumb absolute top-0.5 left-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-md transition-all duration-300 ease-in-out"
+        <!-- Theme Toggle Mobile -->
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-medium">{t("theme.toggle")}</span>
+          <label class="swap swap-rotate">
+            <input type="checkbox" class="theme-controller" value="dark" />
+            <svg
+              class="swap-off h-6 w-6"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
             >
-              <!-- Icône soleil (mode clair) -->
-              <svg
-                class="theme-icon-sun h-3 w-3 text-gray-600 transition-all duration-300 ease-in-out"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <circle cx="12" cy="12" r="5" fill="currentColor"></circle>
-                <g
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                >
-                  <line x1="12" y1="1" x2="12" y2="3"></line>
-                  <line x1="12" y1="21" x2="12" y2="23"></line>
-                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                  <line x1="1" y1="12" x2="3" y2="12"></line>
-                  <line x1="21" y1="12" x2="23" y2="12"></line>
-                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                </g>
-              </svg>
-              <!-- Icône lune (mode sombre) -->
-              <svg
-                class="theme-icon-moon absolute top-1/2 left-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 text-gray-500 opacity-0 transition-all duration-300 ease-in-out"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
-                ></path>
-              </svg>
-            </div>
-          </div>
-        </label>
+              <path
+                d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"
+              ></path>
+            </svg>
+            <svg
+              class="swap-on h-6 w-6"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path
+                d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"
+              ></path>
+            </svg>
+          </label>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<script type="module">
-  // Import pour déclencher l'auto-initialisation du header
-  import "../scripts/header/index.ts";
+<script is:inline type="module">
+  import './header/script.ts';
 </script>
 
+<!-- Preload des pages importantes (Site statique) -->
+{
+  translatedNavLinks
+    .slice(0, 3)
+    .map((link) => <link rel="prefetch" href={link.href} />)
+}
+
+<!-- Links alternatifs pour SEO -->
+{
+  hreflangLinks.map((link) => (
+    <link rel="alternate" hreflang={link.hreflang} href={link.href} />
+  ))
+}
+
 <style>
-  /* Styles additionnels pour les transitions smooth */
-  #mobile-menu-content {
-    box-shadow: -4px 0 15px rgba(0, 0, 0, 0.1);
-  }
-
-  /* Animation pour les headers */
-  #desktop-header,
-  #mobile-header {
-    transition:
-      background-color 0.3s ease,
-      border-color 0.3s ease;
-  }
-
-  /* Amélioration du contraste pour les icônes */
-  .navbar svg {
-    opacity: 0.8;
-    transition: opacity 0.2s ease;
-  }
-
-  .navbar svg:hover {
-    opacity: 1;
-  }
-
-  /* Style pour le menu mobile */
-  .mobile-nav-link {
-    border-radius: 0.75rem;
-    min-height: 3.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  /* Animation d'entrée pour les liens du menu mobile */
-  .mobile-menu-open .mobile-nav-link {
-    animation: slideInFromRight 0.3s ease-out forwards;
-  }
-
-  .mobile-menu-open .mobile-nav-link:nth-child(1) {
-    animation-delay: 0.1s;
-  }
-
-  .mobile-menu-open .mobile-nav-link:nth-child(2) {
-    animation-delay: 0.2s;
-  }
-
-  .mobile-menu-open .mobile-nav-link:nth-child(3) {
-    animation-delay: 0.3s;
-  }
-
-  .mobile-menu-open .mobile-nav-link:nth-child(4) {
-    animation-delay: 0.4s;
-  }
-
-  @keyframes slideInFromRight {
-    from {
-      opacity: 0;
-      transform: translateX(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-
-  /* Animation pour les contrôles en bas du menu mobile */
-  .mobile-menu-open .flex.items-center.justify-center.gap-6 {
-    animation: slideInFromBottom 0.4s ease-out forwards;
-    animation-delay: 0.2s;
-    opacity: 0;
-  }
-
-  @keyframes slideInFromBottom {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  /* Styles pour les contrôles du menu mobile */
-  .mobile-menu-open .dropdown-top .dropdown-content {
-    bottom: 100%;
-    top: auto;
-    margin-bottom: 0.5rem;
-  }
-
-  /* Amélioration du contraste pour les contrôles mobiles */
-  #mobile-theme-toggle:checked + .theme-switch-track .theme-switch-thumb {
-    transform: translateX(1.5rem); /* Même taille que desktop pour cohérence */
-  }
-
-  /* Amélioration des dropdowns */
+  /* Styles non-critiques (chargés de façon asynchrone) */
   .dropdown-content {
     animation: dropdown-appear 0.2s ease-out;
   }
@@ -414,7 +337,7 @@ const {
   @keyframes dropdown-appear {
     from {
       opacity: 0;
-      transform: translateY(-10px);
+      transform: translateY(-8px);
     }
     to {
       opacity: 1;
@@ -422,117 +345,62 @@ const {
     }
   }
 
-  /* Styles pour le switch de thème personnalisé */
-  /* État par défaut (thème clair) : soleil visible, lune cachée */
-  .theme-icon-sun {
-    opacity: 1;
-    transform: rotate(0deg) scale(1);
-    z-index: 2;
-  }
-
-  .theme-icon-moon {
-    opacity: 0;
-    transform: rotate(-180deg) scale(0.8);
-    z-index: 1;
-    visibility: hidden;
-  }
-
-  /* État coché (thème sombre) : lune visible, soleil caché */
-  .theme-switch input:checked + .theme-switch-track {
-    background: linear-gradient(to right, #4b5563, #6b7280);
-  }
-
-  .theme-switch input:checked + .theme-switch-track .theme-switch-thumb {
-    transform: translateX(1.5rem); /* 24px pour desktop */
-  }
-
-  .theme-switch input:checked + .theme-switch-track .theme-icon-sun {
-    opacity: 0;
-    transform: rotate(180deg) scale(0.8);
-    visibility: hidden;
-    z-index: 1;
-  }
-
-  .theme-switch input:checked + .theme-switch-track .theme-icon-moon {
-    opacity: 1;
-    transform: rotate(0deg) scale(1);
-    visibility: visible;
-    z-index: 2;
-  }
-
-  /* Version mobile du switch - taille différente */
-  #mobile-theme-toggle:checked + .theme-switch-track .theme-switch-thumb {
-    transform: translateX(1.25rem); /* 20px pour mobile */
-  }
-
-  /* Animation de rotation pour les icônes */
-  .theme-icon-sun,
-  .theme-icon-moon {
+  /* Animation des icônes de menu */
+  .menu-icon {
     transform-origin: center;
   }
 
-  /* Effet hover sur le switch */
-  .theme-switch:hover .theme-switch-track {
-    box-shadow: 0 0 0 2px rgba(156, 163, 175, 0.3);
+  .mobile-menu-closed {
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
   }
 
-  /* Animation de pulsation lors du changement */
-  .theme-switch-thumb {
-    transition:
-      transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-      box-shadow 0.2s ease;
+  /* État menu fermé */
+  .hamburger {
+    opacity: 1;
+    transform: rotate(0deg);
   }
 
-  .theme-switch input:focus + .theme-switch-track .theme-switch-thumb {
-    box-shadow: 0 0 0 2px rgba(156, 163, 175, 0.5);
-  }
-
-  /* Styles pour le hamburger menu */
-  .hamburger-icon {
-    width: 24px;
-    height: 18px;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
-
-  .hamburger-line {
-    width: 100%;
-    height: 2px;
-    background-color: currentColor;
-    border-radius: 1px;
-    transition: all 0.3s ease;
-    transform-origin: center;
-    display: block;
-  }
-
-  /* Couleur par défaut du bouton hamburger - même que le texte */
-  #mobile-menu-toggle {
-    color: inherit;
-  }
-
-  /* Animation vers la croix quand le menu est ouvert */
-  #mobile-menu-toggle.menu-open {
-    color: hsl(var(--p));
-  }
-
-  #mobile-menu-toggle.menu-open .hamburger-line:nth-child(1) {
-    transform: translateY(8px) rotate(45deg);
-  }
-
-  #mobile-menu-toggle.menu-open .hamburger-line:nth-child(2) {
+  .cross {
     opacity: 0;
-    transform: scaleX(0);
+    transform: rotate(90deg);
   }
 
-  #mobile-menu-toggle.menu-open .hamburger-line:nth-child(3) {
-    transform: translateY(-8px) rotate(-45deg);
+  /* État menu ouvert */
+  [data-menu-toggle].menu-open .hamburger {
+    opacity: 0;
+    transform: rotate(-90deg);
   }
 
-  /* Focus state pour l'accessibilité */
-  #mobile-menu-toggle:focus-visible {
+  [data-menu-toggle].menu-open .cross {
+    opacity: 1;
+    transform: rotate(0deg);
+  }
+
+  /* Optimisation pour les transitions */
+  [data-menu-toggle],
+  [data-menu-close] {
+    transition: all 0.15s ease;
+  }
+
+  /* Focus visible pour l'accessibilité */
+  button:focus-visible,
+  a:focus-visible {
     outline: 2px solid hsl(var(--p));
     outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Optimisation des animations */
+  @media (prefers-reduced-motion: reduce) {
+    #mobile-menu {
+      transition: none !important;
+    }
+    .dropdown-content {
+      animation: none !important;
+    }
+    .menu-icon {
+      transition: none !important;
+    }
   }
 </style>
