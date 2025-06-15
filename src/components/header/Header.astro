@@ -4,21 +4,12 @@ import {
   useTranslations,
   useTranslatedPath,
   getPathWithoutLang,
-  generateLanguageUrls,
 } from "../../i18n/utils";
 import { generateCriticalCSS } from "./header-styles";
-import { mapNavLinks, type NavLink } from "./utils";
-import './script.ts';
+import { mapNavLinks, generateLanguageUrls } from "./utils";
+import type { HeaderProps } from "./types";
 
-interface Props {
-  siteName?: string;
-  navLinks?: NavLink[];
-}
-
-const lang = getLangFromUrl(Astro.url);
-const t = useTranslations(lang);
-const translatePath = useTranslatedPath(lang);
-
+// Props avec types définis
 const {
   siteName = "sebc.dev",
   navLinks = [
@@ -27,24 +18,28 @@ const {
     { href: "/services", key: "nav.services" },
     { href: "/contact", key: "nav.contact" },
   ],
-} = Astro.props;
+} = Astro.props as HeaderProps;
+
+// Logique côté serveur
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const translatePath = useTranslatedPath(lang);
 
 const translatedNavLinks = mapNavLinks(navLinks, lang, translatePath, Astro.url);
-
 const currentPath = getPathWithoutLang(Astro.url);
 const languageUrls = generateLanguageUrls(currentPath, lang);
 
-// Utilisation du module utilitaire centralisé pour le CSS critique
+// CSS critique centralisé
 const criticalCSS = generateCriticalCSS();
 
-// Préparation des attributs SEO
+// SEO et hreflang
 const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
   hreflang: langCode,
   href: data.url,
 }));
 ---
 
-<!-- CSS Critique Inline (zéro temps de chargement) -->
+<!-- CSS Critique Inline -->
 <style is:inline set:html={criticalCSS}></style>
 
 <!-- Header Desktop -->
@@ -54,7 +49,7 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
   role="banner"
 >
   <div class="navbar mx-auto max-w-7xl px-4">
-    <!-- Logo avec préload de la page d'accueil -->
+    <!-- Logo -->
     <div class="navbar-start">
       <a
         href={translatePath("/")}
@@ -65,7 +60,7 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
       </a>
     </div>
 
-    <!-- Navigation Statique (Zero-JS) -->
+    <!-- Navigation -->
     <nav class="navbar-center" aria-label={t("nav.main")}>
       <ul class="flex gap-6" role="menubar">
         {
@@ -73,7 +68,11 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
             <li role="none">
               <a
                 href={link.href}
-                class={`nav-link rounded-md px-3 py-2 transition-colors duration-200 ${link.isActive ? "text-primary font-semibold underline underline-offset-4" : "text-base-content hover:text-primary hover:underline hover:underline-offset-4"}`}
+                class={`nav-link rounded-md px-3 py-2 transition-colors duration-200 ${
+                  link.isActive 
+                    ? "text-primary font-semibold underline underline-offset-4" 
+                    : "text-base-content hover:text-primary hover:underline hover:underline-offset-4"
+                }`}
                 role="menuitem"
                 aria-current={link.isActive ? "page" : undefined}
                 rel="prefetch"
@@ -86,9 +85,9 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
       </ul>
     </nav>
 
-    <!-- Contrôles (Langue + Thème) -->
+    <!-- Contrôles -->
     <div class="navbar-end flex items-center gap-2">
-      <!-- Sélecteur de langue statique -->
+      <!-- Sélecteur de langue -->
       <div class="dropdown dropdown-end">
         <button
           class="btn btn-ghost btn-sm"
@@ -98,20 +97,11 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
           data-dropdown="lang-desktop"
         >
           <span>{languageUrls[lang].flag} {lang.toUpperCase()}</span>
-          <svg
-            width="12"
-            height="12"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M6 9l6 6 6-6"></path>
           </svg>
         </button>
-        <ul
-          class="dropdown-content menu bg-base-100 rounded-box border-base-300 z-[1] w-32 border p-2 shadow-lg"
-        >
+        <ul class="dropdown-content menu bg-base-100 rounded-box border-base-300 z-[1] w-32 border p-2 shadow-lg">
           {
             Object.entries(languageUrls).map(([langCode, data]) => (
               <li>
@@ -129,28 +119,27 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
         </ul>
       </div>
 
-      <!-- Theme Toggle DaisyUI natif -->
-      <label class="swap swap-rotate" aria-label={t("theme.toggle")}>
-        <input type="checkbox" class="theme-controller" value="dark" />
-        <svg
-          class="swap-off h-6 w-6 fill-current"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-        >
-          <path
-            d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"
-          ></path>
+      <!-- Toggle thème -->
+      <button
+        class="btn btn-ghost btn-sm theme-switcher"
+        aria-label={t("theme.toggle")}
+        data-theme-toggle
+      >
+        <svg class="theme-icon theme-light h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="m12 2 0 2"></path>
+          <path d="m12 20 0 2"></path>
+          <path d="m4.93 4.93 1.41 1.41"></path>
+          <path d="m17.66 17.66 1.41 1.41"></path>
+          <path d="m2 12 2 0"></path>
+          <path d="m20 12 2 0"></path>
+          <path d="m6.34 17.66-1.41 1.41"></path>
+          <path d="m19.07 4.93-1.41 1.41"></path>
         </svg>
-        <svg
-          class="swap-on h-6 w-6 fill-current"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-        >
-          <path
-            d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"
-          ></path>
+        <svg class="theme-icon theme-dark h-5 w-5 hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
         </svg>
-      </label>
+      </button>
     </div>
   </div>
 </header>
@@ -167,7 +156,7 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
       {siteName}
     </a>
 
-    <!-- Bouton Menu Mobile -->
+    <!-- Menu Toggle -->
     <button
       id="mobile-menu-toggle"
       class="btn btn-square btn-ghost relative"
@@ -176,69 +165,32 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
       aria-controls="mobile-menu"
       data-menu-toggle
     >
-      <!-- Icône Hamburger -->
-      <svg
-        class="menu-icon hamburger h-6 w-6 transition-all duration-300"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M4 6h16M4 12h16M4 18h16"></path>
+      <svg class="menu-icon hamburger h-6 w-6 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
       </svg>
-      <!-- Icône Croix -->
-      <svg
-        class="menu-icon cross absolute inset-0 m-auto h-6 w-6 rotate-90 opacity-0 transition-all duration-300"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M6 18L18 6M6 6l12 12"></path>
+      <svg class="menu-icon cross absolute inset-0 m-auto h-6 w-6 rotate-90 opacity-0 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
       </svg>
     </button>
   </div>
 </header>
 
-<!-- Menu Mobile (Optimisé pour le statique) -->
-<div
-  id="mobile-menu"
-  class="fixed inset-0 z-40 lg:hidden mobile-menu-closed"
-  aria-hidden="true"
->
+<!-- Menu Mobile -->
+<div id="mobile-menu" class="fixed inset-0 z-40 lg:hidden mobile-menu-closed" aria-hidden="true">
   <div class="fixed inset-0 bg-black/50" data-menu-overlay></div>
   <div class="bg-base-100 fixed inset-0 shadow-xl">
     <div class="flex h-full flex-col">
-      <!-- Header du menu avec bouton de fermeture -->
+      <!-- Header du menu -->
       <div class="flex items-center justify-between border-b px-4 py-3">
         <span class="font-semibold text-lg">{t("nav.main")}</span>
-        <button
-          class="btn btn-square btn-ghost btn-sm"
-          aria-label="Fermer le menu"
-          data-menu-close
-        >
-          <svg
-            class="h-5 w-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            ></path>
+        <button class="btn btn-square btn-ghost btn-sm" aria-label="Fermer le menu" data-menu-close>
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
           </svg>
         </button>
       </div>
-      <!-- Navigation Mobile Statique -->
+
+      <!-- Navigation Mobile -->
       <nav class="flex-1 px-4 py-6" aria-label={t("nav.main")}>
         <ul class="space-y-4">
           {
@@ -246,7 +198,11 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
               <li>
                 <a
                   href={link.href}
-                  class={`block px-4 py-3 text-lg transition-colors ${link.isActive ? "text-primary font-semibold underline underline-offset-4" : "text-base-content hover:text-primary hover:underline hover:underline-offset-4"}`}
+                  class={`block px-4 py-3 text-lg transition-colors ${
+                    link.isActive 
+                      ? "text-primary font-semibold underline underline-offset-4" 
+                      : "text-base-content hover:text-primary hover:underline hover:underline-offset-4"
+                  }`}
                   rel="prefetch"
                   data-menu-link
                 >
@@ -260,7 +216,7 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
 
       <!-- Contrôles Mobile -->
       <div class="space-y-4 border-t p-4">
-        <!-- Changement de langue mobile -->
+        <!-- Langue -->
         <div class="flex items-center justify-between">
           <span class="text-sm font-medium">{t("languageSwitcher.label")}</span>
           <div class="flex gap-2">
@@ -279,125 +235,80 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
           </div>
         </div>
 
-        <!-- Theme Toggle Mobile -->
+        <!-- Thème -->
         <div class="flex items-center justify-between">
           <span class="text-sm font-medium">{t("theme.toggle")}</span>
-          <label class="swap swap-rotate">
-            <input type="checkbox" class="theme-controller" value="dark" />
-            <svg
-              class="swap-off h-6 w-6"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-            >
-              <path
-                d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"
-              ></path>
+          <button class="btn btn-ghost btn-sm theme-switcher" aria-label={t("theme.toggle")} data-theme-toggle>
+            <svg class="theme-icon theme-light h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="4"></circle>
+              <path d="m12 2 0 2"></path>
+              <path d="m12 20 0 2"></path>
+              <path d="m4.93 4.93 1.41 1.41"></path>
+              <path d="m17.66 17.66 1.41 1.41"></path>
+              <path d="m2 12 2 0"></path>
+              <path d="m20 12 2 0"></path>
+              <path d="m6.34 17.66-1.41 1.41"></path>
+              <path d="m19.07 4.93-1.41 1.41"></path>
             </svg>
-            <svg
-              class="swap-on h-6 w-6"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-            >
-              <path
-                d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"
-              ></path>
+            <svg class="theme-icon theme-dark h-5 w-5 hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
             </svg>
-          </label>
+          </button>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Preload des pages importantes (Site statique) -->
-{
-  translatedNavLinks
-    .slice(0, 3)
-    .map((link) => <link rel="prefetch" href={link.href} />)
-}
+<!-- Preload et SEO -->
+{translatedNavLinks.slice(0, 3).map((link) => <link rel="prefetch" href={link.href} />)}
+{hreflangLinks.map((link) => <link rel="alternate" hreflang={link.hreflang} href={link.href} />)}
 
-<!-- Links alternatifs pour SEO -->
-{
-  hreflangLinks.map((link) => (
-    <link rel="alternate" hreflang={link.hreflang} href={link.href} />
-  ))
-}
-
+<!-- Styles CSS -->
 <style>
-  /* Styles non-critiques (chargés de façon asynchrone) */
+  /* Styles non-critiques */
   .dropdown-content {
     animation: dropdown-appear 0.2s ease-out;
   }
 
   @keyframes dropdown-appear {
-    from {
-      opacity: 0;
-      transform: translateY(-8px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
-  /* Animation des icônes de menu */
-  .menu-icon {
-    transform-origin: center;
-  }
-
+  .menu-icon { transform-origin: center; }
   .mobile-menu-closed {
     transform: translateX(100%);
     transition: transform 0.3s ease;
   }
 
-  /* État menu fermé */
-  .hamburger {
-    opacity: 1;
-    transform: rotate(0deg);
-  }
+  .hamburger { opacity: 1; transform: rotate(0deg); }
+  .cross { opacity: 0; transform: rotate(90deg); }
 
-  .cross {
-    opacity: 0;
-    transform: rotate(90deg);
-  }
+  [data-menu-toggle].menu-open .hamburger { opacity: 0; transform: rotate(-90deg); }
+  [data-menu-toggle].menu-open .cross { opacity: 1; transform: rotate(0deg); }
 
-  /* État menu ouvert */
-  [data-menu-toggle].menu-open .hamburger {
-    opacity: 0;
-    transform: rotate(-90deg);
-  }
+  [data-menu-toggle], [data-menu-close] { transition: all 0.15s ease; }
 
-  [data-menu-toggle].menu-open .cross {
-    opacity: 1;
-    transform: rotate(0deg);
-  }
-
-  /* Optimisation pour les transitions */
-  [data-menu-toggle],
-  [data-menu-close] {
-    transition: all 0.15s ease;
-  }
-
-  /* Focus visible pour l'accessibilité */
-  button:focus-visible,
-  a:focus-visible {
+  button:focus-visible, a:focus-visible {
     outline: 2px solid hsl(var(--p));
     outline-offset: 2px;
     border-radius: 4px;
   }
 
-  /* Optimisation des animations */
+  .theme-icon { transition: opacity 0.2s ease, transform 0.2s ease; }
+  .theme-switcher:hover .theme-icon { transform: scale(1.1); }
+
   @media (prefers-reduced-motion: reduce) {
-    #mobile-menu {
-      transition: none !important;
-    }
-    .dropdown-content {
-      animation: none !important;
-    }
-    .menu-icon {
-      transition: none !important;
+    #mobile-menu, .dropdown-content, .menu-icon { 
+      transition: none !important; 
+      animation: none !important; 
     }
   }
 </style>
+
+<!-- Script TypeScript externe -->
+<script>
+  // Import du module TypeScript côté client
+  import('./header-client.ts');
+</script>
