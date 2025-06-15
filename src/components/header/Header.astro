@@ -45,7 +45,7 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
 <!-- Header Desktop -->
 <header
   id="desktop-header"
-  class="header-critical hidden lg:block"
+  class="header-critical hidden lg:block bg-base-200 border-b border-base-content/10"
   role="banner"
 >
   <div class="navbar mx-auto max-w-7xl px-4">
@@ -145,7 +145,7 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
 </header>
 
 <!-- Header Mobile -->
-<header id="mobile-header" class="header-critical lg:hidden" role="banner">
+<header id="mobile-header" class="header-critical lg:hidden bg-base-200 border-b border-base-content/10" role="banner">
   <div class="flex items-center justify-between px-4 py-3">
     <!-- Logo Mobile -->
     <a
@@ -256,28 +256,28 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
 
 <!-- Styles CSS -->
 <style>
-  /* Styles du header avec variables de thème */
+  /* Styles du header avec variables DaisyUI v5 */
   .header-critical .nav-link {
-    color: hsl(var(--bc));
+    color: oklch(var(--color-base-content));
   }
   
   .header-critical .nav-link:hover {
-    color: hsl(var(--p));
+    color: oklch(var(--color-primary));
   }
   
   .header-critical .nav-link.active {
-    color: hsl(var(--p));
+    color: oklch(var(--color-primary));
   }
   
   .header-critical .btn {
-    background: hsl(var(--b2) / 0.8);
-    border-color: hsl(var(--b3) / 0.5);
-    color: hsl(var(--bc));
+    background: oklch(var(--color-base-200) / 0.8);
+    border-color: oklch(var(--color-base-300) / 0.5);
+    color: oklch(var(--color-base-content));
   }
   
   .header-critical .btn:hover {
-    background: hsl(var(--b3));
-    border-color: hsl(var(--p) / 0.5);
+    background: oklch(var(--color-base-300));
+    border-color: oklch(var(--color-primary) / 0.5);
   }
 
   /* Styles non-critiques */
@@ -305,7 +305,7 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
   [data-menu-toggle], [data-menu-close] { transition: all 0.15s ease; }
 
   button:focus-visible, a:focus-visible {
-    outline: 2px solid hsl(var(--p));
+    outline: 2px solid oklch(var(--color-primary));
     outline-offset: 2px;
     border-radius: 4px;
   }
@@ -318,6 +318,12 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
       transition: none !important; 
       animation: none !important; 
     }
+  }
+
+  /* Effet de scroll avec base-200 semi-transparent */
+  .header-critical.scrolled {
+    background-color: oklch(var(--color-base-200) / 0.85) !important;
+    backdrop-filter: blur(20px) !important;
   }
 </style>
 
@@ -411,11 +417,40 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
       });
     }
 
+    // === SCROLL EFFECT ===
+    function initScrollEffect() {
+      const headers = getAllEl('.header-critical');
+      if (!headers.length) return;
+
+      const updateHeader = () => {
+        const scrolled = window.scrollY > 20;
+        headers.forEach(header => {
+          header.classList.toggle('scrolled', scrolled);
+        });
+      };
+
+      // Initial check
+      updateHeader();
+      
+      // Throttled scroll listener
+      let ticking = false;
+      window.addEventListener('scroll', () => {
+        if (!ticking) {
+          requestAnimationFrame(() => {
+            updateHeader();
+            ticking = false;
+          });
+          ticking = true;
+        }
+      });
+    }
+
     // === INIT ===
     document.addEventListener('DOMContentLoaded', () => {
       initTheme();
       initMobileMenu();
       initDropdowns();
+      initScrollEffect();
     });
   })();
 </script>

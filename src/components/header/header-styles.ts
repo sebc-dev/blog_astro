@@ -19,23 +19,8 @@ export function generateCriticalCSS(): string {
     left: 0;
     right: 0;
     z-index: 50;
-    background: hsl(var(--b1) / 0.85);
     backdrop-filter: blur(8px);
     transition: all 0.3s ease;
-  }
-  
-  .header-critical.scrolled {
-    background: hsl(var(--b1) / 0.75);
-    backdrop-filter: blur(20px);
-  }
-  
-  @media (prefers-color-scheme: dark) {
-    .header-critical {
-      background: hsl(var(--b1) / 0.85);
-    }
-    .header-critical.scrolled {
-      background: hsl(var(--b1) / 0.50);
-    }
   }
   
   @media (prefers-reduced-motion: reduce) {

@@ -37,7 +37,7 @@ const formattedDate = pubDate.toLocaleDateString("fr-FR", {
 });
 ---
 
-<article class="h-[calc(100vh-6rem)] mt-4 flex flex-col bg-base-200 shadow-xl overflow-hidden group">
+<article class="card h-[calc(100vh-6rem)] mt-4 flex flex-col bg-base-200 border border-base-content/10 shadow-xl overflow-hidden group">
   <!-- Image Hero -->
   {
     heroImage && (
@@ -52,7 +52,7 @@ const formattedDate = pubDate.toLocaleDateString("fr-FR", {
     )
   }
 
-  <div class="flex-shrink-0 p-6 pt-16 bg-base-100">
+  <div class="flex-shrink-0 p-6 pt-16">
     <!-- Métadonnées -->
     <div class="flex flex-wrap gap-2 mb-4">
       {
