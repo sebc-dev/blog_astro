@@ -195,6 +195,8 @@ describe('Système de traduction (useTranslations)', () => {
     // Simuler une langue avec une clé manquante en utilisant une clé inexistante
     const t = useTranslations('fr');
     
+    // Note: On manipule temporairement l'objet ui pour simuler une traduction manquante
+    // Cette approche évite de modifier le fichier source pendant les tests
     // Utiliser vi.mock pour simuler une clé manquante temporairement
     const originalLookup = Object.getOwnPropertyDescriptor(ui.fr, 'nav.home');
     Object.defineProperty(ui.fr, 'nav.home', {
@@ -214,7 +216,6 @@ describe('Système de traduction (useTranslations)', () => {
       Object.defineProperty(ui.fr, 'nav.home', originalLookup);
     }
   });
-
   it('devrait retourner la clé elle-même et logger une erreur si aucune traduction n\'existe', () => {
     // Test avec une clé qui n'existe nulle part
     const t = useTranslations('en');
