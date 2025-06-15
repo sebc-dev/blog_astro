@@ -50,12 +50,15 @@ function generateLanguageUrls(currentPath: string, lang: 'en' | 'fr') {
       flag: '🇺🇸'
     },
     fr: {
-      url: `/fr${currentPath}`,
+      url: currentPath.startsWith('/fr')
+        ? currentPath
+        : `/fr${currentPath}`,
       isActive: lang === 'fr', 
       label: 'Français',
       flag: '🇫🇷'
     }
   };
+}
 }
 
 // Fonction utilitaire testée: génération du CSS critique
