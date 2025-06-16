@@ -23,7 +23,7 @@ const allPosts: CollectionEntry<"blog">[] = await getCollection("blog", ({ data 
 });
 
 // Trier par date de publication (plus récent en premier)
-const sortedPosts = allPosts.sort((a, b) => {
+const sortedPosts = [...allPosts].sort((a, b) => {
   return new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime();
 });
 
