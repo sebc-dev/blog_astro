@@ -42,8 +42,8 @@ describe('Article Responsive Display Tests', () => {
     });
 
     it('devrait utiliser une grille adaptée pour mobile (1 colonne, puis 2)', () => {
-      // Recherche de la grille mobile responsive
-      expect(componentContent).toMatch(/grid-cols-1\s+sm:grid-cols-2/);
+      // Recherche de la grille mobile responsive - approche simple
+      expect(componentContent).toContain('grid-cols-1 sm:grid-cols-2');
     });
   });
 
