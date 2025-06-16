@@ -56,7 +56,7 @@ describe("Validation des Translation IDs", () => {
       errors,
       stats: {
         totalArticles: articles.length,
-        byLanguage: Object.fromEntries(postsByLang.entries().map(([lang, posts]) => [lang, posts.length])),
+        byLanguage: Object.fromEntries(Array.from(postsByLang.entries()).map(([lang, posts]) => [lang, posts.length])),
         translationPairs: getTranslationPairs(articles)
       }
     };
@@ -73,7 +73,7 @@ describe("Validation des Translation IDs", () => {
       pairs.get(id)!.push(`${post.data.lang}:${post.slug}`);
     });
     
-    return Object.fromEntries(pairs.entries());
+    return Object.fromEntries(Array.from(pairs.entries()));
   }
 
   it("devrait valider l'unicité des translationId par langue", () => {

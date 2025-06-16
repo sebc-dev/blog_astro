@@ -19,7 +19,8 @@ describe('Article Responsive Display Tests', () => {
     });
 
     it('devrait définir correctement les articles pour desktop (sans le premier)', () => {
-      expect(componentContent).toContain('const gridPostsDesktop = showHero && limitedPosts.length > 1');
+      // Utiliser une regex pour gérer les retours à la ligne dans la définition
+      expect(componentContent).toMatch(/const\s+gridPostsDesktop\s*=\s*showHero\s*&&\s*limitedPosts\.length\s*>\s*1[\s\S]*?limitedPosts\.slice\(1\)/);
       expect(componentContent).toContain('limitedPosts.slice(1)');
     });
   });
@@ -34,7 +35,7 @@ describe('Article Responsive Display Tests', () => {
     });
 
     it('devrait afficher la grille mobile uniquement sur mobile avec lg:hidden', () => {
-      expect(componentContent).toContain('class="grid-section lg:hidden');
+      expect(componentContent).toMatch(/class="grid-section lg:hidden[^"]*"/);
     });
 
     it('devrait utiliser une grille adaptée pour mobile (1 colonne, puis 2)', () => {
@@ -44,12 +45,12 @@ describe('Article Responsive Display Tests', () => {
 
   describe('Mappage des Données', () => {
     it('devrait utiliser gridPostsDesktop pour la grille desktop', () => {
-      const desktopGridMatch = componentContent.match(/grid-section hidden lg:block[\s\S]*?gridPostsDesktop\.map/);
+      const desktopGridMatch = componentContent.match(/grid-section hidden lg:block pt-16[\s\S]*?gridPostsDesktop\.map/);
       expect(desktopGridMatch).toBeTruthy();
     });
 
     it('devrait utiliser gridPostsMobile pour la grille mobile', () => {
-      const mobileGridMatch = componentContent.match(/grid-section lg:hidden[\s\S]*?gridPostsMobile\.map/);
+      const mobileGridMatch = componentContent.match(/grid-section lg:hidden pt-4[\s\S]*?gridPostsMobile\.map/);
       expect(mobileGridMatch).toBeTruthy();
     });
 
