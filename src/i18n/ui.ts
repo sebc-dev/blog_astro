@@ -14,8 +14,7 @@ export const ui = {
     'nav.about': 'About',
     'nav.contact': 'Contact',
     'nav.services': 'Services',
-    'nav.ressources': 'Ressources',
-    
+    'nav.resources': 'Resources',
     // Blog
     'blog.read': 'Read',
     'blog.readMore': 'Read more',
