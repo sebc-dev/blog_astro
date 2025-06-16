@@ -27,7 +27,7 @@ describe('Article Responsive Display Tests', () => {
 
   describe('Classes CSS Responsive', () => {
     it('devrait masquer ArticleHero sur mobile avec la classe hidden lg:block', () => {
-      expect(componentContent).toContain('class="hero-section hidden lg:block"');
+      expect(componentContent).toMatch(/class="hero-section hidden lg:block[^"]*"/);
     });
 
     it('devrait masquer la grille desktop sur mobile avec hidden lg:block', () => {
