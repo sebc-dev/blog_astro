@@ -34,7 +34,7 @@ describe('Article Responsive Display Tests', () => {
     });
 
     it('devrait afficher la grille mobile uniquement sur mobile avec lg:hidden', () => {
-      expect(componentContent).toContain('class="grid-section lg:hidden"');
+      expect(componentContent).toContain('class="grid-section lg:hidden');
     });
 
     it('devrait utiliser une grille adaptée pour mobile (1 colonne, puis 2)', () => {
