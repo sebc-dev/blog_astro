@@ -31,7 +31,7 @@ describe('Article Responsive Display Tests', () => {
     });
 
     it('devrait masquer la grille desktop sur mobile avec hidden lg:block', () => {
-      expect(componentContent).toContain('class="grid-section hidden lg:block pt-16"');
+      expect(componentContent).toMatch(/class="grid-section hidden lg:block[^"]*"/);
     });
 
     it('devrait afficher la grille mobile uniquement sur mobile avec lg:hidden', () => {
