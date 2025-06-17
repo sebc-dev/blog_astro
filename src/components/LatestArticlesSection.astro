@@ -211,7 +211,22 @@ function getPostTag(post: CollectionEntry<"blog">): string | undefined {
   /* Optimisations pour la grille responsive */
   .articles-grid {
     /* Grille adaptative avec tailles équilibrées */
-    grid-template-rows: masonry; /* Grille maçonnée si supportée */
+    display: grid;
+    align-items: start; /* Fallback: aligner les items en haut */
+  }
+
+  /* Grille maçonnée si supportée (Firefox uniquement pour l'instant) */
+  @supports (grid-template-rows: masonry) {
+    .articles-grid {
+      grid-template-rows: masonry;
+    }
+  }
+
+  /* Fallback pour navigateurs sans support masonry (Chrome, Safari, etc.) */
+  @supports not (grid-template-rows: masonry) {
+    .articles-grid {
+      grid-auto-rows: min-content; /* Hauteur automatique basée sur le contenu */
+    }
   }
 
   /* Responsive breakpoints personnalisés */

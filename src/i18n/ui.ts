@@ -83,7 +83,7 @@ export const ui = {
     'nav.about': 'À propos',
     'nav.contact': 'Contact',
     'nav.services': 'Services',
-    'nav.ressources': 'Ressources',
+    'nav.resources': 'Ressources',
     
     // Blog
     'blog.read': 'Lire',

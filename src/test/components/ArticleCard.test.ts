@@ -3,7 +3,8 @@ import { describe, it, expect } from "vitest";
 describe("ArticleCard - Logique Métier", () => {
   const mockProps = {
     title: "Optimisation des Performances Web",
-    description: "Apprenez les meilleures techniques pour optimiser les performances de vos applications web modernes",
+    description:
+      "Apprenez les meilleures techniques pour optimiser les performances de vos applications web modernes",
     heroImage: "/images/performance-hero.jpg",
     pubDate: new Date("2024-01-15T00:00:00Z"),
     author: "Dev Expert",
@@ -24,25 +25,30 @@ describe("ArticleCard - Logique Métier", () => {
   });
 
   it("devrait tronquer la description si elle dépasse 120 caractères", () => {
-    const longDescription = "Cette description est très longue et devrait être tronquée automatiquement pour s'adapter au format compact des cartes d'articles dans la grille principale de la section.";
-    
+    const longDescription =
+      "Cette description est très longue et devrait être tronquée automatiquement pour s'adapter au format compact des cartes d'articles dans la grille principale de la section.";
+
     // Reproduire la logique de troncature du composant
-    const truncatedDescription = longDescription.length > 120 
-      ? longDescription.substring(0, 120) + "..." 
-      : longDescription;
+    const truncatedDescription =
+      longDescription.length > 120
+        ? `${longDescription.substring(0, 120)}…`
+        : longDescription;
 
     expect(truncatedDescription).toContain("...");
     expect(truncatedDescription.length).toBeLessThanOrEqual(123); // 120 + "..."
     // Vérifier que la description est effectivement tronquée
-    expect(truncatedDescription).toBe(longDescription.substring(0, 120) + "...");
+    expect(truncatedDescription).toBe(
+      longDescription.substring(0, 120) + "...",
+    );
   });
 
   it("devrait garder la description courte intacte", () => {
     const shortDescription = "Description courte";
-    
-    const truncatedDescription = shortDescription.length > 120 
-      ? shortDescription.substring(0, 120) + "..." 
-      : shortDescription;
+
+    const truncatedDescription =
+      shortDescription.length > 120
+        ? shortDescription.substring(0, 120) + "..."
+        : shortDescription;
 
     expect(truncatedDescription).toBe(shortDescription);
     expect(truncatedDescription).not.toContain("...");
@@ -53,10 +59,10 @@ describe("ArticleCard - Logique Métier", () => {
       "/images/test.jpg",
       "/images/test.png",
       "/images/test.webp",
-      "https://example.com/image.jpg"
+      "https://example.com/image.jpg",
     ];
 
-    validImages.forEach(image => {
+    validImages.forEach((image) => {
       expect(typeof image).toBe("string");
       expect(image.length).toBeGreaterThan(0);
       expect(image).toMatch(/\.(jpg|jpeg|png|webp)$/i);
@@ -65,7 +71,7 @@ describe("ArticleCard - Logique Métier", () => {
 
   it("devrait formater la date en format court", () => {
     const testDate = new Date("2024-01-15T00:00:00Z");
-    
+
     // Test de base pour s'assurer que la date est valide
     expect(testDate.getTime()).not.toBeNaN();
     expect(testDate.getFullYear()).toBe(2024);
@@ -75,8 +81,8 @@ describe("ArticleCard - Logique Métier", () => {
 
   it("devrait valider le temps de lecture", () => {
     const readingTimes = [1, 3, 5, 10, 15];
-    
-    readingTimes.forEach(time => {
+
+    readingTimes.forEach((time) => {
       expect(typeof time).toBe("number");
       expect(time).toBeGreaterThan(0);
       expect(time).toBeLessThan(100); // Temps de lecture raisonnable
@@ -87,10 +93,10 @@ describe("ArticleCard - Logique Métier", () => {
     const testSlugs = [
       "optimisation-performances-web",
       "guide-typescript-avance",
-      "astro-vs-next-js"
+      "astro-vs-next-js",
     ];
 
-    testSlugs.forEach(slug => {
+    testSlugs.forEach((slug) => {
       expect(typeof slug).toBe("string");
       expect(slug).toMatch(/^[a-z0-9-]+$/); // Format kebab-case
       expect(slug).not.toContain(" "); // Pas d'espaces
@@ -113,13 +119,13 @@ describe("ArticleCard - Logique Métier", () => {
     const categories = ["Performance", "Development", "Design", "JavaScript"];
     const tags = ["Optimization", "React", "CSS", "TypeScript"];
 
-    categories.forEach(category => {
+    categories.forEach((category) => {
       expect(typeof category).toBe("string");
       expect(category.length).toBeGreaterThan(0);
       expect(category[0]).toMatch(/[A-Z]/); // Première lettre majuscule
     });
 
-    tags.forEach(tag => {
+    tags.forEach((tag) => {
       expect(typeof tag).toBe("string");
       expect(tag.length).toBeGreaterThan(0);
     });
@@ -129,10 +135,10 @@ describe("ArticleCard - Logique Métier", () => {
     const testTitles = [
       "Titre Court",
       "Un Titre de Longueur Moyenne pour Tester",
-      "Un Très Long Titre Qui Pourrait Être Tronqué Dans L'Interface Utilisateur Selon Les Contraintes d'Affichage"
+      "Un Très Long Titre Qui Pourrait Être Tronqué Dans L'Interface Utilisateur Selon Les Contraintes d'Affichage",
     ];
 
-    testTitles.forEach(title => {
+    testTitles.forEach((title) => {
       expect(typeof title).toBe("string");
       expect(title.length).toBeGreaterThan(0);
       // Les titres très longs devraient être gérés par CSS (line-clamp)
@@ -141,4 +147,4 @@ describe("ArticleCard - Logique Métier", () => {
       }
     });
   });
-}); 
+});

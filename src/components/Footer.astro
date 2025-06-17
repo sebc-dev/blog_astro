@@ -1,11 +1,16 @@
 ---
+import { getLangFromUrl } from "../i18n/utils";
+import { useTranslations } from "../i18n/utils";
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
 
 ---
 <footer class="footer bg-base-200 text-neutral-content p-4">
   <!-- Sur mobile: layout vertical centré, sur desktop: layout horizontal -->
   <div class="flex flex-col items-center gap-4 w-full sm:flex-row sm:justify-between">
     <aside class="text-center sm:text-left">
-      <p>Copyright © {new Date().getFullYear()} - All right reserved</p>
+      <p>{t('footer.allRightsReserved')}</p>
     </aside>
     <nav class="flex gap-4">
       <a>
