@@ -47,7 +47,7 @@ describe("LatestArticlesSection - Logique Métier", () => {
 
   it("devrait trier les articles par date de publication (plus récent en premier)", () => {
     // Reproduire la logique de tri de LatestArticlesSection
-    const sortedPosts = mockPosts.sort((a, b) => {
+    const sortedPosts = [...mockPosts].sort((a, b) => {
       return new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime();
     });
 
