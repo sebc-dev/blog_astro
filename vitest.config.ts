@@ -1,6 +1,7 @@
-import { defineConfig } from "vitest/config";
+/// <reference types="vitest/config" />
+import { getViteConfig } from 'astro/config'
 
-export default defineConfig({
+export default getViteConfig({
   test: {
     globals: true,
     environment: "jsdom",
@@ -25,13 +26,6 @@ export default defineConfig({
         }
       }
     },
-    // Tests post-build pour sites statiques
     testTimeout: process.env.CI ? 10000 : 5000,
-  },
-  resolve: {
-    alias: {
-      "@": new URL("./src", import.meta.url).pathname,
-      "astro:content": new URL("./src/test/mocks/astro-content.ts", import.meta.url).pathname,
-    },
-  },
+  }
 });

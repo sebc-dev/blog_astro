@@ -1,82 +1,111 @@
+// @vitest-environment happy-dom
 import { describe, it, expect } from "vitest";
-import { JSDOM } from "jsdom";
+import { experimental_AstroContainer as AstroContainer } from "astro/container";
+import MainLayout from "../../layouts/MainLayout.astro";
 
 describe("MainLayout with Grid Background", () => {
-  it("should contain grid background element with correct classes", () => {
-    // Simuler le HTML généré par MainLayout
-    const html = `
-      <html lang="en">
-        <head>
-          <meta charset="utf-8" />
-          <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-          <meta name="viewport" content="width=device-width" />
-          <meta name="generator" content="Astro" />
-        </head>
-        <body class="relative">
-          <div class="grid-background"></div>
-          <header>
-            <nav>Header content</nav>
-          </header>
-          <main>
-            <h1>Main content</h1>
-          </main>
-          <footer>
-            <p>Footer content</p>
-          </footer>
-        </body>
-      </html>
-    `;
+  it("should contain grid background element with correct classes", async () => {
+    const container = await AstroContainer.create();
+    const html = await container.renderToString(MainLayout, {
+      slots: {
+        default: "<h1>Test Content</h1>",
+      },
+    });
 
-    const dom = new JSDOM(html);
-    const document = dom.window.document;
+    // Parse the HTML string into a DOM element
+    const template = document.createElement("template");
+    template.innerHTML = html;
+    const renderedContent = template.content;
 
-    // Vérifier que l'élément de grille existe
-    const gridBackground = document.querySelector(".grid-background");
-    expect(gridBackground).toBeDefined();
+    // Chercher l'élément grid-background 
+    const gridBackground = renderedContent.querySelector(".grid-background");
+    expect(gridBackground).not.toBeNull();
+    expect(gridBackground?.classList.contains("grid-background")).toBe(true);
 
-    // Vérifier que le body a la classe relative
-    const body = document.querySelector("body");
-    expect(body?.classList.contains("relative")).toBe(true);
+    // Vérifier que le body a la classe relative (si présent dans le rendu)
+    const body = renderedContent.querySelector("body");
+    if (body) {
+      expect(body.classList.contains("relative")).toBe(true);
+    }
 
-    // Vérifier que main et footer existent (pas besoin de z-index spécifique maintenant)
-    const main = document.querySelector("main");
-    const footer = document.querySelector("footer");
-
-    expect(main).toBeDefined();
-    expect(footer).toBeDefined();
+    // Vérifier que main et footer existent
+    const main = renderedContent.querySelector("main");
+    const footer = renderedContent.querySelector("footer");
+    expect(main).not.toBeNull();
+    expect(footer).not.toBeNull();
   });
 
-  it("should have proper structure for layering", () => {
-    const html = `
-      <body class="relative">
-        <div class="grid-background"></div>
-        <header></header>
-        <main></main>
-        <footer></footer>
-      </body>
-    `;
+  it("should have proper structure for layering", async () => {
+    const container = await AstroContainer.create();
+    const html = await container.renderToString(MainLayout, {
+      slots: {
+        default: "<h1>Test Content</h1>",
+      },
+    });
 
-    const dom = new JSDOM(html);
-    const document = dom.window.document;
+    const template = document.createElement("template");
+    template.innerHTML = html;
+    const renderedContent = template.content;
 
-    const elements = Array.from(
-      document.querySelectorAll("body > *"),
-    ) as Element[];
-    const gridBackground = elements.find((el: Element) =>
-      el.classList.contains("grid-background"),
-    );
-    const main = elements.find((el: Element) => el.tagName === "MAIN") as
-      | HTMLElement
-      | undefined;
-    const footer = elements.find((el: Element) => el.tagName === "FOOTER") as
-      | HTMLElement
-      | undefined;
+    // Si body n'est pas présent, utiliser le contenu racine
+    const rootContent = renderedContent.querySelector("body") || renderedContent;
+    
+    const gridBackground = rootContent.querySelector(".grid-background");
+    const header = rootContent.querySelector("header");
+    const main = rootContent.querySelector("main");
+    const footer = rootContent.querySelector("footer");
 
-    // La grille doit être le premier élément
-    expect(elements[0]).toBe(gridBackground);
+    // Tous les éléments doivent exister
+    expect(gridBackground).not.toBeNull();
+    expect(header).not.toBeNull();
+    expect(main).not.toBeNull();
+    expect(footer).not.toBeNull();
+  });
 
-    // Main et footer doivent exister
-    expect(main).toBeDefined();
-    expect(footer).toBeDefined();
+  it("should render custom content in main slot", async () => {
+    const customContent = "<div class='custom-test'>Custom Test Content</div>";
+    const container = await AstroContainer.create();
+    const html = await container.renderToString(MainLayout, {
+      slots: {
+        default: customContent,
+      },
+    });
+
+    expect(html).toContain("Custom Test Content");
+    expect(html).toContain("custom-test");
+  });
+
+  it("should have correct language attribute", async () => {
+    const container = await AstroContainer.create();
+    const html = await container.renderToString(MainLayout, {
+      slots: {
+        default: "<h1>Test Content</h1>",
+      },
+    });
+
+    const template = document.createElement("template");
+    template.innerHTML = html;
+    const renderedContent = template.content;
+
+    const htmlElement = renderedContent.querySelector("html");
+    if (htmlElement) {
+      expect(htmlElement.getAttribute("lang")).toBe("en"); // Default language
+    } else {
+      // Si l'élément html n'est pas dans le rendu, vérifier le string HTML
+      expect(html).toContain('lang="en"');
+    }
+  });
+
+  it("should contain required meta tags", async () => {
+    const container = await AstroContainer.create();
+    const html = await container.renderToString(MainLayout, {
+      slots: {
+        default: "<h1>Test Content</h1>",
+      },
+    });
+
+    expect(html).toContain('charset="utf-8"');
+    expect(html).toContain('name="viewport"');
+    expect(html).toContain('name="generator"');
   });
 });

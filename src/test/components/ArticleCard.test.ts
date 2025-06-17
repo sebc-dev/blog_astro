@@ -28,17 +28,17 @@ describe("ArticleCard - Logique Métier", () => {
     const longDescription =
       "Cette description est très longue et devrait être tronquée automatiquement pour s'adapter au format compact des cartes d'articles dans la grille principale de la section.";
 
-    // Reproduire la logique de troncature du composant
+    // Reproduire la logique de troncature du composant (utilise le caractère Unicode ellipsis …)
     const truncatedDescription =
       longDescription.length > 120
         ? `${longDescription.substring(0, 120)}…`
         : longDescription;
 
-    expect(truncatedDescription).toContain("...");
-    expect(truncatedDescription.length).toBeLessThanOrEqual(123); // 120 + "..."
+    expect(truncatedDescription).toContain("…"); // Caractère Unicode ellipsis
+    expect(truncatedDescription.length).toBeLessThanOrEqual(121); // 120 + "…"
     // Vérifier que la description est effectivement tronquée
     expect(truncatedDescription).toBe(
-      longDescription.substring(0, 120) + "...",
+      longDescription.substring(0, 120) + "…",
     );
   });
 
