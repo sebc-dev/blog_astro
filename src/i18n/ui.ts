@@ -15,6 +15,7 @@ export const ui = {
     'nav.contact': 'Contact',
     'nav.services': 'Services',
     'nav.resources': 'Resources',
+    'nav.ressources': 'Resources',
     // Blog
     'blog.read': 'Read',
     'blog.readMore': 'Read more',
@@ -84,6 +85,7 @@ export const ui = {
     'nav.contact': 'Contact',
     'nav.services': 'Services',
     'nav.resources': 'Ressources',
+    'nav.ressources': 'Ressources',
     
     // Blog
     'blog.read': 'Lire',

@@ -77,13 +77,9 @@ export interface HeaderConfig {
 }
 
 // === TYPES POUR LES UTILITAIRES ===
-export interface TranslatePathFunction {
-  (path: string): string;
-}
+export type TranslatePathFunction = (path: string) => string;
 
-export interface UseTranslationsFunction {
-  (key: UIKeys): string;
-}
+export type UseTranslationsFunction = (key: UIKeys) => string;
 
 // === TYPES POUR LES ERREURS ===
 export interface HeaderError extends Error {

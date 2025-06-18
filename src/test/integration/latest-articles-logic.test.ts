@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { getPostCategory, getPostTag } from "../../scripts/article-utils";
 
 describe("LatestArticlesSection - Logique Métier", () => {
   // Mock des données d'articles pour tester la logique
@@ -128,21 +129,6 @@ describe("LatestArticlesSection - Logique Métier", () => {
   });
 
   it("devrait déterminer correctement les catégories basées sur le contenu", () => {
-    // Reproduire la fonction getPostCategory
-    function getPostCategory(post: typeof mockPosts[0]): string {
-      const title = post.data.title.toLowerCase();
-      const description = post.data.description.toLowerCase();
-      
-      if (title.includes("astro") || description.includes("astro")) return "Framework";
-      if (title.includes("typescript") || description.includes("typescript")) return "Language";
-      if (title.includes("performance") || description.includes("performance")) return "Performance";
-      if (title.includes("css") || description.includes("css")) return "Styling";
-      if (title.includes("api") || description.includes("api")) return "Backend";
-      if (title.includes("react") || title.includes("vue")) return "Framework";
-      
-      return "Article";
-    }
-
     expect(getPostCategory(mockPosts[0])).toBe("Framework"); // Astro
     expect(getPostCategory(mockPosts[1])).toBe("Language"); // TypeScript
     expect(getPostCategory(mockPosts[2])).toBe("Performance"); // Performance
@@ -150,19 +136,6 @@ describe("LatestArticlesSection - Logique Métier", () => {
   });
 
   it("devrait extraire correctement les tags basés sur le contenu", () => {
-    // Reproduire la fonction getPostTag
-    function getPostTag(post: typeof mockPosts[0]): string | undefined {
-      const title = post.data.title.toLowerCase();
-      const description = post.data.description.toLowerCase();
-      
-      if (title.includes("guide") || title.includes("débuter")) return "Guide";
-      if (title.includes("optimisation") || description.includes("optimiser")) return "Optimization";
-      if (title.includes("bonnes pratiques") || description.includes("pratiques")) return "Best Practices";
-      if (title.includes("vs") || title.includes("comparaison")) return "Comparison";
-      
-      return undefined;
-    }
-
     expect(getPostTag(mockPosts[0])).toBe("Guide"); // Débuter avec Astro
     expect(getPostTag(mockPosts[1])).toBeUndefined(); // TypeScript pour débutants (pas "débuter")
     expect(getPostTag(mockPosts[2])).toBe("Optimization"); // Optimisation

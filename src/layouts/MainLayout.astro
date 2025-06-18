@@ -15,11 +15,11 @@ const lang = getLangFromUrl(Astro.url);
     <meta name="generator" content={Astro.generator} />
     <slot name="head" />
   </head>
-  <body class="relative">
+  <body class="relative" data-cy="app-body">
     <!-- Grille de fond avec fondu -->
-    <div class="grid-background"></div>
+    <div class="grid-background" data-cy="grid-background"></div>
     <Header />
-    <main>
+    <main data-cy="main-content">
       <slot />
     </main>
     <Footer />

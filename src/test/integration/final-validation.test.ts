@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { estimateReadingTime } from "../../scripts/article-utils";
 
 describe("Validation Finale - Section avec Vrais Articles", () => {
   it("devrait pouvoir récupérer les vraies collections d'articles", async () => {
@@ -151,26 +152,6 @@ describe("Validation Finale - Section avec Vrais Articles", () => {
   });
 
   it("devrait valider que notre estimation de temps de lecture fonctionne", () => {
-    function estimateReadingTime(post: { slug: string; data: { title: string; description: string } }): number {
-      const wordsPerMinute = 200;
-      const descWords = post.data.description.split(/\s+/).length;
-      const slug = post.slug;
-      let estimatedWords = descWords * 15;
-      
-      if (slug.includes("guide") || post.data.title.toLowerCase().includes("guide")) {
-        estimatedWords *= 2.5;
-      } else if (slug.includes("vs") || post.data.title.toLowerCase().includes("vs")) {
-        estimatedWords *= 1.8;
-      } else if (slug.includes("api") || post.data.title.toLowerCase().includes("api")) {
-        estimatedWords *= 2.2;
-      } else if (post.data.title.toLowerCase().includes("techniques") || 
-                 post.data.title.toLowerCase().includes("optimisation")) {
-        estimatedWords *= 2.0;
-      }
-      
-      return Math.max(1, Math.ceil(estimatedWords / wordsPerMinute));
-    }
-
     const cssGuidePost = {
       slug: "css-grid-layout-guide",
       data: {

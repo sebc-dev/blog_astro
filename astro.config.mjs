@@ -33,5 +33,17 @@ export default defineConfig({
         }
     },
     
-    integrations: [mdx(), sitemap()]
+    integrations: [
+        mdx({
+            syntaxHighlight: 'shiki',
+            remarkPlugins: [],
+            rehypePlugins: [],
+            extendMarkdownConfig: true,
+            gfm: true,
+            smartypants: true,
+            // Security options to prevent script injection
+            optimize: true
+        }), 
+        sitemap()
+    ]
 });

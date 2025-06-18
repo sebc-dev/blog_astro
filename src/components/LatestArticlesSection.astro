@@ -4,6 +4,7 @@ import type { CollectionEntry } from "astro:content";
 import ArticleHero from "./ArticleHero.astro";
 import ArticleCard from "./ArticleCard.astro";
 import { getLangFromUrl, useTranslations, useTranslatedPath } from "../i18n/utils";
+import { estimateReadingTime as utilEstimateReadingTime, getPostCategory as utilGetPostCategory, getPostTag as utilGetPostTag } from "../scripts/article-utils";
 
 interface Props {
   maxArticles?: number;
@@ -39,76 +40,37 @@ const gridPostsDesktop = showHero && limitedPosts.length > 1
 // Pour mobile : tous les articles dans la grille (pas de hero)
 const gridPostsMobile = limitedPosts;
 
-// Fonction utilitaire pour calculer le temps de lecture estimé
-function calculateReadingTime(content: string): number {
-  const wordsPerMinute = lang === 'fr' ? 200 : 220; // Différence de vitesse de lecture
-  const words = content.split(/\s+/).length;
-  return Math.ceil(words / wordsPerMinute);
-}
+// Utiliser les fonctions utilitaires avec les traductions de ce composant
+const estimateReadingTime = (post: CollectionEntry<"blog">) => utilEstimateReadingTime(post, lang);
 
-// Fonction pour estimer le temps de lecture basé sur la longueur du slug et le contenu
-function estimateReadingTime(post: CollectionEntry<"blog">): number {
-  const wordsPerMinute = lang === 'fr' ? 200 : 220; // Différence de vitesse de lecture
-  
-  // Estimation basée sur la description et quelques indices du slug/titre
-  const descWords = post.data.description.split(/\s+/).length;
-  
-  // Estimation basée sur des patterns de longueur d'articles connus
-  const slug = post.slug;
-  let estimatedWords = descWords * 15; // Ratio description/contenu moyen
-  
-  // Ajustements basés sur le type d'article détecté
-  if (slug.includes("guide") || post.data.title.toLowerCase().includes("guide")) {
-    estimatedWords *= 2.5; // Les guides sont plus longs
-  } else if (slug.includes("vs") || post.data.title.toLowerCase().includes("vs")) {
-    estimatedWords *= 1.8; // Les comparaisons sont moyennement longues
-  } else if (slug.includes("api") || post.data.title.toLowerCase().includes("api")) {
-    estimatedWords *= 2.2; // Les articles API sont techniques et longs
-  } else if (post.data.title.toLowerCase().includes("techniques") || 
-             post.data.title.toLowerCase().includes("optimisation") ||
-             post.data.title.toLowerCase().includes("optimization")) {
-    estimatedWords *= 2.0; // Les articles techniques sont plus longs
+const getPostCategory = (post: CollectionEntry<"blog">) => utilGetPostCategory(post, {
+  translations: {
+    framework: t('category.framework'),
+    language: t('category.language'),
+    performance: t('category.performance'),
+    styling: t('category.styling'),
+    backend: t('category.backend'),
+    article: t('category.article')
   }
-  
-  return Math.max(1, Math.ceil(estimatedWords / wordsPerMinute));
-}
+});
 
-// Fonction pour déterminer la catégorie en fonction du contenu
-function getPostCategory(post: CollectionEntry<"blog">): string {
-  const title = post.data.title.toLowerCase();
-  const description = post.data.description.toLowerCase();
-  
-  if (title.includes("astro") || description.includes("astro")) return t('category.framework');
-  if (title.includes("typescript") || description.includes("typescript")) return t('category.language');
-  if (title.includes("performance") || description.includes("performance")) return t('category.performance');
-  if (title.includes("css") || description.includes("css")) return t('category.styling');
-  if (title.includes("api") || description.includes("api")) return t('category.backend');
-  if (title.includes("react") || title.includes("vue")) return t('category.framework');
-  
-  return t('category.article');
-}
-
-// Fonction pour extraire un tag basé sur le contenu
-function getPostTag(post: CollectionEntry<"blog">): string | undefined {
-  const title = post.data.title.toLowerCase();
-  const description = post.data.description.toLowerCase();
-  
-  if (title.includes("guide") || title.includes("débuter") || title.includes("beginner")) return t('tag.guide');
-  if (title.includes("optimisation") || description.includes("optimiser") || title.includes("optimization")) return t('tag.optimization');
-  if (title.includes("bonnes pratiques") || description.includes("pratiques") || title.includes("best practices")) return t('tag.bestPractices');
-  if (title.includes("vs") || title.includes("comparaison") || title.includes("comparison")) return t('tag.comparison');
-  
-  return undefined;
-}
+const getPostTag = (post: CollectionEntry<"blog">) => utilGetPostTag(post, {
+  translations: {
+    guide: t('tag.guide'),
+    optimization: t('tag.optimization'),
+    bestPractices: t('tag.bestPractices'),
+    comparison: t('tag.comparison')
+  }
+});
 ---
 
-<section class="latest-articles" aria-label={t('latestArticles.title')}>
-  <div class="container mx-auto max-w-7xl px-4">
+<section class="latest-articles" aria-label={t('latestArticles.title')} data-cy="latest-articles-section">
+  <div class="container mx-auto max-w-7xl px-4" data-cy="articles-container">
     <!-- Contenu principal -->
-    <div class="articles-layout">
+    <div class="articles-layout" data-cy="articles-layout">
       <!-- Article Héro (desktop uniquement) -->
       {heroPosts.length > 0 && (
-        <div class="hero-section hidden lg:block">
+        <div class="hero-section hidden lg:block" data-cy="hero-section">
           {heroPosts.map((post) => (
             <ArticleHero
               title={post.data.title}
@@ -127,8 +89,8 @@ function getPostTag(post: CollectionEntry<"blog">): string | undefined {
 
       <!-- Grille d'articles Desktop (sans le premier article qui est en hero) -->
       {gridPostsDesktop.length > 0 && (
-        <div class="grid-section hidden lg:block pt-16">
-          <div class="articles-grid grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div class="grid-section hidden lg:block pt-16" data-cy="grid-section-desktop">
+          <div class="articles-grid grid gap-6 md:grid-cols-2 lg:grid-cols-3" data-cy="articles-grid-desktop">
             {gridPostsDesktop.map((post) => (
               <ArticleCard
                 title={post.data.title}
@@ -148,8 +110,8 @@ function getPostTag(post: CollectionEntry<"blog">): string | undefined {
 
       <!-- Grille d'articles Mobile (tous les articles, y compris le premier) -->
       {gridPostsMobile.length > 0 && (
-        <div class="grid-section lg:hidden pt-4">
-          <div class="articles-grid grid gap-6 grid-cols-1 sm:grid-cols-2">
+        <div class="grid-section lg:hidden pt-4" data-cy="grid-section-mobile">
+          <div class="articles-grid grid gap-6 grid-cols-1 sm:grid-cols-2" data-cy="articles-grid-mobile">
             {gridPostsMobile.map((post) => (
               <ArticleCard
                 title={post.data.title}
@@ -169,7 +131,7 @@ function getPostTag(post: CollectionEntry<"blog">): string | undefined {
 
       <!-- Message si aucun article -->
       {limitedPosts.length === 0 && (
-        <div class="no-articles text-center py-16">
+        <div class="no-articles text-center py-16" data-cy="no-articles">
           <div class="bg-base-200 rounded-lg p-8 max-w-md mx-auto">
             <h3 class="text-xl font-semibold mb-2">{t('latestArticles.noArticles')}</h3>
             <p class="text-base-content/70">
@@ -182,10 +144,11 @@ function getPostTag(post: CollectionEntry<"blog">): string | undefined {
 
     <!-- Lien vers tous les articles (optionnel) -->
     {limitedPosts.length >= maxArticles && (
-      <div class="text-center mt-12 mb-10">
+      <div class="text-center mt-12 mb-10" data-cy="view-all-section">
         <a 
           href={translatePath('/blog')}
           class="btn btn-primary btn-lg"
+          data-cy="view-all-button"
         >
           {t('latestArticles.viewAll')}
           <svg

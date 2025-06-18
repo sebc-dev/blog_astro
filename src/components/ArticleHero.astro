@@ -37,11 +37,11 @@ const formattedDate = pubDate.toLocaleDateString("fr-FR", {
 });
 ---
 
-<article class="card h-[calc(100vh-6rem)] mt-4 flex flex-col bg-base-200 border border-base-content/10 shadow-xl overflow-hidden group">
+<article class="card h-[calc(100vh-6rem)] mt-4 flex flex-col bg-base-200 border border-base-content/10 shadow-xl overflow-hidden group" data-cy="article-hero" data-article-slug={slug}>
   <!-- Image Hero -->
   {
     heroImage && (
-      <figure class="flex-1 min-h-0 overflow-hidden">
+      <figure class="flex-1 min-h-0 overflow-hidden" data-cy="hero-image">
         <img
           src={heroImage}
           alt={title}
@@ -52,52 +52,53 @@ const formattedDate = pubDate.toLocaleDateString("fr-FR", {
     )
   }
 
-  <div class="flex-shrink-0 p-6 pt-16">
+  <div class="flex-shrink-0 p-6 pt-16" data-cy="hero-content">
     <!-- Métadonnées -->
-    <div class="flex flex-wrap gap-2 mb-4">
+    <div class="flex flex-wrap gap-2 mb-4" data-cy="hero-metadata">
       {
         category && (
-          <span class="badge badge-primary badge-lg">
+          <span class="badge badge-primary badge-lg" data-cy="hero-category">
             {category}
           </span>
         )
       }
       {
         tag && (
-          <span class="badge badge-secondary badge-outline">
+          <span class="badge badge-secondary badge-outline" data-cy="hero-tag">
             {tag}
           </span>
         )
       }
-      <span class="text-sm text-base-content/70 ml-auto">
+      <span class="text-sm text-base-content/70 ml-auto" data-cy="hero-date">
         {formattedDate}
       </span>
     </div>
 
     <!-- Titre Hero (plus grand) -->
-    <h2 class="text-2xl lg:text-3xl font-bold leading-tight mb-4 group-hover:text-primary transition-colors">
-      <a href={`/blog/${slug}`} class="link-hover">
+    <h2 class="text-2xl lg:text-3xl font-bold leading-tight mb-4 group-hover:text-primary transition-colors" data-cy="hero-title">
+      <a href={`/blog/${slug}`} class="link-hover" data-cy="hero-title-link">
         {title}
       </a>
     </h2>
 
     <!-- Extrait plus long pour le hero -->
-    <p class="text-base-content/80 text-lg leading-relaxed mb-6 line-clamp-3">
+    <p class="text-base-content/80 text-lg leading-relaxed mb-6 line-clamp-3" data-cy="hero-description">
       {description}
     </p>
 
     <!-- Footer avec auteur, temps de lecture et bouton -->
-    <div class="flex justify-between items-center">
-      <div class="flex items-center gap-2 text-sm text-base-content/70">
-        <span>Par {author}</span>
+    <div class="flex justify-between items-center" data-cy="hero-footer">
+      <div class="flex items-center gap-2 text-sm text-base-content/70" data-cy="hero-author-info">
+        <span data-cy="hero-author">Par {author}</span>
         <span>•</span>
-        <span>{readingTime} min de lecture</span>
+        <span data-cy="hero-reading-time">{readingTime} min de lecture</span>
       </div>
       
       <a
         href={`/blog/${slug}`}
         class="btn btn-primary btn-sm"
         aria-label={`Lire l'article: ${title}`}
+        data-cy="hero-read-button"
       >
         {t('blog.readMore')}
         <svg

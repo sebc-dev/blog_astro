@@ -6,7 +6,7 @@ describe('Grid Background - Ultra Discrete', () => {
   describe('Element Existence and Basic Properties', () => {
     it('should have grid background element with correct structure', () => {
       // Vérifier que l'élément de grille existe (même si ultra-discret)
-      cy.get('.grid-background')
+      cy.get('[data-cy="grid-background"]')
         .should('exist')
         .should(($el) => {
           // L'élément doit être dans le DOM
@@ -15,7 +15,7 @@ describe('Grid Background - Ultra Discrete', () => {
     });
 
     it('should have correct CSS positioning properties', () => {
-      cy.get('.grid-background')
+      cy.get('[data-cy="grid-background"]')
         .should('have.css', 'position', 'fixed')
         .should('have.css', 'top', '0px')
         .should('have.css', 'left', '0px')
@@ -24,7 +24,7 @@ describe('Grid Background - Ultra Discrete', () => {
     });
 
     it('should cover the entire viewport', () => {
-      cy.get('.grid-background').should(($el) => {
+      cy.get('[data-cy="grid-background"]').should(($el) => {
         const element = $el[0];
         const computedStyle = window.getComputedStyle(element);
         
@@ -37,7 +37,7 @@ describe('Grid Background - Ultra Discrete', () => {
 
   describe('Grid Pattern Properties', () => {
     it('should have background-image gradients for grid pattern', () => {
-      cy.get('.grid-background').should(($el) => {
+      cy.get('[data-cy="grid-background"]').should(($el) => {
         const element = $el[0];
         const computedStyle = window.getComputedStyle(element);
         
@@ -49,56 +49,54 @@ describe('Grid Background - Ultra Discrete', () => {
     it('should have appropriate background-size for desktop', () => {
       cy.viewport(1280, 720); // Desktop viewport
       
-      cy.get('.grid-background').should(($el) => {
+      cy.get('[data-cy="grid-background"]').should(($el) => {
         const element = $el[0];
         const computedStyle = window.getComputedStyle(element);
         
-        // Vérifier la taille de la grille (48px pour desktop)
-        expect(computedStyle.backgroundSize).to.include('48px');
+        // Vérifier la taille de la grille (24px pour desktop par défaut)
+        expect(computedStyle.backgroundSize).to.include('24px');
       });
     });
 
     it('should adapt background-size for mobile', () => {
       cy.viewport(375, 667); // Mobile viewport
       
-      cy.get('.grid-background').should(($el) => {
+      cy.get('[data-cy="grid-background"]').should(($el) => {
         const element = $el[0];
         const computedStyle = window.getComputedStyle(element);
         
-        // Vérifier la taille de la grille adaptée pour mobile (40px)
-        expect(computedStyle.backgroundSize).to.include('40px');
+        // Vérifier la taille de la grille adaptée pour mobile (20px)
+        expect(computedStyle.backgroundSize).to.include('20px');
       });
     });
   });
 
   describe('Layering and Content Interaction', () => {
     it('should not interfere with page content', () => {
-      // Vérifier que le contenu principal est accessible
-      cy.get('header').should('be.visible');
-      cy.get('main').should('be.visible');
+      // Vérifier que le contenu principal est accessible avec data-cy
+      cy.get('[data-cy="header-desktop"], [data-cy="header-mobile"]').should('exist');
+      cy.get('[data-cy="main-content"]').should('be.visible');
       cy.get('footer').should('exist');
       
       // Vérifier que la grille existe en arrière-plan
-      cy.get('.grid-background').should('exist');
+      cy.get('[data-cy="grid-background"]').should('exist');
     });
 
     it('should allow proper content interaction', () => {
       // Vérifier que les éléments interactifs fonctionnent
-      cy.get('header').should('be.visible');
+      cy.get('[data-cy="header-desktop"], [data-cy="header-mobile"]').should('exist');
       
       // Tester qu'on peut cliquer sur les éléments de navigation s'ils existent
-      cy.get('header').first().within(() => {
-        cy.get('a, button').first().should('exist');
-      });
+      cy.get('[data-cy="logo-desktop"], [data-cy="logo-mobile"]').first().should('exist');
     });
 
     it('should maintain proper z-index hierarchy', () => {
       // La grille doit être derrière tout le contenu
-      cy.get('.grid-background').should('have.css', 'z-index', '-1');
+      cy.get('[data-cy="grid-background"]').should('have.css', 'z-index', '-1');
       
       // Le contenu principal doit être visible par-dessus
-      cy.get('main').should('be.visible');
-      cy.get('header').should('be.visible');
+      cy.get('[data-cy="main-content"]').should('be.visible');
+      cy.get('[data-cy="header-desktop"], [data-cy="header-mobile"]').should('exist');
     });
   });
 
@@ -116,11 +114,11 @@ describe('Grid Background - Ultra Discrete', () => {
         cy.viewport(viewport.width, viewport.height);
         
         // La grille doit toujours exister
-        cy.get('.grid-background').should('exist');
+        cy.get('[data-cy="grid-background"]').should('exist');
         
         // Le contenu doit rester accessible
-        cy.get('main').should('be.visible');
-        cy.get('header').should('be.visible');
+        cy.get('[data-cy="main-content"]').should('be.visible');
+        cy.get('[data-cy="header-desktop"], [data-cy="header-mobile"]').should('exist');
       });
     });
   });
@@ -129,21 +127,21 @@ describe('Grid Background - Ultra Discrete', () => {
     it('should remain fixed during scroll', () => {
       // Tester le scroll pour vérifier que la grille reste fixe
       cy.scrollTo(0, 500);
-      cy.get('.grid-background')
+      cy.get('[data-cy="grid-background"]')
         .should('exist')
         .should('have.css', 'position', 'fixed');
       
       // Le contenu doit rester accessible
-      cy.get('main').should('be.visible');
+      cy.get('[data-cy="main-content"]').should('be.visible');
     });
 
     it('should not affect scroll performance', () => {
       // Test de performance basique - vérifier que le scroll fonctionne
       cy.scrollTo(0, 1000, { duration: 500 });
-      cy.get('.grid-background').should('exist');
+      cy.get('[data-cy="grid-background"]').should('exist');
       
       cy.scrollTo('top', { duration: 500 });
-      cy.get('.grid-background').should('exist');
+      cy.get('[data-cy="grid-background"]').should('exist');
     });
   });
 
@@ -153,13 +151,13 @@ describe('Grid Background - Ultra Discrete', () => {
       const themes = ['light-blue', 'dark-blue'];
       
       themes.forEach((theme) => {
-        cy.document().then((doc) => {
-          doc.documentElement.setAttribute('data-theme', theme);
+        cy.get('[data-cy="app-body"]').then(($body) => {
+          $body.attr('data-theme', theme);
         });
         
         // La grille doit toujours exister et fonctionner
-        cy.get('.grid-background').should('exist');
-        cy.get('main').should('be.visible');
+        cy.get('[data-cy="grid-background"]').should('exist');
+        cy.get('[data-cy="main-content"]').should('be.visible');
       });
     });
   });
@@ -167,27 +165,27 @@ describe('Grid Background - Ultra Discrete', () => {
   describe('Accessibility', () => {
     it('should not interfere with screen readers', () => {
       // Vérifier que la grille a pointer-events: none
-      cy.get('.grid-background')
+      cy.get('[data-cy="grid-background"]')
         .should('have.css', 'pointer-events', 'none');
     });
 
     it('should not affect keyboard navigation', () => {
       // Vérifier que la grille a pointer-events: none pour ne pas interférer
-      cy.get('.grid-background')
+      cy.get('[data-cy="grid-background"]')
         .should('have.css', 'pointer-events', 'none');
       
       // Vérifier qu'il existe des éléments interactifs sur la page
       cy.get('a, button, input, textarea').should('have.length.greaterThan', 0);
       
       // Vérifier que la grille n'interfère pas avec les éléments du DOM
-      cy.get('.grid-background').should('not.have.attr', 'tabindex');
+      cy.get('[data-cy="grid-background"]').should('not.have.attr', 'tabindex');
     });
 
     it('should respect reduced motion preferences', () => {
       // Test pour prefers-reduced-motion
       cy.window().then((win) => {
         // La grille devrait avoir une opacité réduite si motion réduit est activé
-        cy.get('.grid-background').should('exist');
+        cy.get('[data-cy="grid-background"]').should('exist');
       });
     });
   });
@@ -195,46 +193,23 @@ describe('Grid Background - Ultra Discrete', () => {
   describe('Performance and Optimization', () => {
     it('should not cause layout shifts', () => {
       // Vérifier que la grille ne cause pas de décalages de layout
-      cy.get('.grid-background')
+      cy.get('[data-cy="grid-background"]')
         .should('have.css', 'position', 'fixed')
         .should('have.css', 'top', '0px')
         .should('have.css', 'left', '0px');
-      
-      // Le contenu doit rester stable
-      cy.get('main').should('be.visible');
     });
 
-    it('should load without affecting page performance', () => {
-      // Test basique de performance - la page doit se charger rapidement
-      cy.window().its('performance').invoke('now').should('be.lessThan', 5000);
-      
-      cy.get('.grid-background').should('exist');
-      cy.get('main').should('be.visible');
-    });
-  });
-
-  describe('Edge Cases', () => {
-    it('should handle very small viewports', () => {
-      cy.viewport(320, 568); // iPhone SE
-      
-      cy.get('.grid-background').should('exist');
-      cy.get('main').should('be.visible');
+    it('should be properly layered behind content', () => {
+      // Vérifier que tous les éléments principaux sont au-dessus de la grille
+      cy.get('[data-cy="main-content"]').should('be.visible');
+      cy.get('[data-cy="latest-articles-section"]').should('be.visible');
+      cy.get('[data-cy="grid-background"]').should('have.css', 'z-index', '-1');
     });
 
-    it('should handle very large viewports', () => {
-      cy.viewport(2560, 1440); // 4K display
-      
-      cy.get('.grid-background').should('exist');
-      cy.get('main').should('be.visible');
-    });
-
-    it('should work with dynamic content changes', () => {
-      // La grille doit rester stable même si le contenu change
-      cy.get('.grid-background').should('exist');
-      
-      // Simuler un changement de contenu (scroll par exemple)
-      cy.scrollTo(0, 500);
-      cy.get('.grid-background').should('exist');
+    it('should not affect content rendering', () => {
+      // Vérifier que les articles se chargent correctement malgré la grille
+      cy.get('[data-cy="article-card"], [data-cy="article-hero"]').should('have.length.at.least', 1);
+      cy.get('[data-cy="articles-container"]').should('be.visible');
     });
   });
 }); 

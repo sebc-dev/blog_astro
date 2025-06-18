@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { estimateReadingTime, getPostCategory } from "../../scripts/article-utils";
 
 describe("Articles Réels - Tests d'Intégration", () => {
   // Mock des vrais articles basés sur les fichiers MDX existants
@@ -49,42 +50,7 @@ describe("Articles Réels - Tests d'Intégration", () => {
     },
   ];
 
-  // Reproduire la fonction estimateReadingTime du composant
-  function estimateReadingTime(post: typeof realArticlesMock[0]): number {
-    const wordsPerMinute = 200;
-    const descWords = post.data.description.split(/\s+/).length;
-    const slug = post.slug;
-    let estimatedWords = descWords * 15;
-    
-    // Ajustements basés sur le type d'article détecté
-    if (slug.includes("guide") || post.data.title.toLowerCase().includes("guide")) {
-      estimatedWords *= 2.5; // Les guides sont plus longs
-    } else if (slug.includes("vs") || post.data.title.toLowerCase().includes("vs")) {
-      estimatedWords *= 1.8; // Les comparaisons sont moyennement longues
-    } else if (slug.includes("api") || post.data.title.toLowerCase().includes("api")) {
-      estimatedWords *= 2.2; // Les articles API sont techniques et longs
-    } else if (post.data.title.toLowerCase().includes("techniques") || 
-               post.data.title.toLowerCase().includes("optimisation")) {
-      estimatedWords *= 2.0; // Les articles techniques sont plus longs
-    }
-    
-    return Math.max(1, Math.ceil(estimatedWords / wordsPerMinute));
-  }
 
-  // Fonction de catégorisation identique au composant
-  function getPostCategory(post: typeof realArticlesMock[0]): string {
-    const title = post.data.title.toLowerCase();
-    const description = post.data.description.toLowerCase();
-    
-    if (title.includes("astro") || description.includes("astro")) return "Framework";
-    if (title.includes("typescript") || description.includes("typescript")) return "Language";
-    if (title.includes("performance") || description.includes("performance")) return "Performance";
-    if (title.includes("css") || description.includes("css")) return "Styling";
-    if (title.includes("api") || description.includes("api")) return "Backend";
-    if (title.includes("react") || title.includes("vue")) return "Framework";
-    
-    return "Article";
-  }
 
   it("devrait estimer correctement le temps de lecture pour différents types d'articles", () => {
     const cssGuideTime = estimateReadingTime(realArticlesMock[0]);
@@ -109,7 +75,7 @@ describe("Articles Réels - Tests d'Intégration", () => {
   });
 
   it("devrait catégoriser correctement les vrais articles", () => {
-    const categories = realArticlesMock.map(getPostCategory);
+    const categories = realArticlesMock.map(post => getPostCategory(post));
     
     expect(categories[0]).toBe("Styling"); // CSS Grid
     expect(categories[1]).toBe("Performance"); // Optimisation
@@ -168,7 +134,7 @@ describe("Articles Réels - Tests d'Intégration", () => {
   });
 
   it("devrait calculer des temps de lecture raisonnables", () => {
-    const readingTimes = realArticlesMock.map(estimateReadingTime);
+    const readingTimes = realArticlesMock.map(post => estimateReadingTime(post));
     
     // Tous les temps devraient être entre 1 et 30 minutes (raisonnable pour des articles de blog)
     readingTimes.forEach(time => {

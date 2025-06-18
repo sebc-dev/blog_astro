@@ -42,11 +42,11 @@ const shortDescription = description.length > 120
   : description;
 ---
 
-<article class="card bg-base-200 border border-base-content/10 shadow-lg hover:shadow-xl transition-all duration-300 group overflow-hidden h-full">
+<article class="card bg-base-200 border border-base-content/10 shadow-lg hover:shadow-xl transition-all duration-300 group overflow-hidden h-full" data-cy="article-card" data-article-slug={slug}>
   <!-- Image de carte -->
   {
     heroImage && (
-      <figure class="aspect-video overflow-hidden">
+      <figure class="aspect-video overflow-hidden" data-cy="article-image">
         <img
           src={heroImage}
           alt={title}
@@ -57,43 +57,43 @@ const shortDescription = description.length > 120
     )
   }
 
-  <div class="card-body p-4 flex flex-col justify-between">
+  <div class="card-body p-4 flex flex-col justify-between" data-cy="article-content">
     <!-- Métadonnées compactes -->
-    <div class="flex flex-wrap gap-1 mb-3">
+    <div class="flex flex-wrap gap-1 mb-3" data-cy="article-metadata">
       {
         category && (
-          <span class="badge badge-primary badge-sm">
+          <span class="badge badge-primary badge-sm" data-cy="article-category">
             {category}
           </span>
         )
       }
       {
         tag && (
-          <span class="badge badge-outline badge-sm">
+          <span class="badge badge-outline badge-sm" data-cy="article-tag">
             {tag}
           </span>
         )
       }
-      <span class="text-xs text-base-content/60 ml-auto">
+      <span class="text-xs text-base-content/60 ml-auto" data-cy="article-date">
         {formattedDate}
       </span>
     </div>
 
     <!-- Titre compact -->
-    <h3 class="card-title text-lg font-bold leading-tight mb-3 group-hover:text-primary transition-colors line-clamp-2">
-      <a href={`/blog/${slug}`} class="link-hover">
+    <h3 class="card-title text-lg font-bold leading-tight mb-3 group-hover:text-primary transition-colors line-clamp-2" data-cy="article-title">
+      <a href={`/blog/${slug}`} class="link-hover" data-cy="article-title-link">
         {title}
       </a>
     </h3>
 
     <!-- Extrait court avec ellipsis -->
-    <p class="text-base-content/70 text-sm leading-relaxed mb-4 line-clamp-2 flex-grow">
+    <p class="text-base-content/70 text-sm leading-relaxed mb-4 line-clamp-2 flex-grow" data-cy="article-description">
       {shortDescription}
     </p>
 
     <!-- Footer compact -->
-    <div class="card-actions justify-between items-center mt-auto">
-      <span class="text-xs text-base-content/60">
+    <div class="card-actions justify-between items-center mt-auto" data-cy="article-footer">
+      <span class="text-xs text-base-content/60" data-cy="article-reading-time">
         {readingTime} min
       </span>
       
@@ -101,6 +101,7 @@ const shortDescription = description.length > 120
         href={`/blog/${slug}`}
         class="btn btn-primary btn-xs"
         aria-label={`Lire: ${title}`}
+        data-cy="article-read-button"
       >
         {t('blog.read')}
         <svg
