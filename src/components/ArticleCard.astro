@@ -30,7 +30,8 @@ const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 
 // Formatage de la date
-const formattedDate = pubDate.toLocaleDateString("fr-FR", {
+const locale = lang === 'fr' ? 'fr-FR' : 'en-US';
+const formattedDate = pubDate.toLocaleDateString(locale, {
   day: "numeric",
   month: "short",
   year: "numeric",

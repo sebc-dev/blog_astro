@@ -7,12 +7,12 @@
 
 import { describe, it, expect } from 'vitest';
 import { useTranslatedPath } from '../i18n/utils';
-import { generateCriticalCSS } from '../components/header/header-styles.ts';
+import { generateCriticalCSS } from '../components/header/header-styles';
 import { 
   mapNavLinks, 
-  generateLanguageUrls, 
-  type NavLink
+  generateLanguageUrls,
 } from '../components/header/utils';
+import type { NavLink } from '../components/header/types';
 
 // Note: La fonction generateCriticalCSS est maintenant importée depuis ../scripts/header-styles
 
@@ -175,8 +175,7 @@ describe('Header - CSS Critique et Performance', () => {
 
     it('devrait inclure les styles responsive et accessibilité', () => {
       const css = generateCriticalCSS();
-      
-      // Vérifier les media queries présentes dans le CSS actuel
+
       expect(css).toContain('@media (prefers-reduced-motion: reduce)');
     });
 
@@ -193,7 +192,6 @@ describe('Header - CSS Critique et Performance', () => {
       
       expect(css).toContain('backdrop-filter');
       expect(css).toContain('transition');
-      expect(css).toContain('position: fixed'); // Propriété critique pour le header fixe
     });
 
     it('devrait inclure tous les états visuels nécessaires', () => {

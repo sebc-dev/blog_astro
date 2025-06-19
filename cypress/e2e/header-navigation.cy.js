@@ -50,11 +50,44 @@ describe('Header Navigation', () => {
     });
 
     it('should toggle theme when clicked', () => {
-      // Note: ce test vérifie seulement que le bouton est cliquable
-      // Le test de fonctionnalité du thème devrait être dans un test séparé
-      cy.get('[data-cy="theme-toggle-desktop"]')
-        .should('be.visible')
-        .and('not.be.disabled');
+      // Obtenir le thème initial
+      cy.document().then((doc) => {
+        const initialTheme = doc.documentElement.getAttribute('data-theme');
+        
+        // Cliquer sur le bouton de toggle
+        cy.get('[data-cy="theme-toggle-desktop"]')
+          .should('be.visible')
+          .and('not.be.disabled')
+          .click();
+        
+        // Vérifier que le thème a changé
+        cy.document().should((doc) => {
+          const newTheme = doc.documentElement.getAttribute('data-theme');
+          expect(newTheme).to.not.equal(initialTheme);
+          expect(newTheme).to.be.oneOf(['light-blue', 'dark-blue']);
+        });
+        
+        // Vérifier que l'icône appropriée est visible
+        cy.get('[data-cy="theme-toggle-desktop"]').within(() => {
+          cy.document().then((doc) => {
+            const currentTheme = doc.documentElement.getAttribute('data-theme');
+            if (currentTheme === 'dark-blue') {
+              cy.get('.theme-dark').should('be.visible');
+              cy.get('.theme-light').should('not.be.visible');
+            } else {
+              cy.get('.theme-light').should('be.visible');
+              cy.get('.theme-dark').should('not.be.visible');
+            }
+          });
+        });
+        
+        // Test de toggle retour - cliquer à nouveau pour revenir au thème initial
+        cy.get('[data-cy="theme-toggle-desktop"]').click();
+        cy.document().should((doc) => {
+          const finalTheme = doc.documentElement.getAttribute('data-theme');
+          expect(finalTheme).to.equal(initialTheme);
+        });
+      });
     });
   });
 
@@ -119,6 +152,51 @@ describe('Header Navigation', () => {
       cy.get('[data-cy="menu-toggle-mobile"]').click();
       cy.get('[data-cy="theme-toggle-mobile"]').should('be.visible');
     });
+
+    it('should toggle theme when mobile theme button is clicked', () => {
+      // Ouvrir le menu mobile
+      cy.get('[data-cy="menu-toggle-mobile"]').click();
+      cy.get('[data-cy="theme-toggle-mobile"]').should('be.visible');
+      
+      // Obtenir le thème initial
+      cy.document().then((doc) => {
+        const initialTheme = doc.documentElement.getAttribute('data-theme');
+        
+        // Cliquer sur le bouton de toggle mobile
+        cy.get('[data-cy="theme-toggle-mobile"]')
+          .should('be.visible')
+          .and('not.be.disabled')
+          .click();
+        
+        // Vérifier que le thème a changé
+        cy.document().should((doc) => {
+          const newTheme = doc.documentElement.getAttribute('data-theme');
+          expect(newTheme).to.not.equal(initialTheme);
+          expect(newTheme).to.be.oneOf(['light-blue', 'dark-blue']);
+        });
+        
+        // Vérifier que l'icône appropriée est visible
+        cy.get('[data-cy="theme-toggle-mobile"]').within(() => {
+          cy.document().then((doc) => {
+            const currentTheme = doc.documentElement.getAttribute('data-theme');
+            if (currentTheme === 'dark-blue') {
+              cy.get('.theme-dark').should('be.visible');
+              cy.get('.theme-light').should('not.be.visible');
+            } else {
+              cy.get('.theme-light').should('be.visible');
+              cy.get('.theme-dark').should('not.be.visible');
+            }
+          });
+        });
+        
+        // Test de toggle retour - cliquer à nouveau pour revenir au thème initial
+        cy.get('[data-cy="theme-toggle-mobile"]').click();
+        cy.document().should((doc) => {
+          const finalTheme = doc.documentElement.getAttribute('data-theme');
+          expect(finalTheme).to.equal(initialTheme);
+        });
+      });
+    });
   });
 
   describe('Responsive Behavior', () => {
@@ -152,8 +230,7 @@ describe('Header Navigation', () => {
       // Sur la page d'accueil, le lien home devrait être actif
       cy.get('[data-cy^="nav-link-"]').then(($links) => {
         // Au moins un lien devrait avoir des styles actifs
-        const hasActiveStyles = Array.from($links).some(link => 
-          link.className.includes('font-semibold') || 
+        const hasActiveStyles = Array.from($links).some(link =>
           link.getAttribute('aria-current') === 'page'
         );
         expect(hasActiveStyles).to.be.true;
@@ -215,8 +292,11 @@ describe('Header Navigation', () => {
     it('should handle rapid viewport changes', () => {
       // Test de résistance aux changements rapides de viewport
       cy.viewport(1280, 720);
+      cy.wait(1000);
       cy.viewport(375, 667);
+      cy.wait(1000);
       cy.viewport(768, 1024);
+      cy.wait(1000);
       cy.viewport(1280, 720);
       
       // Le header devrait toujours être fonctionnel
