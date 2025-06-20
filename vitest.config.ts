@@ -1,5 +1,8 @@
 /// <reference types="vitest/config" />
-import { getViteConfig } from 'astro/config'
+import { getViteConfig } from "astro/config";
+
+const TIMEOUT_CI = 10000;
+const TIMEOUT = 5000;
 
 export default getViteConfig({
   test: {
@@ -22,10 +25,10 @@ export default getViteConfig({
           branches: 80,
           functions: 80,
           lines: 80,
-          statements: 80
-        }
-      }
+          statements: 80,
+        },
+      },
     },
-    testTimeout: process.env.CI ? 10000 : 5000,
-  }
+    testTimeout: process.env.CI ? TIMEOUT_CI : TIMEOUT,
+  },
 });

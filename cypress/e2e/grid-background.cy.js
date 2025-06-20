@@ -65,7 +65,19 @@ describe('Grid Background - Ultra Discrete', () => {
         const element = $el[0];
         const computedStyle = window.getComputedStyle(element);
         
-        // Vérifier la taille de la grille adaptée pour mobile (20px)
+        // Vérifier la taille de la grille adaptée pour très petits écrans (16px optimisé)
+        expect(computedStyle.backgroundSize).to.include('16px');
+      });
+    });
+
+    it('should adapt background-size for tablet', () => {
+      cy.viewport(768, 1024); // Tablet viewport
+      
+      cy.get('[data-cy="grid-background"]').should(($el) => {
+        const element = $el[0];
+        const computedStyle = window.getComputedStyle(element);
+        
+        // Vérifier la taille de la grille pour tablette (20px)
         expect(computedStyle.backgroundSize).to.include('20px');
       });
     });
@@ -182,10 +194,16 @@ describe('Grid Background - Ultra Discrete', () => {
     });
 
     it('should respect reduced motion preferences', () => {
-      // Test pour prefers-reduced-motion
-      cy.window().then((win) => {
-        // La grille devrait avoir une opacité réduite si motion réduit est activé
-        cy.get('[data-cy="grid-background"]').should('exist');
+      // Test pour prefers-reduced-motion - la grille est désactivée pour une performance maximale
+      cy.get('[data-cy="grid-background"]').should('exist');
+      
+      // Vérifier que le background reste fonctionnel par défaut
+      cy.get('[data-cy="grid-background"]').should(($el) => {
+        const element = $el[0];
+        const computedStyle = window.getComputedStyle(element);
+        
+        // Le background devrait être présent par défaut
+        expect(computedStyle.backgroundImage).to.not.equal('none');
       });
     });
   });
