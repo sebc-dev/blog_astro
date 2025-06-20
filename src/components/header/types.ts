@@ -17,7 +17,7 @@ export interface TranslatedNavLink {
 }
 
 // === TYPES POUR LES THÈMES ===
-export type Theme = 'light-blue' | 'dark-blue';
+export type Theme = "light-blue" | "dark-blue";
 
 export interface ThemeConfig {
   light: Theme;
@@ -25,7 +25,7 @@ export interface ThemeConfig {
 }
 
 // === TYPES POUR LES LANGUES ===
-export type SupportedLanguage = 'en' | 'fr';
+export type SupportedLanguage = "en" | "fr";
 
 export interface LanguageUrl {
   url: string;

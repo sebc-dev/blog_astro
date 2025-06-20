@@ -17,7 +17,7 @@ describe("MainLayout with Grid Background", () => {
     template.innerHTML = html;
     const renderedContent = template.content;
 
-    // Chercher l'élément grid-background 
+    // Chercher l'élément grid-background
     const gridBackground = renderedContent.querySelector(".grid-background");
     expect(gridBackground).not.toBeNull();
     expect(gridBackground?.classList.contains("grid-background")).toBe(true);
@@ -48,8 +48,9 @@ describe("MainLayout with Grid Background", () => {
     const renderedContent = template.content;
 
     // Si body n'est pas présent, utiliser le contenu racine
-    const rootContent = renderedContent.querySelector("body") || renderedContent;
-    
+    const rootContent =
+      renderedContent.querySelector("body") || renderedContent;
+
     const gridBackground = rootContent.querySelector(".grid-background");
     const header = rootContent.querySelector("header");
     const main = rootContent.querySelector("main");

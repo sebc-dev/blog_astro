@@ -37,9 +37,7 @@ describe("ArticleCard - Logique Métier", () => {
     expect(truncatedDescription).toContain("…"); // Caractère Unicode ellipsis
     expect(truncatedDescription.length).toBeLessThanOrEqual(121); // 120 + "…"
     // Vérifier que la description est effectivement tronquée
-    expect(truncatedDescription).toBe(
-      longDescription.substring(0, 120) + "…",
-    );
+    expect(truncatedDescription).toBe(longDescription.substring(0, 120) + "…");
   });
 
   it("devrait garder la description courte intacte", () => {

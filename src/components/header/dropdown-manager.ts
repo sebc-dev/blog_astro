@@ -11,10 +11,10 @@ export class DropdownManager {
   }
 
   private init(): void {
-    this.dropdownButtons = document.querySelectorAll('[data-dropdown]');
-    
+    this.dropdownButtons = document.querySelectorAll("[data-dropdown]");
+
     if (!this.dropdownButtons.length) {
-      console.warn('No dropdown buttons found');
+      console.warn("No dropdown buttons found");
       return;
     }
 
@@ -25,57 +25,57 @@ export class DropdownManager {
     if (!this.dropdownButtons) return;
 
     // Dropdown button clicks
-    this.dropdownButtons.forEach(btn => {
-      btn.addEventListener('click', (e: Event) => {
+    this.dropdownButtons.forEach((btn) => {
+      btn.addEventListener("click", (e: Event) => {
         e.preventDefault();
         this.toggleDropdown(btn);
       });
     });
 
     // Close dropdowns on outside click
-    document.addEventListener('click', (e: Event) => {
+    document.addEventListener("click", (e: Event) => {
       const target = e.target as HTMLElement;
-      if (!target.closest?.('.dropdown')) {
+      if (!target.closest?.(".dropdown")) {
         this.closeAllDropdowns();
       }
     });
 
     // Close dropdowns on Escape key
-    document.addEventListener('keydown', (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+    document.addEventListener("keydown", (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
         this.closeAllDropdowns();
       }
     });
   }
 
   private toggleDropdown(button: HTMLElement): void {
-    const isExpanded = button.getAttribute('aria-expanded') === 'true';
-    
+    const isExpanded = button.getAttribute("aria-expanded") === "true";
+
     // Close all other dropdowns first
     this.closeAllDropdowns();
-    
+
     // Toggle current dropdown if it wasn't expanded
     if (!isExpanded) {
-      button.setAttribute('aria-expanded', 'true');
+      button.setAttribute("aria-expanded", "true");
     }
   }
 
   private closeAllDropdowns(): void {
     if (!this.dropdownButtons) return;
-    
-    this.dropdownButtons.forEach(btn => {
-      btn.setAttribute('aria-expanded', 'false');
+
+    this.dropdownButtons.forEach((btn) => {
+      btn.setAttribute("aria-expanded", "false");
     });
   }
 
   private closeDropdown(button: HTMLElement): void {
-    button.setAttribute('aria-expanded', 'false');
+    button.setAttribute("aria-expanded", "false");
   }
 
   private openDropdown(button: HTMLElement): void {
     // Close others first
     this.closeAllDropdowns();
-    button.setAttribute('aria-expanded', 'true');
+    button.setAttribute("aria-expanded", "true");
   }
 
   // Public API
@@ -113,4 +113,4 @@ export function initDropdownManager(): DropdownManager {
     dropdownManager = new DropdownManager();
   }
   return dropdownManager;
-} 
+}

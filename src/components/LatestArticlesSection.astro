@@ -3,8 +3,16 @@ import { getCollection } from "astro:content";
 import type { CollectionEntry } from "astro:content";
 import ArticleHero from "./ArticleHero.astro";
 import ArticleCard from "./ArticleCard.astro";
-import { getLangFromUrl, useTranslations, useTranslatedPath } from "../i18n/utils";
-import { estimateReadingTime as utilEstimateReadingTime, getPostCategory as utilGetPostCategory, getPostTag as utilGetPostTag } from "../scripts/article-utils";
+import {
+  getLangFromUrl,
+  useTranslations,
+  useTranslatedPath,
+} from "../i18n/utils";
+import {
+  estimateReadingTime as utilEstimateReadingTime,
+  getPostCategory as utilGetPostCategory,
+  getPostTag as utilGetPostTag,
+} from "../scripts/article-utils";
 
 interface Props {
   maxArticles?: number;
@@ -19,13 +27,18 @@ const t = useTranslations(lang);
 const translatePath = useTranslatedPath(lang);
 
 // Récupérer tous les articles de blog dans la langue courante
-const allPosts: CollectionEntry<"blog">[] = await getCollection("blog", ({ data }) => {
-  return data.lang === lang;
-});
+const allPosts: CollectionEntry<"blog">[] = await getCollection(
+  "blog",
+  ({ data }) => {
+    return data.lang === lang;
+  },
+);
 
 // Trier par date de publication (plus récent en premier)
 const sortedPosts = [...allPosts].sort((a, b) => {
-  return new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime();
+  return (
+    new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime()
+  );
 });
 
 // Limiter le nombre d'articles
@@ -33,140 +46,170 @@ const limitedPosts = sortedPosts.slice(0, maxArticles);
 
 // Séparer l'article héro des autres pour desktop
 const heroPosts = showHero && limitedPosts.length > 0 ? [limitedPosts[0]] : [];
-const gridPostsDesktop = showHero && limitedPosts.length > 1 
-  ? limitedPosts.slice(1) 
-  : limitedPosts;
+const gridPostsDesktop =
+  showHero && limitedPosts.length > 1 ? limitedPosts.slice(1) : limitedPosts;
 
 // Pour mobile : tous les articles dans la grille (pas de hero)
 const gridPostsMobile = limitedPosts;
 
 // Utiliser les fonctions utilitaires avec les traductions de ce composant
-const estimateReadingTime = (post: CollectionEntry<"blog">) => utilEstimateReadingTime(post, lang);
+const estimateReadingTime = (post: CollectionEntry<"blog">) =>
+  utilEstimateReadingTime(post, lang);
 
-const getPostCategory = (post: CollectionEntry<"blog">) => utilGetPostCategory(post, {
-  translations: {
-    framework: t('category.framework'),
-    language: t('category.language'),
-    performance: t('category.performance'),
-    styling: t('category.styling'),
-    backend: t('category.backend'),
-    article: t('category.article')
-  }
-});
+const getPostCategory = (post: CollectionEntry<"blog">) =>
+  utilGetPostCategory(post, {
+    translations: {
+      framework: t("category.framework"),
+      language: t("category.language"),
+      performance: t("category.performance"),
+      styling: t("category.styling"),
+      backend: t("category.backend"),
+      article: t("category.article"),
+    },
+  });
 
-const getPostTag = (post: CollectionEntry<"blog">) => utilGetPostTag(post, {
-  translations: {
-    guide: t('tag.guide'),
-    optimization: t('tag.optimization'),
-    bestPractices: t('tag.bestPractices'),
-    comparison: t('tag.comparison')
-  }
-});
+const getPostTag = (post: CollectionEntry<"blog">) =>
+  utilGetPostTag(post, {
+    translations: {
+      guide: t("tag.guide"),
+      optimization: t("tag.optimization"),
+      bestPractices: t("tag.bestPractices"),
+      comparison: t("tag.comparison"),
+    },
+  });
 ---
 
-<section class="latest-articles" aria-label={t('latestArticles.title')} data-cy="latest-articles-section">
+<section
+  class="latest-articles"
+  aria-label={t("latestArticles.title")}
+  data-cy="latest-articles-section"
+>
   <div class="container mx-auto max-w-7xl px-4" data-cy="articles-container">
     <!-- Contenu principal -->
     <div class="articles-layout" data-cy="articles-layout">
       <!-- Article Héro (desktop uniquement) -->
-      {heroPosts.length > 0 && (
-        <div class="hero-section hidden lg:block" data-cy="hero-section">
-          {heroPosts.map((post) => (
-            <ArticleHero
-              title={post.data.title}
-              description={post.data.description}
-              heroImage={post.data.heroImage}
-              pubDate={post.data.pubDate}
-              author={post.data.author}
-              category={getPostCategory(post)}
-              tag={getPostTag(post)}
-              slug={post.slug}
-              readingTime={estimateReadingTime(post)}
-            />
-          ))}
-        </div>
-      )}
+      {
+        heroPosts.length > 0 && (
+          <div class="hero-section hidden lg:block" data-cy="hero-section">
+            {heroPosts.map((post) => (
+              <ArticleHero
+                title={post.data.title}
+                description={post.data.description}
+                heroImage={post.data.heroImage}
+                pubDate={post.data.pubDate}
+                author={post.data.author}
+                category={getPostCategory(post)}
+                tag={getPostTag(post)}
+                slug={post.slug}
+                readingTime={estimateReadingTime(post)}
+              />
+            ))}
+          </div>
+        )
+      }
 
       <!-- Grille d'articles Desktop (sans le premier article qui est en hero) -->
-      {gridPostsDesktop.length > 0 && (
-        <div class="grid-section hidden lg:block pt-16" data-cy="grid-section-desktop">
-          <div class="articles-grid grid gap-6 md:grid-cols-2 lg:grid-cols-3" data-cy="articles-grid-desktop">
-            {gridPostsDesktop.map((post) => (
-              <ArticleCard
-                title={post.data.title}
-                description={post.data.description}
-                heroImage={post.data.heroImage}
-                pubDate={post.data.pubDate}
-                author={post.data.author}
-                category={getPostCategory(post)}
-                tag={getPostTag(post)}
-                slug={post.slug}
-                readingTime={estimateReadingTime(post)}
-              />
-            ))}
+      {
+        gridPostsDesktop.length > 0 && (
+          <div
+            class="grid-section hidden pt-16 lg:block"
+            data-cy="grid-section-desktop"
+          >
+            <div
+              class="articles-grid grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+              data-cy="articles-grid-desktop"
+            >
+              {gridPostsDesktop.map((post) => (
+                <ArticleCard
+                  title={post.data.title}
+                  description={post.data.description}
+                  heroImage={post.data.heroImage}
+                  pubDate={post.data.pubDate}
+                  author={post.data.author}
+                  category={getPostCategory(post)}
+                  tag={getPostTag(post)}
+                  slug={post.slug}
+                  readingTime={estimateReadingTime(post)}
+                />
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       <!-- Grille d'articles Mobile (tous les articles, y compris le premier) -->
-      {gridPostsMobile.length > 0 && (
-        <div class="grid-section lg:hidden pt-4" data-cy="grid-section-mobile">
-          <div class="articles-grid grid gap-6 grid-cols-1 sm:grid-cols-2" data-cy="articles-grid-mobile">
-            {gridPostsMobile.map((post) => (
-              <ArticleCard
-                title={post.data.title}
-                description={post.data.description}
-                heroImage={post.data.heroImage}
-                pubDate={post.data.pubDate}
-                author={post.data.author}
-                category={getPostCategory(post)}
-                tag={getPostTag(post)}
-                slug={post.slug}
-                readingTime={estimateReadingTime(post)}
-              />
-            ))}
+      {
+        gridPostsMobile.length > 0 && (
+          <div
+            class="grid-section pt-4 lg:hidden"
+            data-cy="grid-section-mobile"
+          >
+            <div
+              class="articles-grid grid grid-cols-1 gap-6 sm:grid-cols-2"
+              data-cy="articles-grid-mobile"
+            >
+              {gridPostsMobile.map((post) => (
+                <ArticleCard
+                  title={post.data.title}
+                  description={post.data.description}
+                  heroImage={post.data.heroImage}
+                  pubDate={post.data.pubDate}
+                  author={post.data.author}
+                  category={getPostCategory(post)}
+                  tag={getPostTag(post)}
+                  slug={post.slug}
+                  readingTime={estimateReadingTime(post)}
+                />
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       <!-- Message si aucun article -->
-      {limitedPosts.length === 0 && (
-        <div class="no-articles text-center py-16" data-cy="no-articles">
-          <div class="bg-base-200 rounded-lg p-8 max-w-md mx-auto">
-            <h3 class="text-xl font-semibold mb-2">{t('latestArticles.noArticles')}</h3>
-            <p class="text-base-content/70">
-              {t('latestArticles.noArticlesDesc')}
-            </p>
+      {
+        limitedPosts.length === 0 && (
+          <div class="no-articles py-16 text-center" data-cy="no-articles">
+            <div class="bg-base-200 mx-auto max-w-md rounded-lg p-8">
+              <h3 class="mb-2 text-xl font-semibold">
+                {t("latestArticles.noArticles")}
+              </h3>
+              <p class="text-base-content/70">
+                {t("latestArticles.noArticlesDesc")}
+              </p>
+            </div>
           </div>
-        </div>
-      )}
+        )
+      }
     </div>
 
     <!-- Lien vers tous les articles (optionnel) -->
-    {limitedPosts.length >= maxArticles && (
-      <div class="text-center mt-12 mb-10" data-cy="view-all-section">
-        <a 
-          href={translatePath('/blog')}
-          class="btn btn-primary btn-lg"
-          data-cy="view-all-button"
-        >
-          {t('latestArticles.viewAll')}
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+    {
+      limitedPosts.length >= maxArticles && (
+        <div class="mt-12 mb-10 text-center" data-cy="view-all-section">
+          <a
+            href={translatePath("/blog")}
+            class="btn btn-primary btn-lg"
+            data-cy="view-all-button"
           >
-            <path d="M7 17L17 7" />
-            <path d="M7 7h10v10" />
-          </svg>
-        </a>
-      </div>
-    )}
+            {t("latestArticles.viewAll")}
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M7 17L17 7" />
+              <path d="M7 7h10v10" />
+            </svg>
+          </a>
+        </div>
+      )
+    }
   </div>
 </section>
 
@@ -197,7 +240,7 @@ const getPostTag = (post: CollectionEntry<"blog">) => utilGetPostTag(post, {
   .grid-section.lg\:hidden .articles-grid {
     gap: 1.5rem;
   }
-  
+
   @media (max-width: 640px) {
     .grid-section.lg\:hidden .articles-grid {
       grid-template-columns: 1fr; /* 1 colonne sur petit mobile */
@@ -207,7 +250,10 @@ const getPostTag = (post: CollectionEntry<"blog">) => utilGetPostTag(post, {
 
   @media (min-width: 641px) and (max-width: 1023px) {
     .grid-section.lg\:hidden .articles-grid {
-      grid-template-columns: repeat(2, 1fr); /* 2 colonnes sur grand mobile/tablette */
+      grid-template-columns: repeat(
+        2,
+        1fr
+      ); /* 2 colonnes sur grand mobile/tablette */
     }
   }
 
@@ -216,7 +262,7 @@ const getPostTag = (post: CollectionEntry<"blog">) => utilGetPostTag(post, {
     .grid-section.hidden.lg\:block .articles-grid {
       grid-template-columns: repeat(3, 1fr); /* 3 colonnes sur desktop */
     }
-    
+
     .hero-section {
       margin-bottom: 2rem;
     }
@@ -225,7 +271,7 @@ const getPostTag = (post: CollectionEntry<"blog">) => utilGetPostTag(post, {
   /* Amélioration de l'accessibilité et des performances */
   .latest-articles {
     /* Optimisation de la peinture */
-    contain: layout paint style;s
+    contain: layout paint style;
   }
 
   /* Animation au chargement */
@@ -240,12 +286,24 @@ const getPostTag = (post: CollectionEntry<"blog">) => utilGetPostTag(post, {
   }
 
   /* Décalage des animations pour effet en cascade */
-  .articles-grid > *:nth-child(1) { animation-delay: 0.1s; }
-  .articles-grid > *:nth-child(2) { animation-delay: 0.2s; }
-  .articles-grid > *:nth-child(3) { animation-delay: 0.3s; }
-  .articles-grid > *:nth-child(4) { animation-delay: 0.4s; }
-  .articles-grid > *:nth-child(5) { animation-delay: 0.5s; }
-  .articles-grid > *:nth-child(6) { animation-delay: 0.6s; }
+  .articles-grid > *:nth-child(1) {
+    animation-delay: 0.1s;
+  }
+  .articles-grid > *:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+  .articles-grid > *:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+  .articles-grid > *:nth-child(4) {
+    animation-delay: 0.4s;
+  }
+  .articles-grid > *:nth-child(5) {
+    animation-delay: 0.5s;
+  }
+  .articles-grid > *:nth-child(6) {
+    animation-delay: 0.6s;
+  }
 
   @keyframes fadeInUp {
     from {
@@ -266,4 +324,5 @@ const getPostTag = (post: CollectionEntry<"blog">) => utilGetPostTag(post, {
       animation: none;
     }
   }
-</style> 
+</style>
+

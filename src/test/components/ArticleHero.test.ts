@@ -3,7 +3,8 @@ import { describe, it, expect } from "vitest";
 describe("ArticleHero - Logique Métier", () => {
   const mockProps = {
     title: "Guide Complet des Performances Web",
-    description: "Un guide approfondi pour optimiser les performances de vos applications web modernes avec les dernières techniques et bonnes pratiques",
+    description:
+      "Un guide approfondi pour optimiser les performances de vos applications web modernes avec les dernières techniques et bonnes pratiques",
     heroImage: "/images/hero-performance.jpg",
     pubDate: new Date("2024-01-15T00:00:00Z"),
     author: "Expert Dev",
@@ -30,10 +31,10 @@ describe("ArticleHero - Logique Métier", () => {
     const testTitles = [
       "Titre Court",
       "Un Titre de Longueur Moyenne",
-      "Un Très Long Titre Qui Pourrait Poser Des Problèmes d'Affichage Dans Certains Contextes de Page"
+      "Un Très Long Titre Qui Pourrait Poser Des Problèmes d'Affichage Dans Certains Contextes de Page",
     ];
 
-    testTitles.forEach(title => {
+    testTitles.forEach((title) => {
       expect(typeof title).toBe("string");
       expect(title.length).toBeGreaterThan(0);
       expect(title.length).toBeLessThan(150); // Limite raisonnable pour un titre de héros
@@ -42,7 +43,8 @@ describe("ArticleHero - Logique Métier", () => {
 
   it("devrait valider la longueur de la description", () => {
     const shortDescription = "Description courte mais informative";
-    const longDescription = "Une description très détaillée qui peut s'étendre sur plusieurs lignes pour donner tous les détails nécessaires sur le contenu de l'article et ce que le lecteur peut attendre en le lisant.";
+    const longDescription =
+      "Une description très détaillée qui peut s'étendre sur plusieurs lignes pour donner tous les détails nécessaires sur le contenu de l'article et ce que le lecteur peut attendre en le lisant.";
 
     expect(shortDescription.length).toBeGreaterThan(10);
     expect(longDescription.length).toBeGreaterThan(50);
@@ -54,10 +56,10 @@ describe("ArticleHero - Logique Métier", () => {
       "/images/hero-performance.jpg",
       "/images/hero-development.png",
       "/images/hero-design.webp",
-      "https://cdn.example.com/hero.jpg"
+      "https://cdn.example.com/hero.jpg",
     ];
 
-    validHeroImages.forEach(image => {
+    validHeroImages.forEach((image) => {
       expect(typeof image).toBe("string");
       expect(image.length).toBeGreaterThan(0);
       expect(image).toMatch(/\.(jpg|jpeg|png|webp)$/i);
@@ -68,10 +70,10 @@ describe("ArticleHero - Logique Métier", () => {
     const testDates = [
       new Date("2024-01-15T00:00:00Z"),
       new Date("2023-12-25T10:30:00Z"),
-      new Date("2024-06-01T14:45:00Z")
+      new Date("2024-06-01T14:45:00Z"),
     ];
 
-    testDates.forEach(date => {
+    testDates.forEach((date) => {
       expect(date instanceof Date).toBe(true);
       expect(date.getTime()).not.toBeNaN();
       expect(date.getFullYear()).toBeGreaterThan(2020);
@@ -84,7 +86,7 @@ describe("ArticleHero - Logique Métier", () => {
       { minutes: 3, description: "Article court" },
       { minutes: 8, description: "Article moyen" },
       { minutes: 15, description: "Article long" },
-      { minutes: 25, description: "Guide approfondi" }
+      { minutes: 25, description: "Guide approfondi" },
     ];
 
     readingTimes.forEach(({ minutes }) => {
@@ -99,10 +101,10 @@ describe("ArticleHero - Logique Métier", () => {
       "guide-performances-web",
       "introduction-typescript",
       "astro-vs-next-comparison",
-      "best-practices-2024"
+      "best-practices-2024",
     ];
 
-    testSlugs.forEach(slug => {
+    testSlugs.forEach((slug) => {
       expect(typeof slug).toBe("string");
       expect(slug).toMatch(/^[a-z0-9-]+$/); // Format kebab-case strict
       expect(slug).not.toContain(" ");
@@ -116,14 +118,14 @@ describe("ArticleHero - Logique Métier", () => {
   it("devrait valider les catégories d'articles", () => {
     const categories = [
       "Performance",
-      "Development", 
+      "Development",
       "Design",
       "JavaScript",
       "TypeScript",
-      "Astro"
+      "Astro",
     ];
 
-    categories.forEach(category => {
+    categories.forEach((category) => {
       expect(typeof category).toBe("string");
       expect(category.length).toBeGreaterThan(2);
       expect(category[0]).toMatch(/[A-Z]/); // Commence par une majuscule
@@ -135,12 +137,12 @@ describe("ArticleHero - Logique Métier", () => {
     const tags = [
       "Optimization",
       "Best Practices",
-      "Tutorial", 
+      "Tutorial",
       "Advanced",
-      "Beginner Friendly"
+      "Beginner Friendly",
     ];
 
-    tags.forEach(tag => {
+    tags.forEach((tag) => {
       expect(typeof tag).toBe("string");
       expect(tag.length).toBeGreaterThan(2);
       expect(tag.length).toBeLessThan(30);
@@ -152,10 +154,10 @@ describe("ArticleHero - Logique Métier", () => {
       "Expert Dev",
       "Marie Dupont",
       "Jean-Pierre Martin",
-      "Alexandra Tech"
+      "Alexandra Tech",
     ];
 
-    authors.forEach(author => {
+    authors.forEach((author) => {
       expect(typeof author).toBe("string");
       expect(author.length).toBeGreaterThan(2);
       expect(author.length).toBeLessThan(50);
@@ -167,8 +169,8 @@ describe("ArticleHero - Logique Métier", () => {
     // Test de la logique d'estimation (environ 200-250 mots par minute)
     const wordsPerMinute = 200;
     const testWordCounts = [400, 800, 1200, 2000];
-    
-    testWordCounts.forEach(wordCount => {
+
+    testWordCounts.forEach((wordCount) => {
       const estimatedTime = Math.ceil(wordCount / wordsPerMinute);
       expect(estimatedTime).toBeGreaterThan(0);
       expect(typeof estimatedTime).toBe("number");
@@ -177,4 +179,4 @@ describe("ArticleHero - Logique Métier", () => {
       expect(estimatedTime).toBeGreaterThanOrEqual(Math.ceil(wordCount / 300)); // Estimation basse
     });
   });
-}); 
+});

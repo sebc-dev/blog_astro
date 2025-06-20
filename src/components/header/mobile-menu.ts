@@ -14,12 +14,12 @@ export class MobileMenuManager {
   }
 
   private init(): void {
-    this.menu = document.querySelector('#mobile-menu');
-    this.toggleButton = document.querySelector('#mobile-menu-toggle');
-    this.overlay = document.querySelector('[data-menu-overlay]');
+    this.menu = document.querySelector("#mobile-menu");
+    this.toggleButton = document.querySelector("#mobile-menu-toggle");
+    this.overlay = document.querySelector("[data-menu-overlay]");
 
     if (!this.menu || !this.toggleButton) {
-      console.warn('Mobile menu elements not found');
+      console.warn("Mobile menu elements not found");
       return;
     }
 
@@ -30,14 +30,14 @@ export class MobileMenuManager {
     if (!this.toggleButton) return;
 
     // Toggle button click
-    this.toggleButton.addEventListener('click', () => this.toggleMenu());
+    this.toggleButton.addEventListener("click", () => this.toggleMenu());
 
     // Overlay click to close
-    this.overlay?.addEventListener('click', () => this.closeMenu());
+    this.overlay?.addEventListener("click", () => this.closeMenu());
 
     // Escape key to close
-    document.addEventListener('keydown', (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+    document.addEventListener("keydown", (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
         this.closeMenu();
       }
     });
@@ -66,14 +66,16 @@ export class MobileMenuManager {
     if (!this.menu || !this.toggleButton) return;
 
     // Update menu visibility
-    this.menu.style.transform = this.isOpen ? 'translateX(0)' : 'translateX(100%)';
-    
+    this.menu.style.transform = this.isOpen
+      ? "translateX(0)"
+      : "translateX(100%)";
+
     // Update toggle button state
-    this.toggleButton.setAttribute('aria-expanded', String(this.isOpen));
-    this.toggleButton.classList.toggle('menu-open', this.isOpen);
-    
+    this.toggleButton.setAttribute("aria-expanded", String(this.isOpen));
+    this.toggleButton.classList.toggle("menu-open", this.isOpen);
+
     // Update body scroll
-    document.body.style.overflow = this.isOpen ? 'hidden' : '';
+    document.body.style.overflow = this.isOpen ? "hidden" : "";
   }
 
   // Public API
@@ -102,4 +104,4 @@ export function initMobileMenuManager(): MobileMenuManager {
     mobileMenuManager = new MobileMenuManager();
   }
   return mobileMenuManager;
-} 
+}

@@ -31,6 +31,7 @@ CSS Grid is a two-dimensional layout system that allows you to create complex gr
 ## Essential Terminology
 
 ### Grid Container and Grid Items
+
 ```html
 <div class="grid-container">
   <div class="grid-item">1</div>
@@ -40,56 +41,61 @@ CSS Grid is a two-dimensional layout system that allows you to create complex gr
 ```
 
 ### Grid Lines
+
 - **Vertical**: Columns numbered from 1 to n+1
 - **Horizontal**: Rows numbered from 1 to n+1
 
 ### Grid Tracks
+
 - **Columns**: Space between two vertical lines
 - **Rows**: Space between two horizontal lines
 
 ## Container Properties
 
 ### Defining Columns
+
 ```css
 .grid {
   /* Fixed columns */
   grid-template-columns: 200px 200px 200px;
-  
+
   /* Flexible columns */
   grid-template-columns: 1fr 2fr 1fr;
-  
+
   /* Mixed fixed and flexible */
   grid-template-columns: 200px 1fr 100px;
-  
+
   /* Repetition */
   grid-template-columns: repeat(3, 1fr);
-  
+
   /* Auto-fit and auto-fill */
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 }
 ```
 
 ### Defining Rows
+
 ```css
 .grid {
   /* Explicit rows */
   grid-template-rows: 100px auto 50px;
-  
+
   /* Implicit rows */
   grid-auto-rows: minmax(100px, auto);
 }
 ```
 
 ### Spacing (Gap)
+
 ```css
 .grid {
   /* Uniform spacing */
   gap: 20px;
-  
+
   /* Different spacing */
   row-gap: 10px;
   column-gap: 20px;
-  
+
   /* Legacy syntax (compatibility) */
   grid-gap: 20px;
 }
@@ -98,22 +104,24 @@ CSS Grid is a two-dimensional layout system that allows you to create complex gr
 ## Item Placement
 
 ### Basic Placement
+
 ```css
 .item {
   /* By line number */
-  grid-column: 1 / 3;  /* From line 1 to 3 */
-  grid-row: 2 / 4;     /* From line 2 to 4 */
-  
+  grid-column: 1 / 3; /* From line 1 to 3 */
+  grid-row: 2 / 4; /* From line 2 to 4 */
+
   /* Span (extend) */
   grid-column: span 2; /* Extend across 2 columns */
-  grid-row: span 3;    /* Extend across 3 rows */
-  
+  grid-row: span 3; /* Extend across 3 rows */
+
   /* Shorthand */
   grid-area: 2 / 1 / 4 / 3; /* row-start / col-start / row-end / col-end */
 }
 ```
 
 ### Named Placement
+
 ```css
 .grid {
   grid-template-areas:
@@ -122,16 +130,27 @@ CSS Grid is a two-dimensional layout system that allows you to create complex gr
     "footer footer footer";
 }
 
-.header { grid-area: header; }
-.sidebar { grid-area: sidebar; }
-.content { grid-area: content; }
-.ads { grid-area: ads; }
-.footer { grid-area: footer; }
+.header {
+  grid-area: header;
+}
+.sidebar {
+  grid-area: sidebar;
+}
+.content {
+  grid-area: content;
+}
+.ads {
+  grid-area: ads;
+}
+.footer {
+  grid-area: footer;
+}
 ```
 
 ## Practical Examples
 
 ### Classic Page Layout
+
 ```css
 .page-layout {
   display: grid;
@@ -145,7 +164,7 @@ CSS Grid is a two-dimensional layout system that allows you to create complex gr
   gap: 20px;
 }
 
-.header { 
+.header {
   grid-area: header;
   background: #333;
   color: white;
@@ -178,6 +197,7 @@ CSS Grid is a two-dimensional layout system that allows you to create complex gr
 ```
 
 ### Responsive Gallery
+
 ```css
 .gallery {
   display: grid;
@@ -209,6 +229,7 @@ CSS Grid is a two-dimensional layout system that allows you to create complex gr
 ```
 
 ### Dashboard Layout
+
 ```css
 .dashboard {
   display: grid;
@@ -235,18 +256,19 @@ CSS Grid is a two-dimensional layout system that allows you to create complex gr
   background: white;
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 ```
 
 ## Responsive Design with Grid
 
 ### Mobile First
+
 ```css
 .responsive-grid {
   display: grid;
   gap: 20px;
-  
+
   /* Mobile: 1 column */
   grid-template-columns: 1fr;
 }
@@ -274,6 +296,7 @@ CSS Grid is a two-dimensional layout system that allows you to create complex gr
 ```
 
 ### Auto-responsive with minmax()
+
 ```css
 .auto-responsive {
   display: grid;
@@ -291,6 +314,7 @@ CSS Grid is a two-dimensional layout system that allows you to create complex gr
 ## Advanced Techniques
 
 ### Subgrid (CSS Grid Level 2)
+
 ```css
 .parent-grid {
   display: grid;
@@ -306,17 +330,18 @@ CSS Grid is a two-dimensional layout system that allows you to create complex gr
 ```
 
 ### Alignment and Justification
+
 ```css
 .grid-container {
   /* Align all items */
-  justify-items: center;    /* horizontal */
-  align-items: center;      /* vertical */
-  place-items: center;      /* shorthand */
-  
+  justify-items: center; /* horizontal */
+  align-items: center; /* vertical */
+  place-items: center; /* shorthand */
+
   /* Align grid within container */
-  justify-content: center;  /* horizontal */
-  align-content: center;    /* vertical */
-  place-content: center;    /* shorthand */
+  justify-content: center; /* horizontal */
+  align-content: center; /* vertical */
+  place-content: center; /* shorthand */
 }
 
 .grid-item {
@@ -328,6 +353,7 @@ CSS Grid is a two-dimensional layout system that allows you to create complex gr
 ```
 
 ### Grid with CSS Custom Properties
+
 ```css
 :root {
   --columns: 3;
@@ -353,6 +379,7 @@ CSS Grid is a two-dimensional layout system that allows you to create complex gr
 ## Compatibility and Fallbacks
 
 ### Browser Support
+
 ```css
 .fallback-layout {
   /* Fallback for older browsers */
@@ -372,11 +399,13 @@ CSS Grid is a two-dimensional layout system that allows you to create complex gr
 ## Development Tools
 
 ### Firefox Grid Inspector
+
 - Grid line visualization
 - Named area inspection
 - Overlap debugging
 
 ### Chrome DevTools
+
 - Grid overlay
 - Property inspection
 - Real-time modification
@@ -386,13 +415,15 @@ CSS Grid is a two-dimensional layout system that allows you to create complex gr
 CSS Grid Layout offers unmatched power and flexibility for creating modern layouts:
 
 ### Key Advantages
+
 - **Two-dimensional**: Complete control over rows and columns
 - **Native responsive**: `auto-fit`, `auto-fill`, `minmax()`
 - **Semantic**: Named areas for clarity
 - **Powerful**: Complex layouts with minimal code
 
 ### When to Use Grid vs Flexbox
+
 - **Grid**: Two-dimensional layouts, precise placement
 - **Flexbox**: One-dimensional alignment, space distribution
 
-Mastering CSS Grid will allow you to create modern, responsive, and maintainable web interfaces with remarkable efficiency! 
+Mastering CSS Grid will allow you to create modern, responsive, and maintainable web interfaces with remarkable efficiency!

@@ -14,10 +14,10 @@ export class ScrollEffectsManager {
   }
 
   private init(): void {
-    this.headers = document.querySelectorAll('.header-critical');
-    
+    this.headers = document.querySelectorAll(".header-critical");
+
     if (!this.headers.length) {
-      console.warn('No header elements found with class .header-critical');
+      console.warn("No header elements found with class .header-critical");
       return;
     }
 
@@ -28,45 +28,53 @@ export class ScrollEffectsManager {
 
   private bindEventListeners(): void {
     // Throttled scroll listener using requestAnimationFrame
-    window.addEventListener('scroll', () => {
-      if (!this.ticking) {
-        requestAnimationFrame(() => {
-          this.updateHeaderState();
-          this.ticking = false;
-        });
-        this.ticking = true;
-      }
-    }, { passive: true });
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (!this.ticking) {
+          requestAnimationFrame(() => {
+            this.updateHeaderState();
+            this.ticking = false;
+          });
+          this.ticking = true;
+        }
+      },
+      { passive: true },
+    );
 
     // Update on resize to handle dynamic content
-    window.addEventListener('resize', () => {
-      this.updateHeaderState();
-    }, { passive: true });
+    window.addEventListener(
+      "resize",
+      () => {
+        this.updateHeaderState();
+      },
+      { passive: true },
+    );
   }
 
   private updateHeaderState(): void {
     if (!this.headers) return;
 
     const scrolled = window.scrollY > this.scrollThreshold;
-    
-    this.headers.forEach(header => {
-      header.classList.toggle('scrolled', scrolled);
+
+    this.headers.forEach((header) => {
+      header.classList.toggle("scrolled", scrolled);
     });
   }
 
   private addScrolledClass(): void {
     if (!this.headers) return;
-    
-    this.headers.forEach(header => {
-      header.classList.add('scrolled');
+
+    this.headers.forEach((header) => {
+      header.classList.add("scrolled");
     });
   }
 
   private removeScrolledClass(): void {
     if (!this.headers) return;
-    
-    this.headers.forEach(header => {
-      header.classList.remove('scrolled');
+
+    this.headers.forEach((header) => {
+      header.classList.remove("scrolled");
     });
   }
 
@@ -104,9 +112,11 @@ export class ScrollEffectsManager {
 // Auto-initialize when loaded as a module
 let scrollEffectsManager: ScrollEffectsManager | null = null;
 
-export function initScrollEffectsManager(threshold?: number): ScrollEffectsManager {
+export function initScrollEffectsManager(
+  threshold?: number,
+): ScrollEffectsManager {
   if (!scrollEffectsManager) {
     scrollEffectsManager = new ScrollEffectsManager(threshold);
   }
   return scrollEffectsManager;
-} 
+}

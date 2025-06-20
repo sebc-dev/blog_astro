@@ -3,10 +3,13 @@
  * Main module that initializes and coordinates all header functionality
  */
 
-import { initThemeManager, type ThemeManager } from './theme-manager';
-import { initMobileMenuManager, type MobileMenuManager } from './mobile-menu';
-import { initDropdownManager, type DropdownManager } from './dropdown-manager';
-import { initScrollEffectsManager, type ScrollEffectsManager } from './scroll-effects';
+import { initThemeManager, type ThemeManager } from "./theme-manager";
+import { initMobileMenuManager, type MobileMenuManager } from "./mobile-menu";
+import { initDropdownManager, type DropdownManager } from "./dropdown-manager";
+import {
+  initScrollEffectsManager,
+  type ScrollEffectsManager,
+} from "./scroll-effects";
 
 export interface HeaderManagers {
   theme: ThemeManager;
@@ -27,8 +30,10 @@ export class HeaderClient {
     if (this.initialized) return;
 
     // Wait for DOM to be ready
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => this.initializeManagers());
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", () =>
+        this.initializeManagers(),
+      );
     } else {
       this.initializeManagers();
     }
@@ -40,13 +45,13 @@ export class HeaderClient {
         theme: initThemeManager(),
         mobileMenu: initMobileMenuManager(),
         dropdown: initDropdownManager(),
-        scrollEffects: initScrollEffectsManager(20)
+        scrollEffects: initScrollEffectsManager(20),
       };
 
       this.initialized = true;
-      console.log('Header client initialized successfully');
+      console.log("Header client initialized successfully");
     } catch (error) {
-      console.error('Failed to initialize header client:', error);
+      console.error("Failed to initialize header client:", error);
     }
   }
 
@@ -91,4 +96,4 @@ export function getHeaderClient(): HeaderClient | null {
 }
 
 // Auto-initialize when module is loaded
-initHeaderClient(); 
+initHeaderClient();

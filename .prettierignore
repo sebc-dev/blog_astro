@@ -1,0 +1,19 @@
+# Ignorer les fichiers Markdown et documentation
+*.md
+*.mdc
+*.mdx
+
+# Ignorer les dossiers de documentation
+/memory/
+/docs/
+
+# Ignorer les fichiers de build et cache
+/dist/
+/node_modules/
+/.astro/
+/coverage/
+
+# Ignorer les fichiers de configuration spécifiques
+pnpm-lock.yaml
+package-lock.json
+yarn.lock 

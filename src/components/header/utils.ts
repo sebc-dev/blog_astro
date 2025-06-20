@@ -1,10 +1,10 @@
 import { useTranslations } from "../../i18n/utils";
-import type { 
-  NavLink, 
-  TranslatedNavLink, 
-  SupportedLanguage, 
+import type {
+  NavLink,
+  TranslatedNavLink,
+  SupportedLanguage,
   LanguageUrls,
-  TranslatePathFunction 
+  TranslatePathFunction,
 } from "./types";
 
 /**
@@ -40,8 +40,8 @@ export function mapNavLinks(
  * @returns Object with language URLs and metadata
  */
 export function generateLanguageUrls(
-  currentPath: string, 
-  lang: SupportedLanguage
+  currentPath: string,
+  lang: SupportedLanguage,
 ): LanguageUrls {
   if (!currentPath.startsWith("/")) currentPath = `/${currentPath}`;
   return {

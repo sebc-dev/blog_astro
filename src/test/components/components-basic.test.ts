@@ -3,7 +3,7 @@ import { describe, it, expect } from "vitest";
 describe("Components Basic Tests", () => {
   // Les tests d'import direct de fichiers .astro sont supprimés car Vitest ne peut pas les traiter
   // Ces composants seront testés via les tests end-to-end Cypress
-  
+
   it("devrait valider la structure des props ArticleHero", () => {
     // Test de validation des types - ce test compile si les types sont corrects
     const mockProps = {
@@ -28,17 +28,20 @@ describe("Components Basic Tests", () => {
 
   it("devrait valider la logique de troncature pour ArticleCard", () => {
     // Test de la logique métier sans rendu Astro
-    const longDescription = "Cette description est très longue et devrait être tronquée automatiquement pour s'adapter au format compact des cartes d'articles dans la grille principale de la section.";
+    const longDescription =
+      "Cette description est très longue et devrait être tronquée automatiquement pour s'adapter au format compact des cartes d'articles dans la grille principale de la section.";
     const shortDescription = "Description courte";
 
     // Reproduire la logique de troncature du composant
-    const truncateLongDescription = longDescription.length > 120 
-      ? longDescription.substring(0, 120) + "..." 
-      : longDescription;
+    const truncateLongDescription =
+      longDescription.length > 120
+        ? longDescription.substring(0, 120) + "..."
+        : longDescription;
 
-    const truncateShortDescription = shortDescription.length > 120 
-      ? shortDescription.substring(0, 120) + "..." 
-      : shortDescription;
+    const truncateShortDescription =
+      shortDescription.length > 120
+        ? shortDescription.substring(0, 120) + "..."
+        : shortDescription;
 
     expect(truncateLongDescription).toContain("...");
     expect(truncateShortDescription).toBe(shortDescription);
@@ -48,7 +51,7 @@ describe("Components Basic Tests", () => {
   it("devrait valider les formats de date pour ArticleHero", () => {
     // Test de la logique de formatage des dates
     const testDate = new Date("2024-01-15T10:30:00Z");
-    
+
     // Valider que la date est valide
     expect(testDate.getTime()).not.toBeNaN();
     expect(testDate.getFullYear()).toBe(2024);
@@ -61,7 +64,7 @@ describe("Components Basic Tests", () => {
     const testTitles = [
       "Article de Test",
       "Un Titre Avec Accents éàü",
-      "Special !@# Characters"
+      "Special !@# Characters",
     ];
 
     testTitles.forEach((input) => {
@@ -79,4 +82,4 @@ describe("Components Basic Tests", () => {
       // Note: Le test exact dépend de l'implémentation réelle dans le composant
     });
   });
-}); 
+});

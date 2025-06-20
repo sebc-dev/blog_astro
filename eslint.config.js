@@ -1,28 +1,24 @@
-import astroPlugin from 'eslint-plugin-astro';
-import tsParser from '@typescript-eslint/parser';
-import { defineConfig } from 'eslint/config';
-import prettierConfig from 'eslint-config-prettier';
-import tsPlugin from '@typescript-eslint/eslint-plugin';
+import astroPlugin from "eslint-plugin-astro";
+import tsParser from "@typescript-eslint/parser";
+import { defineConfig } from "eslint/config";
+import prettierConfig from "eslint-config-prettier";
+import tsPlugin from "@typescript-eslint/eslint-plugin";
 
 export default defineConfig([
   prettierConfig,
   ...astroPlugin.configs.recommended,
   {
     // Ignorer les fichiers générés automatiquement par Astro
-    ignores: [
-      '.astro/**/*',
-      'dist/**/*',
-      'coverage/**/*'
-    ],
+    ignores: [".astro/**/*", "dist/**/*", "coverage/**/*"],
   },
   {
     languageOptions: {
       ecmaVersion: 2024,
-      sourceType: 'module',
+      sourceType: "module",
       globals: {
-        window: 'readonly',
-        document: 'readonly',
-        navigator: 'readonly',
+        window: "readonly",
+        document: "readonly",
+        navigator: "readonly",
       },
     },
 
@@ -30,52 +26,52 @@ export default defineConfig([
       astro: astroPlugin,
     },
 
-    files: ['**/*.{js,ts}'],
+    files: ["**/*.{js,ts}"],
   },
   {
-    files: ['**/*.astro'],
+    files: ["**/*.astro"],
     languageOptions: {
       parser: astroPlugin.parser,
       parserOptions: {
         parser: tsParser,
-        extraFileExtensions: ['.astro'],
+        extraFileExtensions: [".astro"],
       },
     },
     rules: {
       ...(astroPlugin.configs?.recommended?.rules || {}),
-      '@stylistic/curly-newline': 'off',
+      "@stylistic/curly-newline": "off",
     },
   },
   {
-    files: ['**/*.test.ts'],
+    files: ["**/*.test.ts"],
     languageOptions: {
       parser: tsParser,
       parserOptions: {
-        ecmaVersion: 'latest',
-        sourceType: 'module',
-        project: './tsconfig.json',
+        ecmaVersion: "latest",
+        sourceType: "module",
+        project: "./tsconfig.json",
       },
     },
     rules: {
-      '@stylistic/curly-newline': 'off',
+      "@stylistic/curly-newline": "off",
     },
   },
   {
-    files: ['**/*.ts', '**/*.tsx'],
+    files: ["**/*.ts", "**/*.tsx"],
     languageOptions: {
       parser: tsParser,
       parserOptions: {
-        ecmaVersion: 'latest',
-        sourceType: 'module',
-        project: './tsconfig.json',
+        ecmaVersion: "latest",
+        sourceType: "module",
+        project: "./tsconfig.json",
       },
     },
     plugins: {
-      '@typescript-eslint': tsPlugin,
+      "@typescript-eslint": tsPlugin,
     },
     rules: {
       ...tsPlugin.configs.recommended.rules,
-      '@stylistic/curly-newline': 'off',
+      "@stylistic/curly-newline": "off",
     },
   },
 ]);

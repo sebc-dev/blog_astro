@@ -2,10 +2,9 @@
 @plugin "@tailwindcss/typography";
 
 @plugin "daisyui" {
-  themes: [
-    "light-blue",
-    "dark-blue"
-  ];
+  themes:
+    [ "light-blue",
+    "dark-blue"];
 }
 
 /* Déclarations des polices JetBrains Mono */
@@ -97,17 +96,21 @@
   color-scheme: dark; /* color of browser-provided UI */
 
   /* Base colors - gris plus clairs avec une pointe de vert canard désaturé */
-  --color-base-100: oklch(28% 0.008 190); /* background - gris sombre mais respirant */
+  --color-base-100: oklch(
+    28% 0.008 190
+  ); /* background - gris sombre mais respirant */
   --color-base-200: oklch(35% 0.01 190); /* card - gris moyen */
   --color-base-300: oklch(42% 0.012 190); /* muted/border - gris bien visible */
-  --color-base-content: oklch(92% 0.005 190); /* foreground text - très clair et neutre */
+  --color-base-content: oklch(
+    92% 0.005 190
+  ); /* foreground text - très clair et neutre */
 
   /* Primary color - bleu cyan vibrant mais équilibré */
   --color-primary: oklch(68% 0.22 205);
   --color-primary-content: oklch(98% 0.003 205);
 
   /* Secondary color - vert canard plus affirmé */
-  --color-secondary: oklch(72% 0.20 175);
+  --color-secondary: oklch(72% 0.2 175);
   --color-secondary-content: oklch(98% 0.003 175);
 
   /* Accent color - violet désaturé (froid, pas de marron) */
@@ -158,10 +161,16 @@
   color-scheme: light; /* color of browser-provided UI */
 
   /* Base colors - blancs/gris très clairs avec pointe de vert canard désaturé */
-  --color-base-100: oklch(98% 0.005 190); /* background - blanc très légèrement teinté */
+  --color-base-100: oklch(
+    98% 0.005 190
+  ); /* background - blanc très légèrement teinté */
   --color-base-200: oklch(94% 0.008 190); /* card - gris très clair */
-  --color-base-300: oklch(88% 0.012 190); /* muted/border - gris clair visible */
-  --color-base-content: oklch(18% 0.015 190); /* foreground text - gris très sombre */
+  --color-base-300: oklch(
+    88% 0.012 190
+  ); /* muted/border - gris clair visible */
+  --color-base-content: oklch(
+    18% 0.015 190
+  ); /* foreground text - gris très sombre */
 
   /* Primary color - bleu cyan plus sombre pour contraste sur clair */
   --color-primary: oklch(52% 0.25 205);
@@ -180,7 +189,7 @@
   --color-neutral-content: oklch(22% 0.015 190);
 
   /* Info color - bleu cyan sombre */
-  --color-info: oklch(48% 0.20 210);
+  --color-info: oklch(48% 0.2 210);
   --color-info-content: oklch(98% 0.003 210);
 
   /* Success color - vert canard sombre */

@@ -1,5 +1,5 @@
 ---
-import { getLangFromUrl, useTranslations } from '../i18n/utils';
+import { getLangFromUrl, useTranslations } from "../i18n/utils";
 
 export interface Props {
   title: string;
@@ -30,7 +30,7 @@ const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 
 // Formatage de la date
-const locale = lang === 'fr' ? 'fr-FR' : 'en-US';
+const locale = lang === "fr" ? "fr-FR" : "en-US";
 const formattedDate = pubDate.toLocaleDateString(locale, {
   day: "numeric",
   month: "short",
@@ -38,12 +38,17 @@ const formattedDate = pubDate.toLocaleDateString(locale, {
 });
 
 // Limite l'extrait pour les cartes
-const shortDescription = description.length > 120 
-  ? description.substring(0, 120) + "..." 
-  : description;
+const shortDescription =
+  description.length > 120
+    ? description.substring(0, 120) + "..."
+    : description;
 ---
 
-<article class="card bg-base-200 border border-base-content/10 shadow-lg hover:shadow-xl transition-all duration-300 group overflow-hidden h-full" data-cy="article-card" data-article-slug={slug}>
+<article
+  class="card bg-base-200 border-base-content/10 group h-full overflow-hidden border shadow-lg transition-all duration-300 hover:shadow-xl"
+  data-cy="article-card"
+  data-article-slug={slug}
+>
   <!-- Image de carte -->
   {
     heroImage && (
@@ -51,16 +56,19 @@ const shortDescription = description.length > 120
         <img
           src={heroImage}
           alt={title}
-          class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
           loading="lazy"
         />
       </figure>
     )
   }
 
-  <div class="card-body p-4 flex flex-col justify-between" data-cy="article-content">
+  <div
+    class="card-body flex flex-col justify-between p-4"
+    data-cy="article-content"
+  >
     <!-- Métadonnées compactes -->
-    <div class="flex flex-wrap gap-1 mb-3" data-cy="article-metadata">
+    <div class="mb-3 flex flex-wrap gap-1" data-cy="article-metadata">
       {
         category && (
           <span class="badge badge-primary badge-sm" data-cy="article-category">
@@ -75,36 +83,45 @@ const shortDescription = description.length > 120
           </span>
         )
       }
-      <span class="text-xs text-base-content/60 ml-auto" data-cy="article-date">
+      <span class="text-base-content/60 ml-auto text-xs" data-cy="article-date">
         {formattedDate}
       </span>
     </div>
 
     <!-- Titre compact -->
-    <h3 class="card-title text-lg font-bold leading-tight mb-3 group-hover:text-primary transition-colors line-clamp-2" data-cy="article-title">
+    <h3
+      class="card-title group-hover:text-primary mb-3 line-clamp-2 text-lg leading-tight font-bold transition-colors"
+      data-cy="article-title"
+    >
       <a href={`/blog/${slug}`} class="link-hover" data-cy="article-title-link">
         {title}
       </a>
     </h3>
 
     <!-- Extrait court avec ellipsis -->
-    <p class="text-base-content/70 text-sm leading-relaxed mb-4 line-clamp-2 flex-grow" data-cy="article-description">
+    <p
+      class="text-base-content/70 mb-4 line-clamp-2 flex-grow text-sm leading-relaxed"
+      data-cy="article-description"
+    >
       {shortDescription}
     </p>
 
     <!-- Footer compact -->
-    <div class="card-actions justify-between items-center mt-auto" data-cy="article-footer">
-      <span class="text-xs text-base-content/60" data-cy="article-reading-time">
+    <div
+      class="card-actions mt-auto items-center justify-between"
+      data-cy="article-footer"
+    >
+      <span class="text-base-content/60 text-xs" data-cy="article-reading-time">
         {readingTime} min
       </span>
-      
+
       <a
         href={`/blog/${slug}`}
         class="btn btn-primary btn-xs"
         aria-label={`Lire: ${title}`}
         data-cy="article-read-button"
       >
-        {t('blog.read')}
+        {t("blog.read")}
         <svg
           width="12"
           height="12"
@@ -115,8 +132,8 @@ const shortDescription = description.length > 120
           stroke-linecap="round"
           stroke-linejoin="round"
         >
-          <path d="M7 17L17 7" />
-          <path d="M7 7h10v10" />
+          <path d="M7 17L17 7"></path>
+          <path d="M7 7h10v10"></path>
         </svg>
       </a>
     </div>
@@ -130,4 +147,4 @@ const shortDescription = description.length > 120
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-</style> 
+</style>
