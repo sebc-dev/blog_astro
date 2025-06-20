@@ -1,0 +1,479 @@
+---
+import {
+  getLangFromUrl,
+  useTranslations,
+  useTranslatedPath,
+  getPathWithoutLang,
+} from "../../i18n/utils";
+import { generateCriticalCSS } from "./header-styles";
+import { mapNavLinks, generateLanguageUrls } from "./utils";
+import type { HeaderProps } from "./types";
+
+// Props avec types définis
+const {
+  siteName = "sebc.dev",
+  navLinks = [
+    { href: "/", key: "nav.home" },
+    { href: "/articles", key: "nav.articles" },
+    { href: "/ressources", key: "nav.ressources" },
+    { href: "/about", key: "nav.about" },
+  ],
+} = Astro.props as HeaderProps;
+
+// Logique côté serveur
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const translatePath = useTranslatedPath(lang);
+
+const translatedNavLinks = mapNavLinks(
+  navLinks,
+  lang,
+  translatePath,
+  Astro.url,
+);
+const currentPath = getPathWithoutLang(Astro.url);
+const languageUrls = generateLanguageUrls(currentPath, lang);
+
+// CSS critique centralisé
+const criticalCSS = generateCriticalCSS();
+
+// SEO et hreflang
+const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
+  hreflang: langCode,
+  href: data.url,
+}));
+---
+
+<!-- CSS Critique Inline -->
+<style is:inline set:html={criticalCSS}></style>
+
+<!-- Header Desktop -->
+<header
+  id="desktop-header"
+  class="header-critical bg-base-200 border-base-content/10 hidden border-b lg:block"
+  role="banner"
+  data-cy="header-desktop"
+>
+  <div class="navbar mx-auto max-w-7xl px-4" data-cy="navbar-desktop">
+    <!-- Logo -->
+    <div class="navbar-start">
+      <a
+        href={translatePath("/")}
+        class="from-primary to-secondary bg-gradient-to-r bg-clip-text font-mono text-xl font-bold text-transparent"
+        rel="prefetch"
+        data-cy="logo-desktop"
+      >
+        {siteName}
+      </a>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar-center" aria-label={t("nav.main")} data-cy="nav-desktop">
+      <ul class="flex gap-6" role="menubar" data-cy="nav-links-desktop">
+        {
+          translatedNavLinks.map((link) => (
+            <li role="none">
+              <a
+                href={link.href}
+                class={`nav-link rounded-md px-3 py-2 transition-colors duration-200 ${
+                  link.isActive
+                    ? "text-primary font-semibold underline underline-offset-4"
+                    : "text-base-content hover:text-primary hover:underline hover:underline-offset-4"
+                }`}
+                role="menuitem"
+                aria-current={link.isActive ? "page" : undefined}
+                rel="prefetch"
+                data-cy={`nav-link-${link.href.replace(/\//g, "")}`}
+              >
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <!-- Contrôles -->
+    <div class="navbar-end flex items-center gap-2" data-cy="controls-desktop">
+      <!-- Sélecteur de langue -->
+      <div class="dropdown dropdown-end" data-cy="language-selector-desktop">
+        <button
+          class="btn btn-ghost btn-sm text-bg-base-200"
+          aria-haspopup="true"
+          aria-expanded="false"
+          aria-label={t("languageSwitcher.label")}
+          data-dropdown="lang-desktop"
+          data-cy="language-toggle-desktop"
+        >
+          <span>{languageUrls[lang].flag} {lang.toUpperCase()}</span>
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M6 9l6 6 6-6"></path>
+          </svg>
+        </button>
+        <ul
+          class="dropdown-content menu bg-base-100 rounded-box border-base-300 z-[1] w-32 border p-2 shadow-lg"
+          data-cy="language-menu-desktop"
+        >
+          {
+            Object.entries(languageUrls).map(([langCode, data]) => (
+              <li>
+                <a
+                  href={data.url}
+                  class={`text-sm ${data.isActive ? "bg-primary text-primary-content font-semibold" : ""}`}
+                  hreflang={langCode}
+                  rel="prefetch"
+                  data-cy={`language-option-${langCode}-desktop`}
+                >
+                  {data.flag} {data.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <!-- Toggle thème -->
+      <button
+        class="btn btn-ghost btn-sm theme-switcher"
+        aria-label={t("theme.toggle")}
+        data-theme-toggle
+        data-cy="theme-toggle-desktop"
+      >
+        <svg
+          class="theme-icon theme-light h-5 w-5"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="m12 2 0 2"></path>
+          <path d="m12 20 0 2"></path>
+          <path d="m4.93 4.93 1.41 1.41"></path>
+          <path d="m17.66 17.66 1.41 1.41"></path>
+          <path d="m2 12 2 0"></path>
+          <path d="m20 12 2 0"></path>
+          <path d="m6.34 17.66-1.41 1.41"></path>
+          <path d="m19.07 4.93-1.41 1.41"></path>
+        </svg>
+        <svg
+          class="theme-icon theme-dark hidden h-5 w-5"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Header Mobile -->
+<header
+  id="mobile-header"
+  class="header-critical bg-base-200 border-base-content/10 border-b lg:hidden"
+  role="banner"
+  data-cy="header-mobile"
+>
+  <div
+    class="flex items-center justify-between px-4 py-3"
+    data-cy="navbar-mobile"
+  >
+    <!-- Logo Mobile -->
+    <a
+      href={translatePath("/")}
+      class="from-primary to-secondary bg-gradient-to-r bg-clip-text font-mono text-xl font-bold text-transparent"
+      rel="prefetch"
+      data-cy="logo-mobile"
+    >
+      {siteName}
+    </a>
+
+    <!-- Menu Toggle -->
+    <button
+      id="mobile-menu-toggle"
+      class="btn btn-square btn-ghost relative"
+      aria-label="Menu"
+      aria-expanded="false"
+      aria-controls="mobile-menu"
+      data-menu-toggle
+      data-cy="menu-toggle-mobile"
+    >
+      <svg
+        class="menu-icon hamburger h-6 w-6 transition-all duration-300"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+      <svg
+        class="menu-icon cross absolute inset-0 m-auto h-6 w-6 rotate-90 opacity-0 transition-all duration-300"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<!-- Menu Mobile -->
+<div
+  id="mobile-menu"
+  class="mobile-menu-closed fixed inset-0 z-40 lg:hidden"
+  aria-hidden="true"
+  data-cy="mobile-menu"
+>
+  <div
+    class="fixed inset-0 bg-black/50"
+    data-menu-overlay
+    data-cy="mobile-menu-overlay"
+  >
+  </div>
+  <div
+    class="bg-base-100 fixed inset-0 shadow-xl"
+    data-cy="mobile-menu-content"
+  >
+    <div class="flex h-full flex-col">
+      <!-- Navigation Mobile -->
+      <nav
+        class="flex-1 px-4 py-16"
+        aria-label={t("nav.main")}
+        data-cy="nav-mobile"
+      >
+        <ul class="space-y-4" data-cy="nav-links-mobile">
+          {
+            translatedNavLinks.map((link) => (
+              <li>
+                <a
+                  href={link.href}
+                  class={`nav-link block px-4 py-3 text-lg transition-colors ${
+                    link.isActive
+                      ? "active font-semibold underline underline-offset-4"
+                      : "hover:underline hover:underline-offset-4"
+                  }`}
+                  rel="prefetch"
+                  data-menu-link
+                  data-cy={`nav-link-${link.href.replace(/\//g, "")}-mobile`}
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <!-- Contrôles Mobile -->
+      <div class="space-y-4 border-t p-4" data-cy="controls-mobile">
+        <!-- Langue -->
+        <div
+          class="flex items-center justify-between"
+          data-cy="language-selector-mobile"
+        >
+          <span class="text-sm font-medium">{t("languageSwitcher.label")}</span>
+          <div class="flex gap-2" data-cy="language-options-mobile">
+            {
+              Object.entries(languageUrls).map(([langCode, data]) => (
+                <a
+                  href={data.url}
+                  class={`btn btn-sm ${data.isActive ? "btn-primary" : "btn-outline"}`}
+                  hreflang={langCode}
+                  rel="prefetch"
+                  data-cy={`language-option-${langCode}-mobile`}
+                >
+                  {data.flag}
+                </a>
+              ))
+            }
+          </div>
+        </div>
+
+        <!-- Thème -->
+        <div
+          class="flex items-center justify-between"
+          data-cy="theme-selector-mobile"
+        >
+          <span class="text-sm font-medium">{t("theme.toggle")}</span>
+          <button
+            class="btn btn-ghost btn-sm theme-switcher"
+            aria-label={t("theme.toggle")}
+            data-theme-toggle
+            data-cy="theme-toggle-mobile"
+          >
+            <svg
+              class="theme-icon theme-light h-5 w-5"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="12" cy="12" r="4"></circle>
+              <path d="m12 2 0 2"></path>
+              <path d="m12 20 0 2"></path>
+              <path d="m4.93 4.93 1.41 1.41"></path>
+              <path d="m17.66 17.66 1.41 1.41"></path>
+              <path d="m2 12 2 0"></path>
+              <path d="m20 12 2 0"></path>
+              <path d="m6.34 17.66-1.41 1.41"></path>
+              <path d="m19.07 4.93-1.41 1.41"></path>
+            </svg>
+            <svg
+              class="theme-icon theme-dark hidden h-5 w-5"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Preload et SEO -->
+{
+  translatedNavLinks
+    .slice(0, 3)
+    .map((link) => <link rel="prefetch" href={link.href} />)
+}
+{
+  hreflangLinks.map((link) => (
+    <link rel="alternate" hreflang={link.hreflang} href={link.href} />
+  ))
+}
+
+<!-- Styles CSS -->
+<style>
+  /* Styles du header avec variables DaisyUI v5 */
+  .header-critical .nav-link {
+    color: oklch(var(--color-base-content));
+  }
+
+  .header-critical .nav-link:hover {
+    color: oklch(var(--color-primary));
+  }
+
+  .header-critical .nav-link.active {
+    color: oklch(var(--color-primary));
+  }
+
+  .header-critical .btn {
+    background: oklch(var(--color-base-200) / 0.8);
+    color: oklch(var(--color-base-content));
+  }
+
+  .header-critical .btn:hover {
+    background: oklch(var(--color-base-300));
+    border-color: oklch(var(--color-primary) / 0.5);
+  }
+
+  /* Styles non-critiques */
+  .dropdown-content {
+    animation: dropdown-appear 0.2s ease-out;
+  }
+
+  @keyframes dropdown-appear {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .menu-icon {
+    transform-origin: center;
+  }
+  .mobile-menu-closed {
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+  }
+
+  .hamburger {
+    opacity: 1;
+    transform: rotate(0deg);
+  }
+  .cross {
+    opacity: 0;
+    transform: rotate(90deg);
+  }
+
+  [data-menu-toggle].menu-open .hamburger {
+    opacity: 0;
+    transform: rotate(-90deg);
+  }
+  [data-menu-toggle].menu-open .cross {
+    opacity: 1;
+    transform: rotate(0deg);
+  }
+
+  [data-menu-toggle],
+  [data-menu-close] {
+    transition: all 0.15s ease;
+  }
+
+  button:focus-visible,
+  a:focus-visible {
+    outline: 2px solid oklch(var(--color-primary));
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  .theme-icon {
+    transition:
+      opacity 0.2s ease,
+      transform 0.2s ease;
+  }
+  .theme-switcher:hover .theme-icon {
+    transform: scale(1.1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #mobile-menu,
+    .dropdown-content,
+    .menu-icon {
+      transition: none !important;
+      animation: none !important;
+    }
+  }
+
+  /* Effet de scroll avec base-200 semi-transparent */
+  .header-critical.scrolled {
+    background-color: oklch(var(--color-base-200) / 0.85) !important;
+    backdrop-filter: blur(20px) !important;
+  }
+</style>
+
+<!-- Header Client-Side Module -->
+<script>
+  import "./header-client";
+</script>

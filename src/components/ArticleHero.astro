@@ -1,0 +1,142 @@
+---
+import { getLangFromUrl, useTranslations } from "../i18n/utils";
+
+export interface Props {
+  title: string;
+  description: string;
+  heroImage?: string;
+  pubDate: Date;
+  author: string;
+  category?: string;
+  tag?: string;
+  slug: string;
+  readingTime?: number;
+}
+
+const {
+  title,
+  description,
+  heroImage,
+  pubDate,
+  author,
+  category = "Article",
+  tag,
+  slug,
+  readingTime = 5,
+} = Astro.props;
+
+// Système d'internationalisation
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+// Formatage de la date
+const formattedDate = pubDate.toLocaleDateString("fr-FR", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+});
+---
+
+<article
+  class="card bg-base-200 border-base-content/10 group mt-4 flex h-[calc(100vh-6rem)] flex-col overflow-hidden border shadow-xl"
+  data-cy="article-hero"
+  data-article-slug={slug}
+>
+  <!-- Image Hero -->
+  {
+    heroImage && (
+      <figure class="min-h-0 flex-1 overflow-hidden" data-cy="hero-image">
+        <img
+          src={heroImage}
+          alt={title}
+          class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          loading="lazy"
+        />
+      </figure>
+    )
+  }
+
+  <div class="flex-shrink-0 p-6 pt-16" data-cy="hero-content">
+    <!-- Métadonnées -->
+    <div class="mb-4 flex flex-wrap gap-2" data-cy="hero-metadata">
+      {
+        category && (
+          <span class="badge badge-primary badge-lg" data-cy="hero-category">
+            {category}
+          </span>
+        )
+      }
+      {
+        tag && (
+          <span class="badge badge-secondary badge-outline" data-cy="hero-tag">
+            {tag}
+          </span>
+        )
+      }
+      <span class="text-base-content/70 ml-auto text-sm" data-cy="hero-date">
+        {formattedDate}
+      </span>
+    </div>
+
+    <!-- Titre Hero (plus grand) -->
+    <h2
+      class="group-hover:text-primary mb-4 text-2xl leading-tight font-bold transition-colors lg:text-3xl"
+      data-cy="hero-title"
+    >
+      <a href={`/blog/${slug}`} class="link-hover" data-cy="hero-title-link">
+        {title}
+      </a>
+    </h2>
+
+    <!-- Extrait plus long pour le hero -->
+    <p
+      class="text-base-content/80 mb-6 line-clamp-3 text-lg leading-relaxed"
+      data-cy="hero-description"
+    >
+      {description}
+    </p>
+
+    <!-- Footer avec auteur, temps de lecture et bouton -->
+    <div class="flex items-center justify-between" data-cy="hero-footer">
+      <div
+        class="text-base-content/70 flex items-center gap-2 text-sm"
+        data-cy="hero-author-info"
+      >
+        <span data-cy="hero-author">Par {author}</span>
+        <span>•</span>
+        <span data-cy="hero-reading-time">{readingTime} min de lecture</span>
+      </div>
+
+      <a
+        href={`/blog/${slug}`}
+        class="btn btn-primary btn-sm"
+        aria-label={`Lire l'article: ${title}`}
+        data-cy="hero-read-button"
+      >
+        {t("blog.readMore")}
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M7 17L17 7"></path>
+          <path d="M7 7h10v10"></path>
+        </svg>
+      </a>
+    </div>
+  </div>
+</article>
+
+<style>
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

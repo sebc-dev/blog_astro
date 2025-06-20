@@ -1,12 +1,12 @@
 ---
-title: "10 Techniques d'Optimisation des Performances Web en 2024"
+title: "Optimisation des Performances Web : Techniques et Bonnes Pratiques"
 description: "Découvrez les meilleures techniques pour optimiser les performances de votre site web et améliorer l'expérience utilisateur."
-pubDate: 2024-02-01
-author: "Léa Martin"
+pubDate: 2024-02-10
+author: "Marc Leblanc"
 lang: "fr"
-translationId: "web-performance-optimization"
+translationId: "550e8400-e29b-41d4-a716-446655440003"
 canonicalSlug: "optimisation-performance-web"
-heroImage: "/images/performance-optimization.jpg"
+heroImage: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=600&q=80"
 ---
 
 # 10 Techniques d'Optimisation des Performances Web en 2024
@@ -16,15 +16,16 @@ Les performances web sont cruciales pour l'expérience utilisateur et le référ
 ## 1. Optimisation des Images
 
 ### Formats Modernes
+
 - **WebP** : Réduction de 25-35% de la taille
 - **AVIF** : Compression encore meilleure
 - **Responsive Images** : Servir la bonne taille
 
 ```html
 <picture>
-  <source srcset="image.avif" type="image/avif">
-  <source srcset="image.webp" type="image/webp">
-  <img src="image.jpg" alt="Description" loading="lazy">
+  <source srcset="image.avif" type="image/avif" />
+  <source srcset="image.webp" type="image/webp" />
+  <img src="image.jpg" alt="Description" loading="lazy" />
 </picture>
 ```
 
@@ -35,7 +36,7 @@ Ne chargez que ce qui est visible :
 ```javascript
 // Intersection Observer pour le lazy loading personnalisé
 const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
+  entries.forEach((entry) => {
     if (entry.isIntersecting) {
       const img = entry.target;
       img.src = img.dataset.src;
@@ -48,44 +49,56 @@ const observer = new IntersectionObserver((entries) => {
 ## 3. Optimisation du CSS
 
 ### CSS Critique
+
 Inlinez le CSS critique et chargez le reste de manière asynchrone :
 
 ```html
 <style>
   /* CSS critique inline */
-  .header { display: flex; }
+  .header {
+    display: flex;
+  }
 </style>
-<link rel="preload" href="styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<link
+  rel="preload"
+  href="styles.css"
+  as="style"
+  onload="this.onload=null;this.rel='stylesheet'"
+/>
 ```
 
 ### Purge CSS Non Utilisé
+
 Utilisez des outils comme PurgeCSS pour éliminer le CSS inutile.
 
 ## 4. Optimisation JavaScript
 
 ### Code Splitting
+
 ```javascript
 // Chargement dynamique des modules
 const loadModule = async () => {
-  const module = await import('./heavy-module.js');
+  const module = await import("./heavy-module.js");
   return module.default;
 };
 ```
 
 ### Tree Shaking
+
 Éliminez le code JavaScript non utilisé lors du build.
 
 ## 5. Mise en Cache Stratégique
 
 ### Service Workers
+
 ```javascript
 // Cache stratégique avec Service Workers
-self.addEventListener('fetch', event => {
-  if (event.request.destination === 'image') {
+self.addEventListener("fetch", (event) => {
+  if (event.request.destination === "image") {
     event.respondWith(
-      caches.match(event.request).then(response => {
+      caches.match(event.request).then((response) => {
         return response || fetch(event.request);
-      })
+      }),
     );
   }
 });
@@ -95,20 +108,27 @@ self.addEventListener('fetch', event => {
 
 ```html
 <!-- Préchargement des ressources critiques -->
-<link rel="preload" href="/fonts/main.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="prefetch" href="/page-suivante.html">
-<link rel="preconnect" href="https://api.example.com">
+<link
+  rel="preload"
+  href="/fonts/main.woff2"
+  as="font"
+  type="font/woff2"
+  crossorigin
+/>
+<link rel="prefetch" href="/page-suivante.html" />
+<link rel="preconnect" href="https://api.example.com" />
 ```
 
 ## 7. Optimisation des Polices
 
 ### Variable Fonts
+
 Utilisez une seule police variable au lieu de plusieurs weights :
 
 ```css
 @font-face {
-  font-family: 'InterVariable';
-  src: url('inter-variable.woff2') format('woff2');
+  font-family: "InterVariable";
+  src: url("inter-variable.woff2") format("woff2");
   font-weight: 100 900;
   font-display: swap;
 }
@@ -117,6 +137,7 @@ Utilisez une seule police variable au lieu de plusieurs weights :
 ## 8. Compression et Minification
 
 ### Gzip/Brotli
+
 Activez la compression sur votre serveur :
 
 ```nginx
@@ -130,25 +151,29 @@ brotli_types text/css application/javascript;
 ## 9. Optimisation Base de Données
 
 ### Index Optimaux
+
 ```sql
 -- Index pour les requêtes fréquentes
 CREATE INDEX idx_user_active ON users(active, created_at);
 ```
 
 ### Mise en Cache des Requêtes
+
 Utilisez Redis ou Memcached pour les données fréquemment demandées.
 
 ## 10. Monitoring et Métriques
 
 ### Core Web Vitals
+
 Surveillez les métriques clés :
+
 - **LCP** (Largest Contentful Paint) < 2.5s
 - **FID** (First Input Delay) < 100ms
 - **CLS** (Cumulative Layout Shift) < 0.1
 
 ```javascript
 // Mesure des Core Web Vitals
-import { getCLS, getFID, getFCP, getLCP, getTTFB } from 'web-vitals';
+import { getCLS, getFID, getFCP, getLCP, getTTFB } from "web-vitals";
 
 getCLS(console.log);
 getFID(console.log);
@@ -166,4 +191,4 @@ getLCP(console.log);
 
 L'optimisation des performances est un processus continu. Mesurez, optimisez, et mesurez à nouveau. Chaque milliseconde compte pour l'expérience utilisateur et le succès de votre site web.
 
-Commencez par les optimisations ayant le plus d'impact : images, CSS critique, et mise en cache. Les gains seront immédiatement visibles ! 
+Commencez par les optimisations ayant le plus d'impact : images, CSS critique, et mise en cache. Les gains seront immédiatement visibles !

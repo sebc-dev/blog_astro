@@ -1,6 +1,10 @@
-import { defineConfig } from "vitest/config";
+/// <reference types="vitest/config" />
+import { getViteConfig } from "astro/config";
 
-export default defineConfig({
+const TIMEOUT_CI = 10000;
+const TIMEOUT = 5000;
+
+export default getViteConfig({
   test: {
     globals: true,
     environment: "jsdom",
@@ -21,17 +25,10 @@ export default defineConfig({
           branches: 80,
           functions: 80,
           lines: 80,
-          statements: 80
-        }
-      }
+          statements: 80,
+        },
+      },
     },
-    // Tests post-build pour sites statiques
-    testTimeout: process.env.CI ? 10000 : 5000,
-  },
-  resolve: {
-    alias: {
-      "@": new URL("./src", import.meta.url).pathname,
-      "astro:content": new URL("./src/test/mocks/astro-content.ts", import.meta.url).pathname,
-    },
+    testTimeout: process.env.CI ? TIMEOUT_CI : TIMEOUT,
   },
 });

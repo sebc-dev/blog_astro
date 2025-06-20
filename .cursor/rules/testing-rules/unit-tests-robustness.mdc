@@ -1,0 +1,169 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Tests Unitaires Robustes - Règles Anti-Fragility
+
+## Principe Fondamental
+
+**TOUJOURS privilégier la robustesse à la précision** : Un test qui passe en local mais échoue sur GitHub Actions est un test fragile. La compatibilité cross-platform et la résistance aux variations d'environnement sont prioritaires.
+
+## 🚫 Anti-Patterns à Éviter
+
+### 1. Correspondances Exactes de Chaînes Longues
+```typescript
+// ❌ FRAGILE - Échoue facilement sur différents environnements
+expect(content).toContain('class="grid-section hidden lg:block pt-16"');
+expect(content).toContain('const gridPostsDesktop = showHero && limitedPosts.length > 1');
+```
+
+### 2. Regex Complexes Multi-Lignes
+```typescript
+// ❌ FRAGILE - Sensible aux espaces et retours à la ligne
+expect(content).toMatch(/grid-section hidden lg:block pt-16[\s\S]*?gridPostsDesktop\.map/);
+```
+
+### 3. Tests Dépendants de l'Ordre ou du Formatage
+```typescript
+// ❌ FRAGILE - Dépend du formatage exact
+const propsPattern = /title={post\.data\.title}[\s\S]*?description={post\.data\.description}/;
+```
+
+## ✅ Patterns Recommandés
+
+### 1. Tests Basés sur `includes()` 
+```typescript
+// ✅ ROBUSTE - Fonctionne sur tous les environnements
+const hasDesktopGrid = componentContent.includes('gridPostsDesktop.map');
+const hasHiddenClass = componentContent.includes('hidden lg:block');
+expect(hasDesktopGrid).toBe(true);
+expect(hasHiddenClass).toBe(true);
+```
+
+### 2. Regex Flexibles pour Attributs CSS
+```typescript
+// ✅ ROBUSTE - Cherche le pattern dans l'attribut sans ordre strict
+expect(content).toMatch(/grid-section[^>]*hidden[^>]*lg:block/);
+expect(content).toMatch(/hero-section[^>]*hidden[^>]*lg:block/);
+```
+
+### 3. Tests Granulaires Séparés
+```typescript
+// ✅ ROBUSTE - Chaque aspect vérifié indépendamment
+const hasTitle = content.includes('title={post.data.title}');
+const hasDescription = content.includes('description={post.data.description}');
+const hasHeroImage = content.includes('heroImage={post.data.heroImage}');
+
+expect(hasTitle).toBe(true);
+expect(hasDescription).toBe(true);
+expect(hasHeroImage).toBe(true);
+```
+
+### 4. Regex Multi-Lignes avec `Array.from()`
+```typescript
+// ✅ ROBUSTE - Conversion explicite pour Map.entries()
+const byLanguage = Object.fromEntries(
+  Array.from(postsByLang.entries()).map(([lang, posts]) => [lang, posts.length])
+);
+```
+
+## 🔧 Stratégies Cross-Platform
+
+### 1. Tests de Lecture de Fichiers
+```typescript
+// Utiliser des chemins absolus avec process.cwd()
+const componentPath = join(process.cwd(), 'src/components/Component.astro');
+const content = readFileSync(componentPath, 'utf-8');
+```
+
+### 2. Gestion des Variables d'Environnement
+```typescript
+// Tests conditionnels selon l'environnement
+const isGitHub = process.env.GITHUB_ACTIONS === 'true';
+const isWindows = process.platform === 'win32';
+```
+
+### 3. Tests de Debug Intégrés
+```typescript
+describe('Debug Information', () => {
+  it('devrait fournir des informations de debug pour CI/CD', () => {
+    console.log('🔍 File path:', componentPath);
+    console.log('📄 File length:', content.length);
+    console.log('🏷️ Contains key elements:', {
+      hasGridSection: content.includes('grid-section'),
+      hasHeroSection: content.includes('hero-section'),
+      hasLgHidden: content.includes('lg:hidden')
+    });
+    
+    expect(content.length).toBeGreaterThan(0);
+  });
+});
+```
+
+## 📋 Checklist Tests Robustes
+
+Avant de committer des tests, vérifier :
+
+- [ ] **Pas de correspondances exactes** de chaînes > 20 caractères
+- [ ] **Utilisation d'`includes()`** pour les vérifications simples
+- [ ] **Regex flexibles** pour les patterns CSS complexes
+- [ ] **Tests granulaires** plutôt que tests monolithiques
+- [ ] **Conversion explicite** des Map.entries() avec Array.from()
+- [ ] **Tests de debug** intégrés pour le diagnostic CI/CD
+- [ ] **Chemins absolus** avec process.cwd() pour les fichiers
+- [ ] **Tests locaux ET CI** passent avant commit
+
+## 🎯 Cas d'Usage Spécifiques
+
+### Tests de Composants Astro
+```typescript
+// Pour tester la présence de classes CSS
+expect(content).toMatch(/class="[^"]*desired-class[^"]*"/);
+
+// Pour tester la logique de composant
+const hasLogic = content.includes('const variableName');
+const hasMapping = content.includes('array.map');
+expect(hasLogic && hasMapping).toBe(true);
+```
+
+### Tests d'Intégration de Contenu
+```typescript
+// Vérifier la structure sans dépendre du formatage
+const sections = ['section1', 'section2', 'section3'];
+sections.forEach(section => {
+  expect(content.includes(section)).toBe(true);
+});
+```
+
+### Tests de Validation TypeScript
+```typescript
+// Éviter les erreurs Map/Array
+const result = Object.fromEntries(
+  Array.from(mapVariable.entries()).map(([key, value]) => [key, value.length])
+);
+```
+
+## 🔄 Maintenance des Tests
+
+### Refactoring de Tests Fragiles
+1. **Identifier** les tests qui échouent sporadiquement
+2. **Analyser** les différences d'environnement
+3. **Remplacer** par des patterns robustes
+4. **Tester** sur plusieurs environnements
+5. **Ajouter** des tests de debug
+
+### Monitoring de la Fiabilité
+- Utiliser les logs de debug pour identifier les causes d'échec
+- Maintenir un ratio de tests robustes > 95%
+- Refactorer immédiatement les tests fragiles détectés
+
+## 📚 Références de Fichiers
+
+- Tests robustes : [src/test/integration/article-responsive-display.test.ts](mdc:src/test/integration/article-responsive-display.test.ts)
+- Tests Map corrigés : [src/test/integration/translation-validation.test.ts](mdc:src/test/integration/translation-validation.test.ts)
+- Configuration Vitest : [vitest.config.ts](mdc:vitest.config.ts)
+
+## 🏆 Objectif
+
+**Zéro test fragile** : Chaque test doit passer de façon déterministe sur tous les environnements (local Windows, local macOS, GitHub Actions Linux, etc.). La robustesse est plus importante que la précision extrême.
