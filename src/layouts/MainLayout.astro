@@ -40,6 +40,7 @@ const lang = getLangFromUrl(Astro.url);
     --grid-size: 24;
     --grid-stroke-width: 0.4;
     --grid-opacity: 0.25;
+    --grid-bg-url: url("/assets/grid-pattern.svg");
     --mask-start: rgba(0, 0, 0, 1);
     --mask-mid-high: rgba(0, 0, 0, 0.9);
     --mask-mid: rgba(0, 0, 0, 0.7);
@@ -47,8 +48,8 @@ const lang = getLangFromUrl(Astro.url);
     --mask-low: rgba(0, 0, 0, 0.1);
     --mask-end: rgba(0, 0, 0, 0);
     
-    /* Grille optimisée avec data-URI dynamique - Visibilité renforcée */
-    background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23000' stroke-width='0.4' opacity='0.25'%3E%3Cpath d='M0 0v24M24 0v24M0 0h24M0 24h24'/%3E%3C/g%3E%3C/svg%3E");
+    /* Grille optimisée avec fichier SVG externe - Meilleure maintenabilité */
+    background-image: var(--grid-bg-url);
     background-size: calc(var(--grid-size) * 1px) calc(var(--grid-size) * 1px);
     background-attachment: local;
     background-repeat: repeat;
@@ -80,7 +81,8 @@ const lang = getLangFromUrl(Astro.url);
       --grid-size: 20;
       --grid-stroke-width: 0.35;
       --grid-opacity: 0.2;
-      background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23000' stroke-width='0.35' opacity='0.2'%3E%3Cpath d='M0 0v20M20 0v20M0 0h20M0 20h20'/%3E%3C/g%3E%3C/svg%3E");
+      /* Réutilisation de la même variable pour maintenir la cohérence */
+      background-image: var(--grid-bg-url);
     }
   }
 
@@ -103,8 +105,8 @@ const lang = getLangFromUrl(Astro.url);
       --mask-mid: rgba(0, 0, 0, 0.3);
       --mask-end: rgba(0, 0, 0, 0);
       
-      /* Grille bien visible pour très petits écrans */
-      background-image: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23000' stroke-width='0.3' opacity='0.18'%3E%3Cpath d='M0 0v16M16 0v16M0 0h16M0 16h16'/%3E%3C/g%3E%3C/svg%3E");
+      /* Réutilisation cohérente du même fichier SVG */
+      background-image: var(--grid-bg-url);
       
       /* Masque optimisé pour visibilité mobile */
       mask: linear-gradient(
