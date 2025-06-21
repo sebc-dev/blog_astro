@@ -36,40 +36,51 @@ const lang = getLangFromUrl(Astro.url);
     z-index: -1;
     pointer-events: none;
     
-
-
-    /* Grille optimisée avec data-URI statique - Visibilité renforcée */
+    /* CSS Variables pour unifier la configuration */
+    --grid-size: 24;
+    --grid-stroke-width: 0.4;
+    --grid-opacity: 0.25;
+    --mask-start: rgba(0, 0, 0, 1);
+    --mask-mid-high: rgba(0, 0, 0, 0.9);
+    --mask-mid: rgba(0, 0, 0, 0.7);
+    --mask-mid-low: rgba(0, 0, 0, 0.4);
+    --mask-low: rgba(0, 0, 0, 0.1);
+    --mask-end: rgba(0, 0, 0, 0);
+    
+    /* Grille optimisée avec data-URI dynamique - Visibilité renforcée */
     background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23000' stroke-width='0.4' opacity='0.25'%3E%3Cpath d='M0 0v24M24 0v24M0 0h24M0 24h24'/%3E%3C/g%3E%3C/svg%3E");
-    background-size: 24px 24px;
+    background-size: calc(var(--grid-size) * 1px) calc(var(--grid-size) * 1px);
     background-attachment: local;
     background-repeat: repeat;
 
     /* Effet de fondu doux vers le bas - Visibilité maximisée */
     mask: linear-gradient(
       to bottom,
-      rgba(0, 0, 0, 1) 0%,
-      rgba(0, 0, 0, 0.9) 15%,
-      rgba(0, 0, 0, 0.7) 35%,
-      rgba(0, 0, 0, 0.4) 60%,
-      rgba(0, 0, 0, 0.1) 80%,
-      rgba(0, 0, 0, 0) 95%
+      var(--mask-start) 0%,
+      var(--mask-mid-high) 15%,
+      var(--mask-mid) 35%,
+      var(--mask-mid-low) 60%,
+      var(--mask-low) 80%,
+      var(--mask-end) 95%
     );
     -webkit-mask: linear-gradient(
       to bottom,
-      rgba(0, 0, 0, 1) 0%,
-      rgba(0, 0, 0, 0.9) 15%,
-      rgba(0, 0, 0, 0.7) 35%,
-      rgba(0, 0, 0, 0.4) 60%,
-      rgba(0, 0, 0, 0.1) 80%,
-      rgba(0, 0, 0, 0) 95%
+      var(--mask-start) 0%,
+      var(--mask-mid-high) 15%,
+      var(--mask-mid) 35%,
+      var(--mask-mid-low) 60%,
+      var(--mask-low) 80%,
+      var(--mask-end) 95%
     );
   }
 
   /* Adaptation pour les petits écrans */
   @media (max-width: 768px) {
     .grid-background {
+      --grid-size: 20;
+      --grid-stroke-width: 0.35;
+      --grid-opacity: 0.2;
       background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23000' stroke-width='0.35' opacity='0.2'%3E%3Cpath d='M0 0v20M20 0v20M0 0h20M0 20h20'/%3E%3C/g%3E%3C/svg%3E");
-      background-size: 20px 20px;
     }
   }
 
@@ -84,21 +95,29 @@ const lang = getLangFromUrl(Astro.url);
   /* Optimisation pour les appareils low-end */
   @media (max-width: 480px) and (max-height: 800px) {
     .grid-background {
+      /* Configuration unifiée pour très petits écrans */
+      --grid-size: 16;
+      --grid-stroke-width: 0.3;
+      --grid-opacity: 0.18;
+      --mask-start: rgba(0, 0, 0, 0.9);
+      --mask-mid: rgba(0, 0, 0, 0.3);
+      --mask-end: rgba(0, 0, 0, 0);
+      
       /* Grille bien visible pour très petits écrans */
       background-image: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23000' stroke-width='0.3' opacity='0.18'%3E%3Cpath d='M0 0v16M16 0v16M0 0h16M0 16h16'/%3E%3C/g%3E%3C/svg%3E");
-      background-size: 16px 16px;
+      
       /* Masque optimisé pour visibilité mobile */
       mask: linear-gradient(
         to bottom,
-        rgba(0, 0, 0, 0.9) 0%,
-        rgba(0, 0, 0, 0.3) 50%,
-        rgba(0, 0, 0, 0) 80%
+        var(--mask-start) 0%,
+        var(--mask-mid) 50%,
+        var(--mask-end) 80%
       );
       -webkit-mask: linear-gradient(
         to bottom,
-        rgba(0, 0, 0, 0.9) 0%,
-        rgba(0, 0, 0, 0.3) 50%,
-        rgba(0, 0, 0, 0) 80%
+        var(--mask-start) 0%,
+        var(--mask-mid) 50%,
+        var(--mask-end) 80%
       );
     }
   }
