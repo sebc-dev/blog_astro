@@ -203,13 +203,15 @@ describe("Build Static Tests - Phase 2", () => {
       const enHTML = await readHTMLFile("index.html");
 
       // Vérifier que le CSS critique contient les classes Header essentielles
-      const inlineCSS = enHTML.match(/<style[^>]*>(.*?)<\/style>/gs)?.[0] || "";
+      // Récupérer TOUS les blocs de styles inline (pas seulement le premier)
+      const allInlineCSS = enHTML.match(/<style[^>]*>(.*?)<\/style>/gs) || [];
+      const combinedCSS = allInlineCSS.join("");
 
       // Classes critiques pour le Header selon l'implémentation réelle
-      expect(inlineCSS).toContain(".header-critical"); // Classe principale Header
-      expect(inlineCSS).toContain("backdrop-filter"); // Optimisations modernes
-      expect(inlineCSS).toContain("@media"); // Media queries responsive
-      expect(inlineCSS).toContain("prefers-reduced-motion"); // Support accessibilité (remplace prefers-color-scheme pour ce test)
+      expect(combinedCSS).toContain(".header-critical"); // Classe principale Header
+      expect(combinedCSS).toContain("backdrop-filter"); // Optimisations modernes
+      expect(combinedCSS).toContain("@media"); // Media queries responsive
+      expect(combinedCSS).toContain("prefers-reduced-motion"); // Support accessibilité (remplace prefers-color-scheme pour ce test)
     });
 
     test("bundle JavaScript total < 5KB", async () => {
