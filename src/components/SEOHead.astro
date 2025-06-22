@@ -1,5 +1,6 @@
 ---
 import { getLangFromUrl, useTranslations } from "../i18n/utils";
+import { siteConfig, siteUtils } from "../config/site";
 
 interface Props {
   title?: string;
@@ -20,10 +21,10 @@ interface Props {
 const {
   title,
   description,
-  titleTemplate = "%s | sebc.dev",
+  titleTemplate = `%s | ${siteConfig.title}`,
   ogTitle,
   ogDescription,
-  ogImage = "/assets/og-default.jpg",
+  ogImage = siteConfig.defaultOgImage,
   ogType = "website",
   canonicalUrl,
   noindex = false,
@@ -40,7 +41,7 @@ const t = useTranslations(lang);
 // Construction du titre final
 const getPageTitle = () => {
   if (!title) {
-    return "sebc.dev"; // Titre par défaut du site
+    return siteConfig.title; // Titre par défaut du site
   }
   
   // Si titleTemplate contient %s, on remplace par le titre
@@ -56,9 +57,8 @@ const finalDescription = description || t("meta.description.home");
 const finalOgTitle = ogTitle || finalTitle;
 const finalOgDescription = ogDescription || finalDescription;
 
-// URL canonique
-const baseUrl = "https://sebc.dev"; // À adapter selon votre domaine
-const finalCanonicalUrl = canonicalUrl || new URL(Astro.url.pathname, baseUrl).href;
+// URL canonique utilisant la configuration centralisée
+const finalCanonicalUrl = canonicalUrl || siteUtils.getCanonicalUrl(Astro.url.pathname);
 
 // Génération des balises meta pour les tags
 const keywordsContent = tags.length > 0 ? tags.join(", ") : undefined;
@@ -84,15 +84,15 @@ const keywordsContent = tags.length > 0 ? tags.join(", ") : undefined;
 <meta property="og:description" content={finalOgDescription} />
 <meta property="og:type" content={ogType} />
 <meta property="og:url" content={finalCanonicalUrl} />
-<meta property="og:image" content={new URL(ogImage, baseUrl).href} />
+<meta property="og:image" content={siteUtils.getAssetUrl(ogImage)} />
 <meta property="og:locale" content={lang === "fr" ? "fr_FR" : "en_US"} />
-<meta property="og:site_name" content="sebc.dev" />
+<meta property="og:site_name" content={siteConfig.title} />
 
 <!-- Twitter Cards -->
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content={finalOgTitle} />
 <meta name="twitter:description" content={finalOgDescription} />
-<meta name="twitter:image" content={new URL(ogImage, baseUrl).href} />
+<meta name="twitter:image" content={siteUtils.getAssetUrl(ogImage)} />
 
 <!-- Métadonnées d'article (si applicable) -->
 {ogType === "article" && publishedTime && (

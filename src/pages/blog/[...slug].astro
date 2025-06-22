@@ -2,6 +2,7 @@
 import MainLayout from "../../layouts/MainLayout.astro";
 import { getCollection } from "astro:content";
 import { getLangFromUrl } from "../../i18n/utils";
+import { siteUtils } from "../../config/site";
 
 export async function getStaticPaths() {
   const blogEntries = await getCollection("blog");
@@ -18,18 +19,29 @@ const { Content } = await entry.render();
 // Système d'internationalisation
 const lang = getLangFromUrl(Astro.url);
 
-// Métadonnées pour l'article
-const title = entry.data.title;
-const description = entry.data.description;
-const ogImage = entry.data.heroImage;
-const publishedTime = entry.data.pubDate.toISOString();
-const author = entry.data.author;
+// Validation et extraction sécurisée des métadonnées
+const entryData = entry.data || {};
+const title = entryData.title || "Article sans titre";
+const description = entryData.description || "";
+const ogImage = entryData.heroImage;
+const author = entryData.author || "Auteur inconnu";
 
-// Tags pour les métadonnées
-const tags = [
-  ...(entry.data.category ? [entry.data.category] : []),
-  ...(entry.data.tags || []),
-];
+// Validation sécurisée de pubDate
+const pubDate = entryData.pubDate;
+const isValidDate = pubDate && pubDate instanceof Date && !isNaN(pubDate.getTime());
+const publishedTime = isValidDate ? pubDate.toISOString() : new Date().toISOString();
+
+// Tags pour les métadonnées (adaptés aux propriétés disponibles)
+const tags: string[] = [];
+
+// Génération du schéma JSON-LD avec la configuration centralisée
+const blogPostSchema = siteUtils.generateBlogPostSchema({
+  title,
+  description,
+  image: ogImage,
+  datePublished: publishedTime,
+  author,
+});
 ---
 
 <MainLayout 
@@ -46,22 +58,7 @@ const tags = [
   ))}
   
   <!-- Schema.org pour les articles -->
-  <script slot="head" type="application/ld+json" set:html={JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    "headline": title,
-    "description": description,
-    "image": ogImage,
-    "datePublished": publishedTime,
-    "author": {
-      "@type": "Person",
-      "name": author
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "sebc.dev"
-    }
-  })} />
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(blogPostSchema)} />
 
   <article class="prose prose-lg mx-auto max-w-4xl px-4 py-8">
     <!-- En-tête de l'article -->
@@ -73,14 +70,14 @@ const tags = [
         <span>Par {author}</span>
         <span>•</span>
         <time datetime={publishedTime}>
-          {entry.data.pubDate.toLocaleDateString(
+          {isValidDate ? pubDate.toLocaleDateString(
             lang === "fr" ? "fr-FR" : "en-US",
             {
               year: "numeric",
               month: "long",
               day: "numeric"
             }
-          )}
+          ) : "Date non disponible"}
         </time>
       </div>
     </header>
