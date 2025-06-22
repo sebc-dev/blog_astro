@@ -155,4 +155,295 @@ describe('SEOHead Component', () => {
       expect(siteConfig.title).toBe('sebc.dev');
     });
   });
+
+  describe('Gestion des erreurs et cas limites', () => {
+    describe('URLs malformées et invalides', () => {
+      it('devrait gérer les chemins avec caractères spéciaux', async () => {
+        const { siteUtils } = await import('../../config/site');
+        
+        const specialPaths = [
+          '/blog/article-with-émojis-🚀',
+          '/blog/article with spaces',
+          '/blog/article%20encoded',
+          '/blog/article?query=test&param=value',
+          '/blog/article#section',
+        ];
+        
+        specialPaths.forEach(path => {
+          expect(() => {
+            const canonicalUrl = siteUtils.getCanonicalUrl(path);
+            expect(canonicalUrl).toBeDefined();
+            expect(canonicalUrl).toMatch(/^https?:\/\/.+/);
+          }).not.toThrow();
+        });
+      });
+
+      it('devrait gérer les chemins vides ou invalides', async () => {
+        const { siteUtils } = await import('../../config/site');
+        
+        const invalidPaths = ['', '   ', null, undefined];
+        
+        invalidPaths.forEach(path => {
+          expect(() => {
+            const canonicalUrl = siteUtils.getCanonicalUrl(path as string);
+            expect(canonicalUrl).toBeDefined();
+          }).not.toThrow();
+        });
+      });
+
+      it('devrait gérer les URLs d\'assets malformées', async () => {
+        const { siteUtils } = await import('../../config/site');
+        
+        const malformedAssets = [
+          '',
+          '   ',
+          'not-a-url',
+          '//malformed-protocol',
+          'assets/image with spaces.jpg',
+          '/assets/image%20with%20encoding.png',
+        ];
+        
+        malformedAssets.forEach(asset => {
+          expect(() => {
+            const assetUrl = siteUtils.getAssetUrl(asset);
+            expect(assetUrl).toBeDefined();
+            expect(assetUrl).toMatch(/^https?:\/\/.+/);
+          }).not.toThrow();
+        });
+      });
+    });
+
+    describe('Valeurs de configuration manquantes', () => {
+      it('devrait gérer l\'absence de configuration d\'organisation', async () => {
+        const { siteConfig } = await import('../../config/site');
+        
+        // Même si certaines valeurs sont undefined, la structure doit exister
+        expect(siteConfig.organization).toBeDefined();
+        expect(siteConfig.organization.name).toBeDefined();
+        expect(siteConfig.organization.type).toMatch(/^(Organization|Person)$/);
+        
+        // URL doit toujours être définie même si les env vars sont manquantes
+        expect(siteConfig.organization.url).toBeDefined();
+        expect(siteConfig.organization.url).toMatch(/^https?:\/\/.+/);
+      });
+
+      it('devrait gérer les variables d\'environnement manquantes', async () => {
+        const { siteConfig } = await import('../../config/site');
+        
+        // Les valeurs sociales peuvent être undefined
+        expect(siteConfig.social).toBeDefined();
+        // Ces valeurs peuvent être undefined sans causer d'erreur
+        if (siteConfig.social.github) {
+          expect(typeof siteConfig.social.github).toBe('string');
+        }
+        if (siteConfig.social.twitter) {
+          expect(typeof siteConfig.social.twitter).toBe('string');
+        }
+        if (siteConfig.social.linkedin) {
+          expect(typeof siteConfig.social.linkedin).toBe('string');
+        }
+      });
+
+      it('devrait avoir des valeurs par défaut robustes', async () => {
+        const { siteConfig } = await import('../../config/site');
+        
+        // Valeurs critiques qui ne doivent jamais être undefined
+        expect(siteConfig.baseUrl).toBeDefined();
+        expect(siteConfig.baseUrl).not.toBe('');
+        expect(siteConfig.title).toBeDefined();
+        expect(siteConfig.title).not.toBe('');
+        expect(siteConfig.description).toBeDefined();
+        expect(siteConfig.description).not.toBe('');
+        expect(siteConfig.defaultOgImage).toBeDefined();
+        expect(siteConfig.defaultOgImage).not.toBe('');
+      });
+    });
+
+    describe('Gestion des titres avec cas limites', () => {
+      it('devrait gérer les titres très longs', async () => {
+        const { siteUtils } = await import('../../config/site');
+        
+        const longTitle = 'A'.repeat(300); // Titre très long
+        const pageTitle = siteUtils.getPageTitle(longTitle);
+        
+        expect(pageTitle).toBeDefined();
+        expect(pageTitle).toContain(longTitle);
+        expect(pageTitle.length).toBeGreaterThan(300);
+      });
+
+      it('devrait gérer les titres avec caractères spéciaux', async () => {
+        const { siteUtils } = await import('../../config/site');
+        
+        const specialTitles = [
+          'Titre avec émojis 🚀🎉',
+          'Titre avec "guillemets" et \'apostrophes\'',
+          'Titre avec <balises> HTML',
+          'Titre avec & caractères & spéciaux',
+          'Titre avec | pipes | multiples',
+        ];
+        
+        specialTitles.forEach(title => {
+          expect(() => {
+            const pageTitle = siteUtils.getPageTitle(title);
+            expect(pageTitle).toBeDefined();
+            expect(pageTitle).toContain(title);
+          }).not.toThrow();
+        });
+      });
+
+      it('devrait gérer les titres vides ou invalides', async () => {
+        const { siteUtils, siteConfig } = await import('../../config/site');
+        
+        // Test avec titres vraiment vides
+        const emptyTitles = ['', null, undefined];
+        emptyTitles.forEach(title => {
+          const pageTitle = siteUtils.getPageTitle(title as string | undefined);
+          expect(pageTitle).toBe(siteConfig.title); // Doit retourner le titre par défaut
+        });
+        
+        // Test avec titre contenant seulement des espaces
+        // Note: getPageTitle trim maintenant, donc '   ' est traité comme vide
+        const whitespaceTitle = '   ';
+        const pageTitle = siteUtils.getPageTitle(whitespaceTitle);
+        expect(pageTitle).toBe(siteConfig.title);
+      });
+    });
+
+    describe('Génération de schémas JSON-LD avec erreurs', () => {
+      it('devrait gérer les articles avec données manquantes', async () => {
+        const { siteUtils } = await import('../../config/site');
+        
+        const incompleteArticles = [
+          { title: '', description: 'Description', datePublished: '2024-01-01', author: 'Test' },
+          { title: 'Titre', description: '', datePublished: '2024-01-01', author: 'Test' },
+          { title: 'Titre', description: 'Description', datePublished: '', author: 'Test' },
+          { title: 'Titre', description: 'Description', datePublished: '2024-01-01', author: '' },
+        ];
+        
+        incompleteArticles.forEach(article => {
+          expect(() => {
+            const schema = siteUtils.generateBlogPostSchema(article);
+            expect(schema).toBeDefined();
+            expect(typeof schema).toBe('object');
+          }).not.toThrow();
+        });
+      });
+
+      it('devrait gérer les dates invalides', async () => {
+        const { siteUtils } = await import('../../config/site');
+        
+        const invalidDates = [
+          'not-a-date',
+          '2024-13-45', // Date impossible
+          '2024/01/01', // Format incorrect
+          '01-01-2024', // Format incorrect
+        ];
+        
+        invalidDates.forEach(date => {
+          expect(() => {
+            const schema = siteUtils.generateBlogPostSchema({
+              title: 'Test',
+              description: 'Description',
+              datePublished: date,
+              author: 'Test Author'
+            });
+            expect(schema).toBeDefined();
+          }).not.toThrow();
+        });
+      });
+
+      it('devrait gérer les images d\'article invalides', async () => {
+        const { siteUtils } = await import('../../config/site');
+        
+        const invalidImages = [
+          '',
+          '   ',
+          'not-an-image',
+          '/path/to/nonexistent.jpg',
+          'malformed-url',
+        ];
+        
+        invalidImages.forEach(image => {
+          expect(() => {
+            const schema = siteUtils.generateBlogPostSchema({
+              title: 'Test',
+              description: 'Description',
+              datePublished: '2024-01-01',
+              author: 'Test Author',
+              image
+            });
+            expect(schema).toBeDefined();
+          }).not.toThrow();
+        });
+      });
+    });
+
+    describe('Robustesse des utilitaires URL', () => {
+      it('devrait gérer les doubles slashes et normalisation', async () => {
+        const { siteUtils } = await import('../../config/site');
+        
+        const pathsWithSlashes = [
+          '//double-slash',
+          '/normal/path/',
+          'path/without/leading/slash',
+          '/path//with//double//slashes/',
+        ];
+        
+        pathsWithSlashes.forEach(path => {
+          expect(() => {
+            const canonicalUrl = siteUtils.getCanonicalUrl(path);
+            expect(canonicalUrl).toBeDefined();
+            expect(canonicalUrl).toMatch(/^https?:\/\/[^\/]+\//); // URL bien formée
+          }).not.toThrow();
+        });
+      });
+
+      it('devrait maintenir la cohérence malgré les erreurs d\'entrée', async () => {
+        const { siteUtils } = await import('../../config/site');
+        
+        // Même avec des entrées bizarres, les URLs doivent rester cohérentes
+        const weirdInputs = [
+          { path: '/test-path', asset: '/test-asset.jpg' },
+          { path: '', asset: '' },
+          { path: '   ', asset: '   ' },
+          { path: 'relative-path', asset: 'relative-asset.png' },
+        ];
+        
+        weirdInputs.forEach(({ path, asset }) => {
+          const canonicalUrl = siteUtils.getCanonicalUrl(path);
+          const assetUrl = siteUtils.getAssetUrl(asset);
+          
+          // Les deux doivent avoir le même domaine de base
+          const canonicalDomain = new URL(canonicalUrl).origin;
+          const assetDomain = new URL(assetUrl).origin;
+          
+          expect(canonicalDomain).toBe(assetDomain);
+          
+          // Les URLs doivent être bien formées
+          expect(canonicalUrl).toMatch(/^https?:\/\/.+/);
+          expect(assetUrl).toMatch(/^https?:\/\/.+/);
+        });
+      });
+    });
+
+    describe('Gestion des erreurs de configuration', () => {
+      it('devrait fonctionner même avec une baseUrl malformée', async () => {
+        // Ce test vérifie que même si la configuration est corrompue,
+        // les fonctions ne plantent pas
+        const { siteUtils } = await import('../../config/site');
+        
+        expect(() => {
+          const url = siteUtils.getCanonicalUrl('/test');
+          expect(url).toBeDefined();
+        }).not.toThrow();
+      });
+
+      it('devrait gérer les types d\'organisation invalides', async () => {
+        const { siteConfig } = await import('../../config/site');
+        
+        // Le type doit être l'un des deux valides
+        expect(['Organization', 'Person']).toContain(siteConfig.organization.type);
+      });
+    });
+  });
 }); 

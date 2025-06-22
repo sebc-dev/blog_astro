@@ -93,7 +93,7 @@ export const siteUtils = {
    * Construit le titre complet de la page
    */
   getPageTitle(pageTitle?: string): string {
-    return pageTitle ? `${pageTitle} | ${siteConfig.title}` : siteConfig.title;
+    return pageTitle && pageTitle.trim() ? `${pageTitle} | ${siteConfig.title}` : siteConfig.title;
   },
 
   /**
@@ -111,7 +111,7 @@ export const siteUtils = {
       "@type": "BlogPosting",
       "headline": article.title,
       "description": article.description,
-      "image": article.image ? this.getAssetUrl(article.image) : undefined,
+      "image": article.image ? siteUtils.getAssetUrl(article.image) : undefined,
       "datePublished": article.datePublished,
       "author": {
         "@type": "Person",
@@ -136,6 +136,19 @@ export const envConfig = {
   
   /**
    * Indique si on est en mode debug (développement ou preview)
+   * 
+   * Retourne `true` si l'environnement est soit en développement (`dev`) 
+   * soit en mode preview. Utile pour activer des fonctionnalités de debug,
+   * des logs détaillés, ou des outils de développement qui ne doivent pas
+   * être présents en production.
+   * 
+   * @returns {boolean} `true` en mode développement ou preview, `false` en production
+   * @example
+   * ```typescript
+   * if (envConfig.isDebug) {
+   *   console.log('Debug info:', someData);
+   * }
+   * ```
    */
   get isDebug() {
     return this.isDev || this.isPreview;

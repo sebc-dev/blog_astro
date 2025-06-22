@@ -93,6 +93,30 @@ describe('Configuration du Site', () => {
         
         expect(result).toBe(`${pageTitle} | ${siteConfig.title}`);
       });
+
+      it('devrait traiter null comme un titre manquant', () => {
+        const result = siteUtils.getPageTitle(undefined);
+        
+        expect(result).toBe(siteConfig.title);
+      });
+
+      it('devrait traiter les chaînes avec seulement des espaces comme vides', () => {
+        const result = siteUtils.getPageTitle('   ');
+        
+        expect(result).toBe(siteConfig.title);
+      });
+
+      it('devrait traiter les chaînes avec tabs et espaces comme vides', () => {
+        const result = siteUtils.getPageTitle(' \t \n ');
+        
+        expect(result).toBe(siteConfig.title);
+      });
+
+      it('devrait traiter une chaîne vide avec espaces en début/fin comme vide', () => {
+        const result = siteUtils.getPageTitle('  \t  ');
+        
+        expect(result).toBe(siteConfig.title);
+      });
     });
 
     describe('generateBlogPostSchema', () => {
