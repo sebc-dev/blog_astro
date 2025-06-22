@@ -1,9 +1,20 @@
 ---
 import MainLayout from "../layouts/MainLayout.astro";
 import LatestArticlesSection from "../components/LatestArticlesSection.astro";
-import "../assets/app.css";
+import { getLangFromUrl, useTranslations } from "../i18n/utils";
+
+// Système d'internationalisation
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+// Métadonnées de la page
+const pageTitle = t("page.title.home");
+const pageDescription = t("meta.description.home");
 ---
 
-<MainLayout>
+<MainLayout 
+  title={pageTitle}
+  description={pageDescription}
+>
   <LatestArticlesSection />
 </MainLayout>

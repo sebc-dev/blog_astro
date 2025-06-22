@@ -22,6 +22,7 @@ export const ui = {
     "blog.readMore": "Read more",
     "blog.publishedOn": "Published on",
     "blog.author": "Author",
+    "blog.unknownAuthor": "Unknown Author",
     "blog.backToBlog": "Back to Blog",
     "blog.relatedPosts": "Related Posts",
     "blog.noPostsFound": "No posts found",
@@ -79,6 +80,14 @@ export const ui = {
       "Latest articles and tutorials about web development, programming and technology",
     "meta.description.about": "Learn more about our team and our mission",
     "meta.description.contact": "Get in touch with us",
+    
+    // Titres de pages
+    "page.title.home": "Home",
+    "page.title.blog": "Blog",
+    "page.title.about": "About",
+    "page.title.contact": "Contact",
+    "page.title.articles": "Articles",
+    "page.title.notFound": "Page Not Found",
   },
   fr: {
     // Navigation
@@ -97,6 +106,7 @@ export const ui = {
     "blog.readMore": "Lire la suite",
     "blog.publishedOn": "Publié le",
     "blog.author": "Auteur",
+    "blog.unknownAuthor": "Auteur inconnu",
     "blog.backToBlog": "Retour au Blog",
     "blog.relatedPosts": "Articles similaires",
     "blog.noPostsFound": "Aucun article trouvé",
@@ -155,6 +165,14 @@ export const ui = {
     "meta.description.about":
       "En savoir plus sur notre équipe et notre mission",
     "meta.description.contact": "Contactez-nous",
+    
+    // Titres de pages
+    "page.title.home": "Accueil",
+    "page.title.blog": "Blog",
+    "page.title.about": "À propos",
+    "page.title.contact": "Contact",
+    "page.title.articles": "Articles",
+    "page.title.notFound": "Page Non Trouvée",
   },
 } as const;
 

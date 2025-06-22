@@ -105,6 +105,14 @@
     92% 0.005 190
   ); /* foreground text - très clair et neutre */
 
+  /* Couleurs secondaires accessibles WCAG 2.1 AA compliant */
+  --color-secondary-text: oklch(
+    78% 0.005 190
+  ); /* texte secondaire accessible - ratio 4.5:1+ sur base-200 */
+  --color-muted-text: oklch(
+    70% 0.005 190
+  ); /* texte discret mais lisible - ratio 3:1+ sur base-200 */
+
   /* Primary color - bleu cyan vibrant mais équilibré */
   --color-primary: oklch(68% 0.22 205);
   --color-primary-content: oklch(98% 0.003 205);
@@ -171,6 +179,14 @@
   --color-base-content: oklch(
     18% 0.015 190
   ); /* foreground text - gris très sombre */
+
+  /* Couleurs secondaires accessibles WCAG 2.1 AA compliant */
+  --color-secondary-text: oklch(
+    38% 0.015 190
+  ); /* texte secondaire accessible - ratio 4.5:1+ sur base-200 */
+  --color-muted-text: oklch(
+    48% 0.015 190
+  ); /* texte discret mais lisible - ratio 3:1+ sur base-200 */
 
   /* Primary color - bleu cyan plus sombre pour contraste sur clair */
   --color-primary: oklch(52% 0.25 205);
@@ -241,4 +257,13 @@ body {
 /* Classe utilitaire pour JetBrains Mono */
 .font-mono {
   font-family: "JetBrains Mono", monospace;
+}
+
+/* Classes utilitaires pour texte accessible */
+.text-secondary-accessible {
+  color: oklch(var(--color-secondary-text));
+}
+
+.text-muted-accessible {
+  color: oklch(var(--color-muted-text));
 }

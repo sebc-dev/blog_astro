@@ -1,10 +1,37 @@
 ---
 import Header from "../components/header/Header.astro";
 import Footer from "../components/Footer.astro";
-import { getLangFromUrl } from "../i18n/utils";
+import { getLangFromUrl, useTranslations } from "../i18n/utils";
+import { siteConfig, siteUtils } from "../config/site";
+import "../assets/app.css";
+
+
+// Props pour le layout
+interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+  noindex?: boolean;
+}
 
 // Détecter la langue depuis l'URL
 const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+// Récupérer les props avec valeurs par défaut
+const {
+  title,
+  description,
+  ogImage = siteConfig.defaultOgImage,
+  noindex = false,
+} = Astro.props as Props;
+
+// Construction du titre final et description
+const finalTitle = siteUtils.getPageTitle(title);
+const finalDescription = description || t("meta.description.home");
+
+// URL canonique utilisant la configuration dynamique
+const canonicalUrl = siteUtils.getCanonicalUrl(Astro.url.pathname);
 ---
 
 <html lang={lang}>
@@ -13,6 +40,34 @@ const lang = getLangFromUrl(Astro.url);
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
+    
+    <!-- Titre et métadonnées de base -->
+    <title>{finalTitle}</title>
+    <meta name="description" content={finalDescription} />
+    <meta name="language" content={lang} />
+    
+    <!-- URL canonique -->
+    <link rel="canonical" href={canonicalUrl} />
+    
+    <!-- Directive robots -->
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:title" content={finalTitle} />
+    <meta property="og:description" content={finalDescription} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={siteUtils.getAssetUrl(ogImage)} />
+    <meta property="og:locale" content={lang === "fr" ? "fr_FR" : "en_US"} />
+    <meta property="og:site_name" content={siteConfig.title} />
+    
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={finalTitle} />
+    <meta name="twitter:description" content={finalDescription} />
+    <meta name="twitter:image" content={siteUtils.getAssetUrl(ogImage)} />
+    
+    <!-- Slot pour métadonnées additionnelles -->
     <slot name="head" />
   </head>
   <body class="relative" data-cy="app-body">

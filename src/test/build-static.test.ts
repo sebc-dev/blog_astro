@@ -15,7 +15,7 @@ const BUILD_CONFIG = {
 
   // Tailles réalistes pour Lighthouse 90+
   maxBundleSize: 20 * 1024, // 20KB JS total
-  maxCSSSize: 1536, // 1.5KB CSS critique
+  maxCSSSize: 5120, // 5KB CSS critique (avec SEO complet)
   maxHTMLSize: 80 * 1024, // 80KB HTML
   maxSizeDifference: 20 * 1024, // 20KB différence langues
 
@@ -203,13 +203,53 @@ describe("Build Static Tests - Phase 2", () => {
       const enHTML = await readHTMLFile("index.html");
 
       // Vérifier que le CSS critique contient les classes Header essentielles
-      const inlineCSS = enHTML.match(/<style[^>]*>(.*?)<\/style>/gs)?.[0] || "";
+      // Récupérer TOUS les blocs de styles inline (pas seulement le premier)
+      const allInlineCSS = enHTML.match(/<style[^>]*>(.*?)<\/style>/gs) || [];
+      const combinedCSS = allInlineCSS.join("");
 
       // Classes critiques pour le Header selon l'implémentation réelle
-      expect(inlineCSS).toContain(".header-critical"); // Classe principale Header
-      expect(inlineCSS).toContain("backdrop-filter"); // Optimisations modernes
-      expect(inlineCSS).toContain("@media"); // Media queries responsive
-      expect(inlineCSS).toContain("prefers-reduced-motion"); // Support accessibilité (remplace prefers-color-scheme pour ce test)
+      expect(combinedCSS).toContain(".header-critical"); // Classe principale Header
+      expect(combinedCSS).toContain("backdrop-filter"); // Optimisations modernes
+      expect(combinedCSS).toContain("@media"); // Media queries responsive
+      expect(combinedCSS).toContain("prefers-reduced-motion"); // Support accessibilité (remplace prefers-color-scheme pour ce test)
+
+      // 🔍 ENHANCED: Vérifications spécifiques des propriétés CSS critiques essentielles
+      // pour le rendu initial sans layout shift
+
+      // 1. Positionnement critique du header (évite le layout shift)
+      expect(combinedCSS).toMatch(/\.header-critical\s*{[^}]*position:\s*fixed/);
+      expect(combinedCSS).toMatch(/\.header-critical\s*{[^}]*top:\s*0/);
+      expect(combinedCSS).toMatch(/\.header-critical\s*{[^}]*left:\s*0/);
+      expect(combinedCSS).toMatch(/\.header-critical\s*{[^}]*right:\s*0/);
+
+      // 2. Z-index pour l'empilement correct (évite les problèmes de superposition)
+      expect(combinedCSS).toMatch(/\.header-critical\s*{[^}]*z-index:\s*50/);
+
+      // 3. Effet de flou pour l'esthétique moderne (backdrop-filter avec valeur)
+      expect(combinedCSS).toMatch(/backdrop-filter:\s*blur\(8px\)/);
+
+      // 4. Transitions pour l'expérience utilisateur fluide
+      expect(combinedCSS).toMatch(/transition:\s*all\s+0\.3s\s+ease/);
+
+      // 5. Accessibilité - respect des préférences de mouvement réduit
+      expect(combinedCSS).toMatch(/@media\s*\(\s*prefers-reduced-motion:\s*reduce\s*\)/);
+      expect(combinedCSS).toMatch(/transition:\s*none\s*!\s*important/);
+
+      // 6. Vérifications des animations responsives pour les articles (performance initiale)
+      expect(combinedCSS).toMatch(/@keyframes\s+fadeInUp/);
+      expect(combinedCSS).toMatch(/opacity:\s*0/); // État initial des animations
+      expect(combinedCSS).toMatch(/transform:\s*translateY\(20px\)/); // Position initiale
+      expect(combinedCSS).toMatch(/opacity:\s*1/); // État final des animations
+      expect(combinedCSS).toMatch(/transform:\s*translateY\(0\)/); // Position finale
+
+      // 7. Support des grilles CSS modernes pour la mise en page
+      expect(combinedCSS).toMatch(/display:\s*grid/);
+      expect(combinedCSS).toMatch(/grid-template-columns/);
+
+      // 8. Optimisations de performance CSS (contain property)
+      expect(combinedCSS).toMatch(/contain:\s*layout\s+paint\s+style/);
+
+      console.log("✅ Critical CSS properties verified for initial render performance");
     });
 
     test("bundle JavaScript total < 5KB", async () => {

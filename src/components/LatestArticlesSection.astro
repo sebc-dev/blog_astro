@@ -97,7 +97,6 @@ const getPostTag = (post: CollectionEntry<"blog">) =>
                 description={post.data.description}
                 heroImage={post.data.heroImage}
                 pubDate={post.data.pubDate}
-                author={post.data.author}
                 category={getPostCategory(post)}
                 tag={getPostTag(post)}
                 slug={post.slug}
@@ -174,7 +173,7 @@ const getPostTag = (post: CollectionEntry<"blog">) =>
               <h3 class="mb-2 text-xl font-semibold">
                 {t("latestArticles.noArticles")}
               </h3>
-              <p class="text-base-content/70">
+              <p class="text-muted-accessible">
                 {t("latestArticles.noArticlesDesc")}
               </p>
             </div>
