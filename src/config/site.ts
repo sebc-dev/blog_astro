@@ -61,7 +61,9 @@ export const siteConfig: SiteConfig = {
   author: 'Sebastien',
   organization: {
     name: import.meta.env.SITE_ORGANIZATION_NAME || 'sebc.dev',
-    type: (import.meta.env.SITE_ORGANIZATION_TYPE as 'Organization' | 'Person') || 'Organization',
+    type: (['Organization', 'Person'].includes(import.meta.env.SITE_ORGANIZATION_TYPE)
+      ? import.meta.env.SITE_ORGANIZATION_TYPE
+      : 'Organization') as 'Organization' | 'Person',
     url: getBaseUrl(),
   },
   social: {
