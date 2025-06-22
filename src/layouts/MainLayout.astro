@@ -73,6 +73,10 @@ const canonicalUrl = siteUtils.getCanonicalUrl(Astro.url.pathname);
   <body class="relative" data-cy="app-body">
     <!-- Grille de fond avec fondu -->
     <div class="grid-background" data-cy="grid-background"></div>
+    
+    <!-- Container de fond avec couleur base-100 -->
+    <div class="content-background" data-cy="content-background"></div>
+    
     <Header />
     <main data-cy="main-content">
       <slot />
@@ -88,7 +92,7 @@ const canonicalUrl = siteUtils.getCanonicalUrl(Astro.url.pathname);
     left: 0;
     width: 100%;
     height: 100vh;
-    z-index: -1;
+    z-index: -2;
     pointer-events: none;
     
     /* CSS Variables pour unifier la configuration */
@@ -128,6 +132,26 @@ const canonicalUrl = siteUtils.getCanonicalUrl(Astro.url.pathname);
       var(--mask-low) 80%,
       var(--mask-end) 95%
     );
+  }
+
+  .content-background {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 1280px; /* max-w-7xl = 80rem = 1280px */
+    height: 100vh;
+    z-index: -1;
+    pointer-events: none;
+    
+    /* Couleur de fond base-100 avec padding identique au header */
+    background-color: oklch(var(--color-base-100));
+    padding-left: 1rem; /* px-4 = 16px = 1rem */
+    padding-right: 1rem;
+    
+    /* Masque la couleur de fond pour ne pas déborder sur les côtés */
+    box-sizing: border-box;
   }
 
   /* Adaptation pour les petits écrans */

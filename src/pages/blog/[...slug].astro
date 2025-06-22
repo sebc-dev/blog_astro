@@ -3,6 +3,7 @@ import MainLayout from "../../layouts/MainLayout.astro";
 import { getCollection } from "astro:content";
 import { getLangFromUrl, useTranslations } from "../../i18n/utils";
 import { siteUtils } from "../../config/site";
+import { estimateReadingTime } from "../../scripts/article-utils";
 
 export async function getStaticPaths() {
   const blogEntries = await getCollection("blog");
@@ -39,6 +40,9 @@ const publishedTime = isValidDate ? pubDate.toISOString() : new Date().toISOStri
 // Tags pour les métadonnées (adaptés aux propriétés disponibles)
 const tags: string[] = [];
 
+// Calcul du temps de lecture
+const readingTime = estimateReadingTime(entry, lang);
+
 // Génération du schéma JSON-LD avec la configuration centralisée
 // Seulement si nous avons un auteur valide pour éviter les données structurées incorrectes
 const blogPostSchema = siteUtils.generateBlogPostSchema({
@@ -68,42 +72,253 @@ const blogPostSchema = siteUtils.generateBlogPostSchema({
   <!-- Schema.org pour les articles -->
   <script slot="head" type="application/ld+json" set:html={JSON.stringify(blogPostSchema)} />
 
-  <article class="prose prose-lg mx-auto max-w-4xl px-4 py-8">
-    <!-- En-tête de l'article -->
-    <header class="mb-8">
-      <h1 class="text-4xl font-bold mb-4">{title}</h1>
-      <p class="text-xl text-muted-accessible mb-4">{description}</p>
-      
-      <div class="flex items-center gap-4 text-sm text-secondary-accessible">
-        {hasValidAuthor && (
-          <>
-            <span>Par {author}</span>
-            <span>•</span>
-          </>
-        )}
-        <time datetime={publishedTime}>
-          {isValidDate ? pubDate.toLocaleDateString(
-            lang === "fr" ? "fr-FR" : "en-US",
-            {
-              year: "numeric",
-              month: "long",
-              day: "numeric"
-            }
-          ) : "Date non disponible"}
-        </time>
+  <!-- Conteneur avec fond pour l'article -->
+  <div class="article-background min-h-screen">
+    <article class="prose prose-lg mx-auto max-w-4xl px-4 pt-8 pb-16 bg-base-200/50 backdrop-blur-sm rounded-lg shadow-lg border border-base-300/20">
+      <!-- Image hero en premier -->
+      {ogImage && (
+        <div class="article-image mb-6 not-prose">
+          <img 
+            src={ogImage} 
+            alt={title}
+            class="w-full h-64 object-cover rounded-lg shadow-md"
+          />
+        </div>
+      )}
+
+      <!-- En-tête de l'article : Titre + Métadonnées -->
+      <header class="article-header mb-4 not-prose">
+        <!-- Titre principal -->
+        <h1 class="text-4xl font-bold mb-6 text-base-content leading-tight">{title}</h1>
+        
+        <!-- Métadonnées : date et temps de lecture -->
+        <div class="metadata-bar flex items-center justify-between text-sm text-muted-accessible mb-2">
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 opacity-60" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+            </svg>
+            <time datetime={publishedTime}>
+              {isValidDate ? pubDate.toLocaleDateString(
+                lang === "fr" ? "fr-FR" : "en-US",
+                {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric"
+                }
+              ) : "Date non disponible"}
+            </time>
+          </div>
+          
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 opacity-60" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+            </svg>
+            <span>{readingTime} min de lecture</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Contenu de l'article (sans le titre H1 du Markdown) -->
+      <div class="article-content">
+        <Content />
       </div>
-    </header>
+    </article>
+  </div>
+</MainLayout>
 
-    <!-- Image hero -->
-    {ogImage && (
-      <img 
-        src={ogImage} 
-        alt={title}
-        class="w-full h-64 object-cover rounded-lg mb-8"
-      />
-    )}
-
-    <!-- Contenu de l'article -->
-    <Content />
-  </article>
-</MainLayout> 
+<style>
+  .article-background {
+    /* Fond dégradé subtil qui s'adapte aux thèmes */
+    background: linear-gradient(
+      135deg,
+      oklch(var(--color-base-100)) 0%,
+      oklch(var(--color-base-200) / 0.3) 50%,
+      oklch(var(--color-base-100)) 100%
+    );
+    
+    /* Pattern subtil pour enrichir visuellement */
+    background-image: 
+      radial-gradient(circle at 25% 25%, oklch(var(--color-primary) / 0.03) 0%, transparent 50%),
+      radial-gradient(circle at 75% 75%, oklch(var(--color-secondary) / 0.02) 0%, transparent 50%);
+    
+    /* Assure une hauteur minimale pour couvrir tout l'écran */
+    min-height: calc(100vh - 64px); /* Compensation pour le header fixe */
+    
+    /* Positionnement relatif pour les éléments enfants */
+    position: relative;
+  }
+  
+  /* Amélioration de la lisibilité du contenu prose */
+  .article-background article.prose {
+    /* Assure que le texte utilise les bonnes couleurs du thème */
+    color: oklch(var(--color-base-content));
+  }
+  
+  /* Masquer TOUS les titres H1 du contenu Markdown pour éviter la duplication */
+  .article-background article.prose .article-content h1 {
+    display: none !important;
+  }
+  
+  /* Ajuster la hiérarchie : promouvoir H2 à H1 visuellement */
+  .article-background article.prose .article-content h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-top: 3rem;
+    margin-bottom: 1.5rem;
+    color: oklch(var(--color-base-content));
+    border-bottom: 2px solid oklch(var(--color-primary) / 0.2);
+    padding-bottom: 0.5rem;
+  }
+  
+  /* Styles pour le titre principal dans le header */
+  .article-background .article-header h1 {
+    color: oklch(var(--color-base-content));
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 0 0 1.5rem 0;
+  }
+  
+  .article-background article.prose h2,
+  .article-background article.prose h3,
+  .article-background article.prose h4,
+  .article-background article.prose h5,
+  .article-background article.prose h6 {
+    color: oklch(var(--color-base-content));
+  }
+  
+  .article-background article.prose p {
+    color: oklch(var(--color-base-content) / 0.9);
+  }
+  
+  .article-background article.prose a {
+    color: oklch(var(--color-primary));
+    text-decoration-color: oklch(var(--color-primary) / 0.3);
+  }
+  
+  .article-background article.prose a:hover {
+    color: oklch(var(--color-primary) / 0.8);
+    text-decoration-color: oklch(var(--color-primary) / 0.6);
+  }
+  
+  .article-background article.prose code {
+    background-color: oklch(var(--color-base-300) / 0.3);
+    color: oklch(var(--color-accent));
+    padding: 0.125rem 0.25rem;
+    border-radius: var(--radius-box);
+  }
+  
+  .article-background article.prose pre {
+    background-color: oklch(var(--color-base-300) / 0.2);
+    border: 1px solid oklch(var(--color-base-300) / 0.3);
+  }
+  
+  .article-background article.prose blockquote {
+    border-left-color: oklch(var(--color-primary));
+    background-color: oklch(var(--color-base-200) / 0.3);
+    color: oklch(var(--color-base-content) / 0.9);
+  }
+  
+  /* Styles pour le header de l'article */
+  .article-background .article-header {
+    border-bottom: 1px solid oklch(var(--color-base-300) / 0.2);
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .article-background .article-header p {
+    font-size: 1.25rem;
+    line-height: 1.6;
+    color: oklch(var(--color-base-content) / 0.8);
+    margin: 0;
+  }
+  
+  /* Styles pour les métadonnées discrètes */
+  .article-background .metadata-bar {
+    padding: 0.75rem 0;
+    border-top: 1px solid oklch(var(--color-base-300) / 0.15);
+    border-bottom: 1px solid oklch(var(--color-base-300) / 0.15);
+    color: oklch(var(--color-base-content) / 0.6);
+    font-size: 0.875rem;
+  }
+  
+  .article-background .metadata-bar svg {
+    color: oklch(var(--color-base-content) / 0.4);
+  }
+  
+  /* Styles pour l'image de l'article */
+  .article-background .article-image {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+  }
+  
+  .article-background .article-image img {
+    transition: transform 0.3s ease;
+    margin: 0;
+  }
+  
+  .article-background .article-image:hover img {
+    transform: scale(1.02);
+  }
+  
+  /* Amélioration du contenu de l'article */
+  .article-background .article-content {
+    margin-top: 1rem;
+  }
+  
+  /* Responsive : ajustements pour mobile */
+  @media (max-width: 768px) {
+    .article-background {
+      /* Simplification du fond sur mobile pour les performances */
+      background: oklch(var(--color-base-100));
+      background-image: 
+        radial-gradient(circle at 50% 50%, oklch(var(--color-primary) / 0.02) 0%, transparent 70%);
+    }
+    
+    .article-background article {
+      /* Réduction des marges sur mobile */
+      margin: 0 1rem;
+      padding: 1.5rem 1rem 2rem 1rem;
+      border-radius: 0.5rem; /* rounded-lg cohérent */
+    }
+    
+         /* Ajustements du header sur mobile */
+     .article-background .article-header h1 {
+       font-size: 2rem;
+       line-height: 1.3;
+       margin-bottom: 1rem;
+     }
+     
+     .article-background .article-header p {
+       font-size: 1.125rem;
+       line-height: 1.5;
+     }
+     
+     .article-background .article-header {
+       padding-bottom: 1rem;
+       margin-bottom: 1rem;
+     }
+    
+    /* Métadonnées en colonne sur mobile */
+    .article-background .metadata-bar {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+      padding: 0.5rem 0;
+    }
+    
+    /* Image plus petite sur mobile */
+    .article-background .article-image img {
+      height: 200px;
+    }
+  }
+  
+  /* Mode motion réduit */
+  @media (prefers-reduced-motion: reduce) {
+    .article-background {
+      /* Fond simplifié pour éviter les distractions */
+      background: oklch(var(--color-base-100));
+      background-image: none;
+    }
+  }
+</style> 
