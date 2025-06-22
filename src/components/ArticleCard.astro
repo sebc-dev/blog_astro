@@ -6,7 +6,7 @@ export interface Props {
   description: string;
   heroImage?: string;
   pubDate: Date;
-  author: string;
+  author?: string;
   category?: string;
   tag?: string;
   slug: string;
@@ -83,7 +83,7 @@ const shortDescription =
           </span>
         )
       }
-      <span class="text-base-content/60 ml-auto text-xs" data-cy="article-date">
+      <span class="text-secondary-accessible ml-auto text-xs" data-cy="article-date">
         {formattedDate}
       </span>
     </div>
@@ -100,7 +100,7 @@ const shortDescription =
 
     <!-- Extrait court avec ellipsis -->
     <p
-      class="text-base-content/70 mb-4 line-clamp-2 flex-grow text-sm leading-relaxed"
+      class="text-muted-accessible mb-4 line-clamp-2 flex-grow text-sm leading-relaxed"
       data-cy="article-description"
     >
       {shortDescription}
@@ -111,7 +111,7 @@ const shortDescription =
       class="card-actions mt-auto items-center justify-between"
       data-cy="article-footer"
     >
-      <span class="text-base-content/60 text-xs" data-cy="article-reading-time">
+      <span class="text-secondary-accessible text-xs" data-cy="article-reading-time">
         {readingTime} min
       </span>
 

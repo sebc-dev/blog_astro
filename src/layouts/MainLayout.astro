@@ -1,10 +1,36 @@
 ---
 import Header from "../components/header/Header.astro";
 import Footer from "../components/Footer.astro";
-import { getLangFromUrl } from "../i18n/utils";
+import { getLangFromUrl, useTranslations } from "../i18n/utils";
+
+// Props pour le layout
+interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+  noindex?: boolean;
+}
 
 // Détecter la langue depuis l'URL
 const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+// Récupérer les props avec valeurs par défaut
+const {
+  title,
+  description,
+  ogImage = "/assets/og-default.jpg",
+  noindex = false,
+} = Astro.props as Props;
+
+// Construction du titre final
+const siteTitle = "sebc.dev";
+const finalTitle = title ? `${title} | ${siteTitle}` : siteTitle;
+const finalDescription = description || t("meta.description.home");
+
+// URL canonique
+const baseUrl = "https://sebc.dev"; // À adapter selon votre domaine
+const canonicalUrl = new URL(Astro.url.pathname, baseUrl).href;
 ---
 
 <html lang={lang}>
@@ -13,6 +39,34 @@ const lang = getLangFromUrl(Astro.url);
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
+    
+    <!-- Titre et métadonnées de base -->
+    <title>{finalTitle}</title>
+    <meta name="description" content={finalDescription} />
+    <meta name="language" content={lang} />
+    
+    <!-- URL canonique -->
+    <link rel="canonical" href={canonicalUrl} />
+    
+    <!-- Directive robots -->
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:title" content={finalTitle} />
+    <meta property="og:description" content={finalDescription} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={new URL(ogImage, baseUrl).href} />
+    <meta property="og:locale" content={lang === "fr" ? "fr_FR" : "en_US"} />
+    <meta property="og:site_name" content="sebc.dev" />
+    
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={finalTitle} />
+    <meta name="twitter:description" content={finalDescription} />
+    <meta name="twitter:image" content={new URL(ogImage, baseUrl).href} />
+    
+    <!-- Slot pour métadonnées additionnelles -->
     <slot name="head" />
   </head>
   <body class="relative" data-cy="app-body">

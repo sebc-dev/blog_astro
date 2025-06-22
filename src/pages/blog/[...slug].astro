@@ -1,0 +1,97 @@
+---
+import MainLayout from "../../layouts/MainLayout.astro";
+import { getCollection } from "astro:content";
+import { getLangFromUrl } from "../../i18n/utils";
+
+export async function getStaticPaths() {
+  const blogEntries = await getCollection("blog");
+  
+  return blogEntries.map((entry) => ({
+    params: { slug: entry.slug },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+
+// Système d'internationalisation
+const lang = getLangFromUrl(Astro.url);
+
+// Métadonnées pour l'article
+const title = entry.data.title;
+const description = entry.data.description;
+const ogImage = entry.data.heroImage;
+const publishedTime = entry.data.pubDate.toISOString();
+const author = entry.data.author;
+
+// Tags pour les métadonnées
+const tags = [
+  ...(entry.data.category ? [entry.data.category] : []),
+  ...(entry.data.tags || []),
+];
+---
+
+<MainLayout 
+  title={title}
+  description={description}
+  ogImage={ogImage}
+>
+  <!-- Métadonnées spécifiques aux articles -->
+  <meta slot="head" property="og:type" content="article" />
+  <meta slot="head" property="article:published_time" content={publishedTime} />
+  <meta slot="head" property="article:author" content={author} />
+  {tags.map(tag => (
+    <meta slot="head" property="article:tag" content={tag} />
+  ))}
+  
+  <!-- Schema.org pour les articles -->
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": title,
+    "description": description,
+    "image": ogImage,
+    "datePublished": publishedTime,
+    "author": {
+      "@type": "Person",
+      "name": author
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "sebc.dev"
+    }
+  })} />
+
+  <article class="prose prose-lg mx-auto max-w-4xl px-4 py-8">
+    <!-- En-tête de l'article -->
+    <header class="mb-8">
+      <h1 class="text-4xl font-bold mb-4">{title}</h1>
+      <p class="text-xl text-gray-600 mb-4">{description}</p>
+      
+      <div class="flex items-center gap-4 text-sm text-gray-500">
+        <span>Par {author}</span>
+        <span>•</span>
+        <time datetime={publishedTime}>
+          {entry.data.pubDate.toLocaleDateString(lang === "fr" ? "fr-FR" : "en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+          })}
+        </time>
+      </div>
+    </header>
+
+    <!-- Image hero -->
+    {ogImage && (
+      <img 
+        src={ogImage} 
+        alt={title}
+        class="w-full h-64 object-cover rounded-lg mb-8"
+      />
+    )}
+
+    <!-- Contenu de l'article -->
+    <Content />
+  </article>
+</MainLayout> 

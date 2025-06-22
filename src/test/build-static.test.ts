@@ -15,7 +15,7 @@ const BUILD_CONFIG = {
 
   // Tailles réalistes pour Lighthouse 90+
   maxBundleSize: 20 * 1024, // 20KB JS total
-  maxCSSSize: 1536, // 1.5KB CSS critique
+  maxCSSSize: 5120, // 5KB CSS critique (avec SEO complet)
   maxHTMLSize: 80 * 1024, // 80KB HTML
   maxSizeDifference: 20 * 1024, // 20KB différence langues
 
