@@ -46,7 +46,7 @@ function getBaseUrl(): string {
     return import.meta.env.ASTRO_SITE.replace(/\/$/, '');
   }
   
-  // URL par défaut pour le développement
+  // URL par défaut pour le développement (cohérent avec env.example)
   return 'https://sebc.dev';
 }
 
@@ -113,7 +113,7 @@ export const siteUtils = {
       "@type": "BlogPosting",
       "headline": article.title,
       "description": article.description,
-      "image": article.image ? siteUtils.getAssetUrl(article.image) : undefined,
+      "image": article.image && siteUtils.getAssetUrl(article.image),
       "datePublished": article.datePublished,
       "author": {
         "@type": "Person",
