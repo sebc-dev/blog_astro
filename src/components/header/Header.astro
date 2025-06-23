@@ -15,7 +15,6 @@ const {
   navLinks = [
     { href: "/", key: "nav.home" },
     { href: "/articles", key: "nav.articles" },
-    { href: "/ressources", key: "nav.ressources" },
     { href: "/about", key: "nav.about" },
   ],
 } = Astro.props as HeaderProps;
@@ -50,7 +49,7 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
 <!-- Header Desktop -->
 <header
   id="desktop-header"
-  class="header-critical bg-base-200 border-base-content/10 hidden border-b lg:block"
+  class="header-critical bg-base-300 border-base-content/10 hidden border-b lg:block"
   role="banner"
   data-cy="header-desktop"
 >

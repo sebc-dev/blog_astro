@@ -1,9 +1,11 @@
 ---
 import MainLayout from "../../layouts/MainLayout.astro";
+import TableOfContents from "../../components/TableOfContents.astro";
 import { getCollection } from "astro:content";
 import { getLangFromUrl, useTranslations } from "../../i18n/utils";
 import { siteUtils } from "../../config/site";
 import { estimateReadingTime } from "../../scripts/article-utils";
+import { buildTocHierarchy, shouldShowToc } from "../../scripts/toc-utils";
 
 export async function getStaticPaths() {
   const blogEntries = await getCollection("blog");
@@ -15,7 +17,7 @@ export async function getStaticPaths() {
 }
 
 const { entry } = Astro.props;
-const { Content } = await entry.render();
+const { Content, headings } = await entry.render();
 
 // Système d'internationalisation
 const lang = getLangFromUrl(Astro.url);
@@ -42,6 +44,10 @@ const tags: string[] = [];
 
 // Calcul du temps de lecture
 const readingTime = estimateReadingTime(entry, lang);
+
+// Génération de la table des matières au build-time
+const tableOfContents = buildTocHierarchy(headings);
+const showToc = shouldShowToc(headings);
 
 // Génération du schéma JSON-LD avec la configuration centralisée
 // Seulement si nous avons un auteur valide pour éviter les données structurées incorrectes
@@ -72,19 +78,22 @@ const blogPostSchema = siteUtils.generateBlogPostSchema({
   <!-- Schema.org pour les articles -->
   <script slot="head" type="application/ld+json" set:html={JSON.stringify(blogPostSchema)} />
     <!-- Layout en grille pour article + future table des matières -->
-    <div class="article-layout max-w-7xl mx-auto px-4 pt-8 pb-16">
+    <div class="article-layout max-w-7xl mx-auto px-4 pt-4 pb-16">
       <!-- Article principal (colonne de gauche) -->
-      <article class="prose prose-lg bg-base-200 backdrop-blur-sm rounded-lg shadow-lg border border-base-300 px-6 py-8">
-      <!-- Image hero en premier -->
+      <article class="prose prose-lg max-w-none bg-base-300 backdrop-blur-sm rounded-lg shadow-lg border border-base-400 overflow-hidden flex flex-col min-h-[80vh]">
+      <!-- Image hero en premier qui prend tout le haut -->
       {ogImage && (
-        <div class="article-image mb-6 not-prose">
+        <figure class="article-image m-0 p-0 not-prose flex-1 min-h-0 overflow-hidden">
           <img 
             src={ogImage} 
             alt={title}
-            class="w-full h-64 object-cover rounded-lg shadow-md"
+            class="w-full h-full object-cover"
           />
-        </div>
+        </figure>
       )}
+      
+      <!-- Contenu qui ne rétrécit pas -->
+      <div class="flex-shrink-0 px-6 py-8">
 
       <!-- En-tête de l'article : Titre + Métadonnées -->
       <header class="article-header mb-4 not-prose">
@@ -122,17 +131,11 @@ const blogPostSchema = siteUtils.generateBlogPostSchema({
       <div class="article-content">
         <Content />
       </div>
+      </div>
       </article>
       
-      <!-- Espace réservé pour la future table des matières -->
-      <aside class="toc-placeholder">
-        <h2>Table des matières</h2>
-        <ul>
-          <li>
-            <a href="#introduction">Introduction</a>
-          </li>
-        </ul>
-      </aside>
+      <!-- Table des matières générée dynamiquement -->
+      <TableOfContents headings={tableOfContents} />
     </div>
 </MainLayout>
 
@@ -140,26 +143,12 @@ const blogPostSchema = siteUtils.generateBlogPostSchema({
   /* Layout en grille pour article + table des matières */
   .article-layout {
     display: grid;
-    grid-template-columns: 1fr 280px;
+    grid-template-columns: minmax(0, 1fr) 280px;
     gap: 1.5rem;
     align-items: start;
   }
   
-  /* Styles pour l'espace réservé à la table des matières */
-  .toc-placeholder {
-    position: sticky;
-    top: 100px; /* Décalage du header fixe */
-    height: fit-content;
-    background: var(--color-base-200);
-    backdrop-filter: blur(4px);
-    border: 1px solid var(--color-base-300);
-    border-radius: 0.5rem;
-    box-shadow: 0 10px 15px -3px oklch(var(--color-base-content) / 0.1), 0 4px 6px -2px oklch(var(--color-base-content) / 0.05);
-    padding: 1.5rem;
-    color: oklch(var(--color-base-content) / 0.7);
-    font-size: 0.875rem;
-    text-align: center;
-  }
+
 
   /* Amélioration de la lisibilité du contenu prose */
   .article-background article.prose {
@@ -259,18 +248,21 @@ const blogPostSchema = siteUtils.generateBlogPostSchema({
     color: oklch(var(--color-base-content) / 0.4);
   }
   
-  /* Styles pour l'image de l'article */
-  .article-background .article-image {
-    margin-top: 0;
-    margin-bottom: 1.5rem;
+  /* Styles pour l'image de l'article qui prend tout le haut */
+  .article-image {
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 0.5rem 0.5rem 0 0; /* Arrondi seulement en haut */
+    overflow: hidden;
   }
   
-  .article-background .article-image img {
+  .article-image img {
     transition: transform 0.3s ease;
-    margin: 0;
+    margin: 0 !important;
+    border-radius: 0;
   }
   
-  .article-background .article-image:hover img {
+  .article-image:hover img {
     transform: scale(1.02);
   }
   
@@ -287,10 +279,7 @@ const blogPostSchema = siteUtils.generateBlogPostSchema({
       gap: 1rem;
     }
     
-    /* Masquer la table des matières sur mobile */
-    .toc-placeholder {
-      display: none;
-    }
+
     
     .article-background {
       /* Simplification du fond sur mobile pour les performances */
