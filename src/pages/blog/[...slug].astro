@@ -71,13 +71,10 @@ const blogPostSchema = siteUtils.generateBlogPostSchema({
   
   <!-- Schema.org pour les articles -->
   <script slot="head" type="application/ld+json" set:html={JSON.stringify(blogPostSchema)} />
-
-  <!-- Conteneur avec fond pour l'article -->
-  <div class="article-background min-h-screen">
     <!-- Layout en grille pour article + future table des matières -->
     <div class="article-layout max-w-7xl mx-auto px-4 pt-8 pb-16">
       <!-- Article principal (colonne de gauche) -->
-      <article class="prose prose-lg bg-base-200/50 backdrop-blur-sm rounded-lg shadow-lg border border-base-300/20 px-6 py-8">
+      <article class="prose prose-lg bg-base-200 backdrop-blur-sm rounded-lg shadow-lg border border-base-300 px-6 py-8">
       <!-- Image hero en premier -->
       {ogImage && (
         <div class="article-image mb-6 not-prose">
@@ -129,34 +126,17 @@ const blogPostSchema = siteUtils.generateBlogPostSchema({
       
       <!-- Espace réservé pour la future table des matières -->
       <aside class="toc-placeholder">
-        <!-- Table des matières sera ajoutée ici -->
+        <h2>Table des matières</h2>
+        <ul>
+          <li>
+            <a href="#introduction">Introduction</a>
+          </li>
+        </ul>
       </aside>
     </div>
-  </div>
 </MainLayout>
 
-<style>
-  .article-background {
-    /* Fond dégradé subtil qui s'adapte aux thèmes */
-    background: linear-gradient(
-      135deg,
-      oklch(var(--color-base-100)) 0%,
-      oklch(var(--color-base-200) / 0.3) 50%,
-      oklch(var(--color-base-100)) 100%
-    );
-    
-    /* Pattern subtil pour enrichir visuellement */
-    background-image: 
-      radial-gradient(circle at 25% 25%, oklch(var(--color-primary) / 0.03) 0%, transparent 50%),
-      radial-gradient(circle at 75% 75%, oklch(var(--color-secondary) / 0.02) 0%, transparent 50%);
-    
-    /* Assure une hauteur minimale pour couvrir tout l'écran */
-    min-height: calc(100vh - 64px); /* Compensation pour le header fixe */
-    
-    /* Positionnement relatif pour les éléments enfants */
-    position: relative;
-  }
-  
+<style>  
   /* Layout en grille pour article + table des matières */
   .article-layout {
     display: grid;
@@ -170,29 +150,15 @@ const blogPostSchema = siteUtils.generateBlogPostSchema({
     position: sticky;
     top: 100px; /* Décalage du header fixe */
     height: fit-content;
-    background: oklch(var(--color-base-200) / 0.5);
+    background: var(--color-base-200);
     backdrop-filter: blur(4px);
-    border: 1px solid oklch(var(--color-base-300) / 0.2);
+    border: 1px solid var(--color-base-300);
     border-radius: 0.5rem;
     box-shadow: 0 10px 15px -3px oklch(var(--color-base-content) / 0.1), 0 4px 6px -2px oklch(var(--color-base-content) / 0.05);
     padding: 1.5rem;
     color: oklch(var(--color-base-content) / 0.7);
     font-size: 0.875rem;
     text-align: center;
-  }
-  
-  .toc-placeholder::before {
-    content: "📋 Table des matières";
-    display: block;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-  }
-  
-  .toc-placeholder::after {
-    content: "(sera ajoutée prochainement)";
-    display: block;
-    font-style: italic;
-    opacity: 0.7;
   }
 
   /* Amélioration de la lisibilité du contenu prose */
