@@ -29,9 +29,7 @@ export function buildTocHierarchy(
   if (headings.length === 0) {
     return toc;
   }
-  
-  // …rest of the implementation…
-}
+
   headings.forEach((heading) => {
     // Ignorer les headings plus profonds que nécessaire
     if (heading.depth < minDepth) {
