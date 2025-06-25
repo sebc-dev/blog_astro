@@ -1,11 +1,15 @@
 describe('Table des Matières - Scroll avec Offset', () => {
   beforeEach(() => {
-    // Visiter un article qui a une table des matières
+    // Vérifier que la page existe avant de continuer
+    cy.request('/blog/fr/guide-astro').its('status').should('eq', 200);
     cy.visit('/blog/fr/guide-astro');
-    
-    // Attendre que la page se charge complètement
-    cy.wait(1000);
+
+    // Attendre que la table des matières soit chargée
+    cy.get('.table-of-contents', { timeout: 10000 }).should('exist');
   });
+
+  // ... reste de la suite de tests ...
+});
 
   it('devrait afficher la table des matières sur desktop', () => {
     // Vérifier que la table des matières est présente
