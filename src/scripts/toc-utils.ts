@@ -26,7 +26,7 @@ export function buildTocHierarchy(
   const toc: TocHeading[] = [];
   const parentHeadings = new Map<number, TocHeading>();
   
-  if (headings.length === 0) {
+  if (!headings || headings.length === 0) {
     return toc;
   }
 
@@ -80,6 +80,7 @@ export function filterHeadingsByDepth(
   headings: AstroHeading[],
   maxDepth = 4
 ): AstroHeading[] {
+  if (!headings) return [];
   return headings.filter(heading => heading.depth <= maxDepth);
 }
 
@@ -89,6 +90,7 @@ export function filterHeadingsByDepth(
  * @returns Objet avec le nombre de headings par niveau
  */
 export function countHeadingsByLevel(headings: AstroHeading[]): Record<number, number> {
+  if (!headings) return {};
   return headings.reduce((acc, heading) => {
     acc[heading.depth] = (acc[heading.depth] || 0) + 1;
     return acc;
