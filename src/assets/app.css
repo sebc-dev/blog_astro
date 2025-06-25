@@ -188,6 +188,14 @@
     22% 0.015 190
   ); /* foreground text - légèrement plus clair */
 
+  /* Couleurs secondaires accessibles WCAG 2.1 AA compliant */
+  --color-secondary-text: oklch(
+    45% 0.012 190
+  ); /* texte secondaire accessible - adapté pour fond clair */
+  --color-muted-text: oklch(
+    58% 0.01 190
+  ); /* texte discret mais lisible - adapté pour fond clair */
+
   /* Primary color - bleu cyan plus sombre pour contraste sur clair */
   --color-primary: oklch(52% 0.25 205);
   --color-primary-content: oklch(98% 0.003 205);
