@@ -76,8 +76,8 @@ export function buildTocHierarchy(
  * @returns Headings filtrés
  */
 export function filterHeadingsByDepth(
-  headings: AstroHeading[], 
-  maxDepth: number = 4
+  headings: AstroHeading[],
+  maxDepth = 4
 ): AstroHeading[] {
   return headings.filter(heading => heading.depth <= maxDepth);
 }
