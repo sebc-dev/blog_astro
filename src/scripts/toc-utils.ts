@@ -100,6 +100,6 @@ export function countHeadingsByLevel(headings: AstroHeading[]): Record<number, n
  * @param minHeadings - Nombre minimum de headings requis (défaut: 3)
  * @returns true si l'article mérite une table des matières
  */
-export function shouldShowToc(headings: AstroHeading[], minHeadings: number = 3): boolean {
+export function shouldShowToc(headings: AstroHeading[], minHeadings = 3): boolean {
   return Boolean(headings && headings.length >= minHeadings);
 } 
