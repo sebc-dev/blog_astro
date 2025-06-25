@@ -7,6 +7,16 @@
     "dark-blue"];
 }
 
+/* Variables de thème TailwindCSS 4 pour les couleurs base personnalisées */
+@theme {
+  /* Couleurs base - valeurs par défaut (thème clair) qui seront surchargées par DaisyUI */
+  --color-base-50: oklch(94% 0.003 190);
+  --color-base-100: oklch(88% 0.005 190);
+  --color-base-200: oklch(82% 0.008 190);
+  --color-base-300: oklch(75% 0.012 190);
+  --color-base-400: oklch(68% 0.015 190);
+}
+
 /* Déclarations des polices JetBrains Mono */
 @font-face {
   font-family: "JetBrains Mono";
@@ -95,23 +105,23 @@
   prefersdark: true; /* set as default dark mode (prefers-color-scheme:dark) */
   color-scheme: dark; /* color of browser-provided UI */
 
-  /* Base colors - gris plus clairs avec une pointe de vert canard désaturé */
-  --color-base-100: oklch(
-    28% 0.008 190
-  ); /* background - gris sombre mais respirant */
-  --color-base-200: oklch(35% 0.01 190); /* card - gris moyen */
-  --color-base-300: oklch(42% 0.012 190); /* muted/border - gris bien visible */
+  /* Base colors - palette sombre profonde (surcharge les variables TailwindCSS) */
+  --color-base-50: oklch(16% 0.006 190); /* très sombre - pour éléments de fond profonds */
+  --color-base-100: oklch(19% 0.008 190); /* background principal - sombre */
+  --color-base-200: oklch(26% 0.01 190); /* card - sombre mais lisible */
+  --color-base-300: oklch(33% 0.012 190); /* muted/border */
+  --color-base-400: oklch(40% 0.014 190); /* éléments interactifs au repos */
   --color-base-content: oklch(
-    92% 0.005 190
-  ); /* foreground text - très clair et neutre */
+    90% 0.005 190
+  ); /* foreground text - légèrement moins blanc */
 
   /* Couleurs secondaires accessibles WCAG 2.1 AA compliant */
   --color-secondary-text: oklch(
-    78% 0.005 190
-  ); /* texte secondaire accessible - ratio 4.5:1+ sur base-200 */
+    75% 0.005 190
+  ); /* texte secondaire accessible - ajusté pour fond plus sombre */
   --color-muted-text: oklch(
-    70% 0.005 190
-  ); /* texte discret mais lisible - ratio 3:1+ sur base-200 */
+    65% 0.005 190
+  ); /* texte discret mais lisible - ajusté */
 
   /* Primary color - bleu cyan vibrant mais équilibré */
   --color-primary: oklch(68% 0.22 205);
@@ -168,25 +178,23 @@
   preferslight: true; /* set as default light mode (prefers-color-scheme:light) */
   color-scheme: light; /* color of browser-provided UI */
 
-  /* Base colors - blancs/gris très clairs avec pointe de vert canard désaturé */
-  --color-base-100: oklch(
-    98% 0.005 190
-  ); /* background - blanc très légèrement teinté */
-  --color-base-200: oklch(94% 0.008 190); /* card - gris très clair */
-  --color-base-300: oklch(
-    88% 0.012 190
-  ); /* muted/border - gris clair visible */
+  /* Base colors - palette claire mais plus douce (surcharge les variables TailwindCSS) */
+  --color-base-50: oklch(94% 0.003 190); /* clair - pour highlights subtils */
+  --color-base-100: oklch(88% 0.005 190); /* background principal - gris clair doux */
+  --color-base-200: oklch(82% 0.008 190); /* card - gris moyen clair */
+  --color-base-300: oklch(75% 0.012 190); /* muted/border - bien visible */
+  --color-base-400: oklch(68% 0.015 190); /* éléments désactivés/subtils */
   --color-base-content: oklch(
-    18% 0.015 190
-  ); /* foreground text - gris très sombre */
+    22% 0.015 190
+  ); /* foreground text - légèrement plus clair */
 
   /* Couleurs secondaires accessibles WCAG 2.1 AA compliant */
   --color-secondary-text: oklch(
-    38% 0.015 190
-  ); /* texte secondaire accessible - ratio 4.5:1+ sur base-200 */
+    45% 0.012 190
+  ); /* texte secondaire accessible - adapté pour fond clair */
   --color-muted-text: oklch(
-    48% 0.015 190
-  ); /* texte discret mais lisible - ratio 3:1+ sur base-200 */
+    58% 0.01 190
+  ); /* texte discret mais lisible - adapté pour fond clair */
 
   /* Primary color - bleu cyan plus sombre pour contraste sur clair */
   --color-primary: oklch(52% 0.25 205);
@@ -237,10 +245,16 @@
   --noise: 0;
 }
 
+:root {
+  --header-height: 6rem;
+}
+
 html {
   padding: 64px 0 0 0;
   margin: 0;
   scroll-behavior: smooth;
+  scroll-padding-top: var(--header-height); /* Offset pour les ancres avec header fixe */
+  overscroll-behavior: none;
   font-family:
     "Inter",
     system-ui,
@@ -252,6 +266,7 @@ body {
   padding: 0;
   margin: 0;
   scroll-behavior: smooth;
+  overscroll-behavior: none;
 }
 
 /* Classe utilitaire pour JetBrains Mono */

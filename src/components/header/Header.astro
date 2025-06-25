@@ -1,12 +1,6 @@
 ---
-import {
-  getLangFromUrl,
-  useTranslations,
-  useTranslatedPath,
-  getPathWithoutLang,
-} from "../../i18n/utils";
 import { generateCriticalCSS } from "./header-styles";
-import { mapNavLinks, generateLanguageUrls } from "./utils";
+import { prepareHeaderData } from "./utils";
 import type { HeaderProps } from "./types";
 
 // Props avec types définis
@@ -15,33 +9,23 @@ const {
   navLinks = [
     { href: "/", key: "nav.home" },
     { href: "/articles", key: "nav.articles" },
-    { href: "/ressources", key: "nav.ressources" },
     { href: "/about", key: "nav.about" },
   ],
 } = Astro.props as HeaderProps;
 
-// Logique côté serveur
-const lang = getLangFromUrl(Astro.url);
-const t = useTranslations(lang);
-const translatePath = useTranslatedPath(lang);
-
-const translatedNavLinks = mapNavLinks(
-  navLinks,
+// Préparer toutes les données du header via la logique TypeScript extraite
+const {
   lang,
+  languageContext,
+  t,
   translatePath,
-  Astro.url,
-);
-const currentPath = getPathWithoutLang(Astro.url);
-const languageUrls = generateLanguageUrls(currentPath, lang);
+  translatedNavLinks,
+  languageUrls,
+  hreflangLinks,
+} = await prepareHeaderData(Astro.url, navLinks);
 
 // CSS critique centralisé
 const criticalCSS = generateCriticalCSS();
-
-// SEO et hreflang
-const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
-  hreflang: langCode,
-  href: data.url,
-}));
 ---
 
 <!-- CSS Critique Inline -->
@@ -50,7 +34,7 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
 <!-- Header Desktop -->
 <header
   id="desktop-header"
-  class="header-critical bg-base-200 border-base-content/10 hidden border-b lg:block"
+  class="header-critical bg-base-300 border-base-content/10 hidden border-b lg:block"
   role="banner"
   data-cy="header-desktop"
 >
@@ -98,7 +82,7 @@ const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
       <!-- Sélecteur de langue -->
       <div class="dropdown dropdown-end" data-cy="language-selector-desktop">
         <button
-          class="btn btn-ghost btn-sm text-bg-base-200"
+          class="btn btn-ghost btn-sm"
           aria-haspopup="true"
           aria-expanded="false"
           aria-label={t("languageSwitcher.label")}

@@ -93,13 +93,11 @@ describe("Article Responsive Display Tests", () => {
       const hasPubDate = componentContent.includes(
         "pubDate={post.data.pubDate}",
       );
-      const hasAuthor = componentContent.includes("author={post.data.author}");
 
       expect(hasTitle).toBe(true);
       expect(hasDescription).toBe(true);
       expect(hasHeroImage).toBe(true);
       expect(hasPubDate).toBe(true);
-      expect(hasAuthor).toBe(true);
     });
   });
 

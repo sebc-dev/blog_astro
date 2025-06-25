@@ -7,7 +7,6 @@ const blogCollection = defineCollection({
     title: z.string(),
     description: z.string(),
     pubDate: z.date(),
-    author: z.string(),
     lang: z.enum(["en", "fr"]),
     translationId: z.string().uuid(),
     canonicalSlug: z.string().regex(SLUG_REGEX, {

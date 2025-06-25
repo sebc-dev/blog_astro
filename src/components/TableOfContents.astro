@@ -1,0 +1,153 @@
+---
+// Interface pour les headings de la table des matières
+interface TocHeading {
+  depth: number;
+  text: string;
+  slug: string;
+  subheadings?: TocHeading[];
+}
+
+interface Props {
+  headings: TocHeading[];
+  title?: string;
+  className?: string;
+}
+
+const { 
+  headings, 
+  title = "Table des matières",
+  className = "" 
+} = Astro.props;
+---
+
+{headings && headings.length > 0 && (
+  <aside class={`table-of-contents ${className}`} aria-label={title}>
+    <h2 class="toc-title">{title}</h2>
+    <nav class="toc-nav">
+      <ul class="toc-list">
+        {headings.map((heading) => (
+          <li class="toc-item">
+            <a href={`#${heading.slug}`} class="toc-link">
+              {heading.text}
+            </a>
+            {heading.subheadings && heading.subheadings.length > 0 && (
+              <ul class="toc-sublist">
+                {heading.subheadings.map((subheading) => (
+                  <li class="toc-subitem">
+                    <a href={`#${subheading.slug}`} class="toc-sublink">
+                      {subheading.text}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </li>
+        ))}
+      </ul>
+    </nav>
+  </aside>
+)}
+
+<style>
+  /* Styles pour la table des matières */
+  .table-of-contents {
+    position: sticky;
+    top: 5rem;
+    height: fit-content;
+    max-height: calc(100vh - 6rem);
+    overflow-y: auto;
+    background: var(--color-base-300);
+    backdrop-filter: blur(4px);
+    border: 1px solid var(--color-base-400);
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px oklch(var(--color-base-content) / 0.1), 0 4px 6px -2px oklch(var(--color-base-content) / 0.05);
+    padding: 1.5rem;
+  }
+
+  .toc-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: oklch(var(--color-base-content));
+    margin: 0 0 1rem 0;
+    border-bottom: 1px solid oklch(var(--color-base-400) / 0.3);
+    padding-bottom: 0.5rem;
+  }
+
+  .toc-nav {
+    font-size: 0.875rem;
+  }
+
+  .toc-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .toc-item {
+    margin-bottom: 0.5rem;
+  }
+
+  .toc-link {
+    display: block;
+    color: oklch(var(--color-base-content) / 0.8);
+    text-decoration: none;
+    padding: 0.25rem 0;
+    border-radius: 0.25rem;
+    transition: all 0.2s ease;
+    line-height: 1.4;
+  }
+
+  .toc-link:hover {
+    color: oklch(var(--color-primary));
+    background: oklch(var(--color-primary) / 0.1);
+    padding-left: 0.5rem;
+  }
+
+  .toc-link:focus {
+    outline: 2px solid oklch(var(--color-primary));
+    outline-offset: 2px;
+    background: oklch(var(--color-primary) / 0.1);
+  }
+
+  .toc-sublist {
+    list-style: none;
+    margin: 0.25rem 0 0 1rem;
+    padding: 0;
+    border-left: 1px solid oklch(var(--color-base-400) / 0.3);
+    padding-left: 0.75rem;
+  }
+
+  .toc-subitem {
+    margin-bottom: 0.25rem;
+  }
+
+  .toc-sublink {
+    display: block;
+    color: oklch(var(--color-base-content) / 0.6);
+    text-decoration: none;
+    padding: 0.125rem 0;
+    border-radius: 0.25rem;
+    transition: all 0.2s ease;
+    font-size: 0.8rem;
+    line-height: 1.3;
+  }
+
+  .toc-sublink:hover {
+    color: oklch(var(--color-primary));
+    background: oklch(var(--color-primary) / 0.08);
+    padding-left: 0.25rem;
+  }
+
+  .toc-sublink:focus {
+    outline: 2px solid oklch(var(--color-primary));
+    outline-offset: 2px;
+    background: oklch(var(--color-primary) / 0.08);
+  }
+
+  /* Responsive : masquer sur mobile */
+  @media (max-width: 768px) {
+    .table-of-contents {
+      display: none;
+    }
+  }
+</style> 

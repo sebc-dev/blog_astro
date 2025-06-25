@@ -1,11 +1,16 @@
-import { useTranslations } from "../../i18n/utils";
+import { useTranslations, useTranslatedPath, getLangFromUrl } from "../../i18n/utils";
+import type { Languages } from "../../i18n/ui";
 import type {
   NavLink,
   TranslatedNavLink,
-  SupportedLanguage,
-  LanguageUrls,
   TranslatePathFunction,
+  HeaderData,
 } from "./types";
+import { 
+  generateContextualLanguageUrls, 
+  generateHreflangLinks 
+} from "./article-utils";
+import { analyzeLanguageContext } from "./server-utils";
 
 /**
  * Transforms navigation links with translations and active state detection
@@ -17,7 +22,7 @@ import type {
  */
 export function mapNavLinks(
   navLinks: NavLink[],
-  lang: SupportedLanguage,
+  lang: Languages,
   translatePath: TranslatePathFunction,
   currentUrl: URL,
 ): TranslatedNavLink[] {
@@ -34,28 +39,46 @@ export function mapNavLinks(
 }
 
 /**
- * Generates language switch URLs for the header language selector
- * @param currentPath - Current path without language prefix
- * @param lang - Current language
- * @returns Object with language URLs and metadata
+ * Prépare toutes les données nécessaires pour le header
+ * @param currentUrl - URL courante
+ * @param navLinks - Liens de navigation
+ * @returns Objet avec toutes les données du header
  */
-export function generateLanguageUrls(
-  currentPath: string,
-  lang: SupportedLanguage,
-): LanguageUrls {
-  if (!currentPath.startsWith("/")) currentPath = `/${currentPath}`;
+export async function prepareHeaderData(
+  currentUrl: URL,
+  navLinks: NavLink[]
+): Promise<HeaderData> {
+  // Analyser le contexte linguistique
+  const languageContext = await analyzeLanguageContext(currentUrl);
+  
+  // Utiliser la langue détectée ou fallback vers getLangFromUrl qui ne peut jamais échouer
+  const lang = languageContext.detectedLang || getLangFromUrl(currentUrl);
+  
+  // Log pour debugging si on utilise le fallback
+  if (!languageContext.detectedLang) {
+    console.warn(`Language detection failed for URL: ${currentUrl.pathname}. Using fallback: ${lang}`);
+  }
+  
+  // Préparer les traductions et navigation
+  const t = useTranslations(lang);
+  const translatePath = useTranslatedPath(lang);
+  const translatedNavLinks = mapNavLinks(navLinks, lang, translatePath, currentUrl);
+  
+  // Générer les URLs de langue
+  const languageUrls = generateContextualLanguageUrls(languageContext, currentUrl);
+  
+  // Générer les liens hreflang
+  const hreflangLinks = generateHreflangLinks(languageUrls);
+  
   return {
-    en: {
-      url: currentPath,
-      isActive: lang === "en",
-      label: "English",
-      flag: "🇺🇸",
-    },
-    fr: {
-      url: currentPath.startsWith("/fr") ? currentPath : `/fr${currentPath}`,
-      isActive: lang === "fr",
-      label: "Français",
-      flag: "🇫🇷",
-    },
+    lang,
+    languageContext,
+    t,
+    translatePath,
+    translatedNavLinks,
+    languageUrls,
+    hreflangLinks,
+    // Ajouter un flag pour indiquer si on a utilisé le fallback
+    usingLanguageFallback: !languageContext.detectedLang,
   };
 }

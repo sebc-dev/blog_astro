@@ -3,6 +3,7 @@
  */
 
 import type { UIKeys } from "../../i18n/ui";
+import type { Languages } from "../../i18n/ui";
 
 // === TYPES POUR LA NAVIGATION ===
 export interface NavLink {
@@ -24,19 +25,38 @@ export interface ThemeConfig {
   dark: Theme;
 }
 
-// === TYPES POUR LES LANGUES ===
-export type SupportedLanguage = "en" | "fr";
+// === TYPES POUR LES DRAPEAUX ===
+/**
+ * Union type for country flags used in language switching
+ * Includes emoji flags for supported languages and generic fallback
+ */
+export type CountryFlag = 
+  | "🇺🇸"  // United States (English)
+  | "🇫🇷"  // France (French)
+  | "🌐"; // Generic/fallback flag
 
-export interface LanguageUrl {
-  url: string;
-  isActive: boolean;
-  label: string;
-  flag: string;
+// === TYPES POUR LES ARTICLES ===
+export type ArticleTranslationMapping = Record<Languages, string | null>;
+
+export interface ArticleLanguageContext {
+  isArticlePage: boolean;
+  detectedLang: Languages | null;
+  translationMapping?: ArticleTranslationMapping;
+  articleSlug?: string;
 }
 
-export interface LanguageUrls {
-  en: LanguageUrl;
-  fr: LanguageUrl;
+export interface LanguageUrlData {
+  url: string;
+  label: string;
+  flag: CountryFlag;
+  isActive: boolean;
+}
+
+export type LanguageUrls = Record<Languages, LanguageUrlData>;
+
+export interface HreflangLink {
+  hreflang: string;
+  href: string;
 }
 
 // === TYPES POUR LES ÉLÉMENTS DOM ===
@@ -85,4 +105,16 @@ export type UseTranslationsFunction = (key: UIKeys) => string;
 export interface HeaderError extends Error {
   context?: string;
   element?: string;
+}
+
+// === TYPES POUR LE RETOUR DE prepareHeaderData ===
+export interface HeaderData {
+  readonly lang: Languages;
+  readonly languageContext: ArticleLanguageContext;
+  readonly t: UseTranslationsFunction;
+  readonly translatePath: TranslatePathFunction;
+  readonly translatedNavLinks: TranslatedNavLink[];
+  readonly languageUrls: LanguageUrls;
+  readonly hreflangLinks: HreflangLink[];
+  readonly usingLanguageFallback: boolean;
 }

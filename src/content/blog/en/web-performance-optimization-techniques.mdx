@@ -2,25 +2,18 @@
 title: "Web Performance Optimization: Techniques and Best Practices"
 description: "Discover the best techniques to optimize your website performance and improve user experience."
 pubDate: 2024-02-10
-author: "Marc Leblanc"
 lang: "en"
 translationId: "550e8400-e29b-41d4-a716-446655440003"
 canonicalSlug: "web-performance-optimization-techniques"
 heroImage: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=600&q=80"
 ---
-
 # 10 Web Performance Optimization Techniques in 2024
-
 Web performance is crucial for user experience and SEO. Here are 10 essential techniques to optimize your website in 2024.
-
 ## 1. Image Optimization
-
 ### Modern Formats
-
 - **WebP**: 25-35% size reduction
 - **AVIF**: Even better compression
 - **Responsive Images**: Serve the right size
-
 ```html
 <picture>
   <source srcset="image.avif" type="image/avif" />
@@ -28,11 +21,8 @@ Web performance is crucial for user experience and SEO. Here are 10 essential te
   <img src="image.jpg" alt="Description" loading="lazy" />
 </picture>
 ```
-
 ## 2. Smart Lazy Loading
-
 Only load what's visible:
-
 ```javascript
 // Intersection Observer for custom lazy loading
 const observer = new IntersectionObserver((entries) => {
@@ -45,13 +35,9 @@ const observer = new IntersectionObserver((entries) => {
   });
 });
 ```
-
 ## 3. CSS Optimization
-
 ### Critical CSS
-
 Inline critical CSS and load the rest asynchronously:
-
 ```html
 <style>
   /* Critical CSS inline */
@@ -66,15 +52,10 @@ Inline critical CSS and load the rest asynchronously:
   onload="this.onload=null;this.rel='stylesheet'"
 />
 ```
-
 ### Purge Unused CSS
-
 Use tools like PurgeCSS to eliminate unused CSS.
-
 ## 4. JavaScript Optimization
-
 ### Code Splitting
-
 ```javascript
 // Dynamic module loading
 const loadModule = async () => {
@@ -82,15 +63,10 @@ const loadModule = async () => {
   return module.default;
 };
 ```
-
 ### Tree Shaking
-
 Eliminate unused JavaScript code during build.
-
 ## 5. Strategic Caching
-
 ### Service Workers
-
 ```javascript
 // Strategic caching with Service Workers
 self.addEventListener("fetch", (event) => {
@@ -103,9 +79,7 @@ self.addEventListener("fetch", (event) => {
   }
 });
 ```
-
 ## 6. Resource Preloading
-
 ```html
 <!-- Preload critical resources -->
 <link
@@ -118,13 +92,9 @@ self.addEventListener("fetch", (event) => {
 <link rel="prefetch" href="/next-page.html" />
 <link rel="preconnect" href="https://api.example.com" />
 ```
-
 ## 7. Font Optimization
-
 ### Variable Fonts
-
 Use a single variable font instead of multiple weights:
-
 ```css
 @font-face {
   font-family: "InterVariable";
@@ -133,13 +103,9 @@ Use a single variable font instead of multiple weights:
   font-display: swap;
 }
 ```
-
 ## 8. Compression and Minification
-
 ### Gzip/Brotli
-
 Enable compression on your server:
-
 ```nginx
 # Nginx configuration
 gzip on;
@@ -147,48 +113,32 @@ gzip_types text/css application/javascript image/svg+xml;
 brotli on;
 brotli_types text/css application/javascript;
 ```
-
 ## 9. Database Optimization
-
 ### Optimal Indexes
-
 ```sql
 -- Index for frequent queries
 CREATE INDEX idx_user_active ON users(active, created_at);
 ```
-
 ### Query Caching
-
 Use Redis or Memcached for frequently requested data.
-
 ## 10. Monitoring and Metrics
-
 ### Core Web Vitals
-
 Monitor key metrics:
-
 - **LCP** (Largest Contentful Paint) < 2.5s
 - **FID** (First Input Delay) < 100ms
 - **CLS** (Cumulative Layout Shift) < 0.1
-
 ```javascript
 // Measure Core Web Vitals
 import { getCLS, getFID, getFCP, getLCP, getTTFB } from "web-vitals";
-
 getCLS(console.log);
 getFID(console.log);
 getLCP(console.log);
 ```
-
 ## Recommended Tools
-
 1. **Lighthouse**: Comprehensive performance audit
 2. **WebPageTest**: Detailed performance testing
 3. **GTmetrix**: Analysis and recommendations
 4. **Chrome DevTools**: Real-time profiling
-
 ## Conclusion
-
 Performance optimization is an ongoing process. Measure, optimize, and measure again. Every millisecond counts for user experience and your website's success.
-
 Start with the highest impact optimizations: images, critical CSS, and caching. The gains will be immediately visible!

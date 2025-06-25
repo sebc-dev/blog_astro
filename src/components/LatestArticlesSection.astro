@@ -124,7 +124,6 @@ const getPostTag = (post: CollectionEntry<"blog">) =>
                   description={post.data.description}
                   heroImage={post.data.heroImage}
                   pubDate={post.data.pubDate}
-                  author={post.data.author}
                   category={getPostCategory(post)}
                   tag={getPostTag(post)}
                   slug={post.slug}
@@ -153,7 +152,6 @@ const getPostTag = (post: CollectionEntry<"blog">) =>
                   description={post.data.description}
                   heroImage={post.data.heroImage}
                   pubDate={post.data.pubDate}
-                  author={post.data.author}
                   category={getPostCategory(post)}
                   tag={getPostTag(post)}
                   slug={post.slug}
