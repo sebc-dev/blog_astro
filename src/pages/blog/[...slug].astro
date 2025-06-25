@@ -157,8 +157,8 @@ const blogPostSchema = siteUtils.generateBlogPostSchema({
   }
   
   /* Masquer TOUS les titres H1 du contenu Markdown pour éviter la duplication */
-  .article-background article.prose .article-content h1 {
-    display: none !important;
+  .article-background article.prose .article-content :where(h1) {
+    display: none;
   }
   
   /* Ajuster la hiérarchie : promouvoir H2 à H1 visuellement */
