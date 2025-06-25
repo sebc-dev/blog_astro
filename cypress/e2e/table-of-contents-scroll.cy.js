@@ -39,18 +39,19 @@ describe('Table des Matières - Scroll avec Offset', () => {
       // Vérifier que l'élément cible existe
       cy.get(`#${targetId}`).should('exist');
       
+      // Constantes pour l'offset du header
+      const HEADER_HEIGHT = 96;       // 6rem = 96px
+      const OFFSET_TOLERANCE = 16;    // Tolérance pour les variations
+      
       // Vérifier que l'élément cible est visible dans le viewport
       cy.get(`#${targetId}`).should('be.visible');
       
       // Vérifier que l'élément n'est pas masqué par le header
-      // En mesurant la distance depuis le haut du viewport
       cy.get(`#${targetId}`).then(($target) => {
         const rect = $target[0].getBoundingClientRect();
         
-        // L'élément devrait être au moins à 96px du haut (6rem = 96px)
-        // pour éviter d'être masqué par le header
-        expect(rect.top).to.be.greaterThan(80);
-        expect(rect.top).to.be.lessThan(150); // Pas trop loin non plus
+        expect(rect.top).to.be.greaterThan(HEADER_HEIGHT - OFFSET_TOLERANCE);
+        expect(rect.top).to.be.lessThan(HEADER_HEIGHT + OFFSET_TOLERANCE * 3);
       });
     });
   });
