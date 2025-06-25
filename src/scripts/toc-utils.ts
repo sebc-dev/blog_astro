@@ -21,7 +21,7 @@ export interface AstroHeading {
  */
 export function buildTocHierarchy(
   headings: AstroHeading[], 
-  minDepth: number = 2
+  minDepth = 2
 ): TocHeading[] {
   const toc: TocHeading[] = [];
   const parentHeadings = new Map<number, TocHeading>();
@@ -77,8 +77,8 @@ export function buildTocHierarchy(
  * @returns Headings filtrés
  */
 export function filterHeadingsByDepth(
-  headings: AstroHeading[], 
-  maxDepth: number = 4
+  headings: AstroHeading[],
+  maxDepth = 4
 ): AstroHeading[] {
   return headings.filter(heading => heading.depth <= maxDepth);
 }
@@ -101,6 +101,6 @@ export function countHeadingsByLevel(headings: AstroHeading[]): Record<number, n
  * @param minHeadings - Nombre minimum de headings requis (défaut: 3)
  * @returns true si l'article mérite une table des matières
  */
-export function shouldShowToc(headings: AstroHeading[], minHeadings: number = 3): boolean {
+export function shouldShowToc(headings: AstroHeading[], minHeadings = 3): boolean {
   return Boolean(headings && headings.length >= minHeadings);
 } 

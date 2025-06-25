@@ -147,12 +147,12 @@ export function createArticleTranslationMappingPure(
           post.data.translationId === currentTranslationId
         );
         
-        // Initialiser toutes les langues supportées à null
-        getSupportedLanguages().forEach(lang => {
+        // Initialiser et remplir en une seule passe
+        const supportedLanguages = getSupportedLanguages();
+        supportedLanguages.forEach(lang => {
           translationMapping[lang] = null;
         });
         
-        // Remplir avec les slugs trouvés
         relatedPosts.forEach(post => {
           const postLang = post.data.lang as Languages;
           // Extraire juste le nom du fichier sans le préfixe de langue de manière robuste

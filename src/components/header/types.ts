@@ -29,9 +29,7 @@ export interface ThemeConfig {
 export type SupportedLanguage = "en" | "fr";
 
 // === TYPES POUR LES ARTICLES ===
-export interface ArticleTranslationMapping {
-  [key: string]: string | null;
-}
+export type ArticleTranslationMapping = Record<Languages, string | null>;
 
 export interface ArticleLanguageContext {
   isArticlePage: boolean;
