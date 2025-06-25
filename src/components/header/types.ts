@@ -3,6 +3,7 @@
  */
 
 import type { UIKeys } from "../../i18n/ui";
+import type { Languages } from "../../i18n/ui";
 
 // === TYPES POUR LA NAVIGATION ===
 export interface NavLink {
@@ -27,16 +28,30 @@ export interface ThemeConfig {
 // === TYPES POUR LES LANGUES ===
 export type SupportedLanguage = "en" | "fr";
 
-export interface LanguageUrl {
-  url: string;
-  isActive: boolean;
-  label: string;
-  flag: string;
+// === TYPES POUR LES ARTICLES ===
+export interface ArticleTranslationMapping {
+  [key: string]: string | null;
 }
 
-export interface LanguageUrls {
-  en: LanguageUrl;
-  fr: LanguageUrl;
+export interface ArticleLanguageContext {
+  isArticlePage: boolean;
+  detectedLang: Languages | null;
+  translationMapping?: Record<Languages, string | null>;
+  articleSlug?: string;
+}
+
+export interface LanguageUrlData {
+  url: string;
+  label: string;
+  flag: string;
+  isActive: boolean;
+}
+
+export type LanguageUrls = Record<Languages, LanguageUrlData>;
+
+export interface HreflangLink {
+  hreflang: string;
+  href: string;
 }
 
 // === TYPES POUR LES ÉLÉMENTS DOM ===
@@ -85,4 +100,16 @@ export type UseTranslationsFunction = (key: UIKeys) => string;
 export interface HeaderError extends Error {
   context?: string;
   element?: string;
+}
+
+// === TYPES POUR LE RETOUR DE prepareHeaderData ===
+export interface HeaderData {
+  lang: Languages;
+  languageContext: ArticleLanguageContext;
+  t: UseTranslationsFunction;
+  translatePath: TranslatePathFunction;
+  translatedNavLinks: TranslatedNavLink[];
+  languageUrls: LanguageUrls;
+  hreflangLinks: HreflangLink[];
+  usingLanguageFallback: boolean;
 }

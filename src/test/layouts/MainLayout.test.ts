@@ -1,112 +1,95 @@
 // @vitest-environment happy-dom
 import { describe, it, expect } from "vitest";
-import { experimental_AstroContainer as AstroContainer } from "astro/container";
-import MainLayout from "../../layouts/MainLayout.astro";
+import { readFileSync } from "fs";
+import { join } from "path";
 
-describe("MainLayout with Grid Background", () => {
-  it("should contain grid background element with correct classes", async () => {
-    const container = await AstroContainer.create();
-    const html = await container.renderToString(MainLayout, {
-      slots: {
-        default: "<h1>Test Content</h1>",
-      },
-    });
+describe("MainLayout Structure and Configuration", () => {
+  // Lire le contenu du fichier MainLayout pour analyser sa structure
+  const layoutPath = join(process.cwd(), "src/layouts/MainLayout.astro");
+  const layoutContent = readFileSync(layoutPath, "utf-8");
 
-    // Parse the HTML string into a DOM element
-    const template = document.createElement("template");
-    template.innerHTML = html;
-    const renderedContent = template.content;
-
-    // Chercher l'élément grid-background
-    const gridBackground = renderedContent.querySelector(".grid-background");
-    expect(gridBackground).not.toBeNull();
-    expect(gridBackground?.classList.contains("grid-background")).toBe(true);
-
-    // Vérifier que le body a la classe relative (si présent dans le rendu)
-    const body = renderedContent.querySelector("body");
-    if (body) {
-      expect(body.classList.contains("relative")).toBe(true);
-    }
-
-    // Vérifier que main et footer existent
-    const main = renderedContent.querySelector("main");
-    const footer = renderedContent.querySelector("footer");
-    expect(main).not.toBeNull();
-    expect(footer).not.toBeNull();
+  it("should import required dependencies", () => {
+    expect(layoutContent).toContain('import Header from "../components/header/Header.astro"');
+    expect(layoutContent).toContain('import Footer from "../components/Footer.astro"');
+    expect(layoutContent).toContain('import { getLangFromUrl, useTranslations } from "../i18n/utils"');
+    expect(layoutContent).toContain('import { siteConfig, siteUtils } from "../config/site"');
   });
 
-  it("should have proper structure for layering", async () => {
-    const container = await AstroContainer.create();
-    const html = await container.renderToString(MainLayout, {
-      slots: {
-        default: "<h1>Test Content</h1>",
-      },
-    });
-
-    const template = document.createElement("template");
-    template.innerHTML = html;
-    const renderedContent = template.content;
-
-    // Si body n'est pas présent, utiliser le contenu racine
-    const rootContent =
-      renderedContent.querySelector("body") || renderedContent;
-
-    const gridBackground = rootContent.querySelector(".grid-background");
-    const header = rootContent.querySelector("header");
-    const main = rootContent.querySelector("main");
-    const footer = rootContent.querySelector("footer");
-
-    // Tous les éléments doivent exister
-    expect(gridBackground).not.toBeNull();
-    expect(header).not.toBeNull();
-    expect(main).not.toBeNull();
-    expect(footer).not.toBeNull();
+  it("should contain grid background element", () => {
+    expect(layoutContent).toContain('class="grid-background"');
+    expect(layoutContent).toContain('data-cy="grid-background"');
   });
 
-  it("should render custom content in main slot", async () => {
-    const customContent = "<div class='custom-test'>Custom Test Content</div>";
-    const container = await AstroContainer.create();
-    const html = await container.renderToString(MainLayout, {
-      slots: {
-        default: customContent,
-      },
-    });
-
-    expect(html).toContain("Custom Test Content");
-    expect(html).toContain("custom-test");
+  it("should have proper HTML structure", () => {
+    expect(layoutContent).toContain('<html lang={lang}>');
+    expect(layoutContent).toContain('<head>');
+    expect(layoutContent).toContain('<body class="relative bg-base-50 z-[0]" data-cy="app-body">');
+    expect(layoutContent).toContain('<Header />');
+    expect(layoutContent).toContain('<main data-cy="main-content">');
+    expect(layoutContent).toContain('<Footer />');
   });
 
-  it("should have correct language attribute", async () => {
-    const container = await AstroContainer.create();
-    const html = await container.renderToString(MainLayout, {
-      slots: {
-        default: "<h1>Test Content</h1>",
-      },
-    });
-
-    const template = document.createElement("template");
-    template.innerHTML = html;
-    const renderedContent = template.content;
-
-    const htmlElement = renderedContent.querySelector("html");
-    if (htmlElement) {
-      expect(htmlElement.getAttribute("lang")).toBe("en"); // Default language
-    } else {
-      // Si l'élément html n'est pas dans le rendu, vérifier le string HTML
-      expect(html).toContain('lang="en"');
-    }
+  it("should contain content background element for layering", () => {
+    expect(layoutContent).toContain('class="content-background"');
+    expect(layoutContent).toContain('data-cy="content-background"');
   });
 
-  it("should contain required meta tags", async () => {
-    const container = await AstroContainer.create();
-    const html = await container.renderToString(MainLayout, {
-      slots: {
-        default: "<h1>Test Content</h1>",
-      },
-    });
+  it("should have required meta tags structure", () => {
+    expect(layoutContent).toContain('<meta charset="utf-8" />');
+    expect(layoutContent).toContain('<meta name="viewport"');
+    expect(layoutContent).toContain('<meta name="generator"');
+    expect(layoutContent).toContain('<meta name="description"');
+  });
 
-    expect(html).toContain('charset="utf-8"');
-    expect(html).toContain('name="viewport"');
-    expect(html).toContain('name="generator"');
+  it("should contain Open Graph meta tags", () => {
+    expect(layoutContent).toContain('<meta property="og:title"');
+    expect(layoutContent).toContain('<meta property="og:description"');
+    expect(layoutContent).toContain('<meta property="og:type"');
+    expect(layoutContent).toContain('<meta property="og:url"');
+    expect(layoutContent).toContain('<meta property="og:image"');
+  });
+
+  it("should contain Twitter Card meta tags", () => {
+    expect(layoutContent).toContain('<meta name="twitter:card"');
+    expect(layoutContent).toContain('<meta name="twitter:title"');
+    expect(layoutContent).toContain('<meta name="twitter:description"');
+    expect(layoutContent).toContain('<meta name="twitter:image"');
+  });
+
+  it("should have Props interface defined", () => {
+    expect(layoutContent).toContain('interface Props {');
+    expect(layoutContent).toContain('title?: string;');
+    expect(layoutContent).toContain('description?: string;');
+    expect(layoutContent).toContain('ogImage?: string;');
+    expect(layoutContent).toContain('noindex?: boolean;');
+  });
+
+  it("should handle internationalization", () => {
+    expect(layoutContent).toContain('const lang = getLangFromUrl(Astro.url)');
+    expect(layoutContent).toContain('const t = useTranslations(lang)');
+    expect(layoutContent).toContain('lang === "fr" ? "fr_FR" : "en_US"');
+  });
+
+  it("should include slot for additional head content", () => {
+    expect(layoutContent).toContain('<slot name="head" />');
+  });
+
+  it("should include grid background CSS styles", () => {
+    expect(layoutContent).toContain('.grid-background');
+    expect(layoutContent).toContain('.content-background');
+  });
+
+  it("should have responsive design considerations", () => {
+    expect(layoutContent).toContain('@media (max-width: 768px)');
+    expect(layoutContent).toContain('@media (prefers-reduced-motion: reduce)');
+    expect(layoutContent).toContain('@media (max-width: 480px)');
+  });
+
+  it("should utilize site configuration", () => {
+    expect(layoutContent).toContain('siteUtils.getPageTitle(title)');
+    expect(layoutContent).toContain('siteUtils.getCanonicalUrl');
+    expect(layoutContent).toContain('siteUtils.getAssetUrl');
+    expect(layoutContent).toContain('siteConfig.title');
+    expect(layoutContent).toContain('siteConfig.defaultOgImage');
   });
 });

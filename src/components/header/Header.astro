@@ -1,12 +1,6 @@
 ---
-import {
-  getLangFromUrl,
-  useTranslations,
-  useTranslatedPath,
-  getPathWithoutLang,
-} from "../../i18n/utils";
 import { generateCriticalCSS } from "./header-styles";
-import { mapNavLinks, generateLanguageUrls } from "./utils";
+import { prepareHeaderData } from "./utils";
 import type { HeaderProps } from "./types";
 
 // Props avec types définis
@@ -19,28 +13,19 @@ const {
   ],
 } = Astro.props as HeaderProps;
 
-// Logique côté serveur
-const lang = getLangFromUrl(Astro.url);
-const t = useTranslations(lang);
-const translatePath = useTranslatedPath(lang);
-
-const translatedNavLinks = mapNavLinks(
-  navLinks,
+// Préparer toutes les données du header via la logique TypeScript extraite
+const {
   lang,
+  languageContext,
+  t,
   translatePath,
-  Astro.url,
-);
-const currentPath = getPathWithoutLang(Astro.url);
-const languageUrls = generateLanguageUrls(currentPath, lang);
+  translatedNavLinks,
+  languageUrls,
+  hreflangLinks,
+} = await prepareHeaderData(Astro.url, navLinks);
 
 // CSS critique centralisé
 const criticalCSS = generateCriticalCSS();
-
-// SEO et hreflang
-const hreflangLinks = Object.entries(languageUrls).map(([langCode, data]) => ({
-  hreflang: langCode,
-  href: data.url,
-}));
 ---
 
 <!-- CSS Critique Inline -->

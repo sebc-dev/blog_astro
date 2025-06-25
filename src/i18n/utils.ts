@@ -214,3 +214,58 @@ export function generateLanguageUrls(
     >,
   );
 }
+
+/**
+ * Génère les URLs de langue pour les articles avec mapping de traductions pré-calculé
+ * @param currentPath - Chemin actuel sans préfixe de langue
+ * @param currentLang - Langue actuelle
+ * @param translationMapping - Mapping des slugs par langue (optionnel)
+ * @returns Objet avec les URLs de toutes les langues supportées
+ */
+export function generateLanguageUrlsForArticle(
+  currentPath: string,
+  currentLang: Languages,
+  translationMapping?: Record<Languages, string | null>,
+) {
+  const supportedLanguages = getSupportedLanguages();
+
+  const result = {} as Record<
+    Languages,
+    {
+      url: string;
+      isActive: boolean;
+      label: string;
+      flag: string;
+    }
+  >;
+
+  for (const lang of supportedLanguages) {
+    let targetUrl: string;
+
+    // Si on a un mapping de traductions, utiliser le slug traduit pour toutes les langues
+    if (translationMapping) {
+      const translatedSlug = translationMapping[lang];
+      if (translatedSlug) {
+        // Pour les articles, générer l'URL selon le format Astro: /blog/{lang}/{slug}
+        targetUrl = `/blog/${lang}/${translatedSlug}`;
+      } else {
+        // Si pas de traduction trouvée, rediriger vers la page d'accueil de la langue cible
+        const translatePathForLang = useTranslatedPath(lang);
+        targetUrl = translatePathForLang("/", lang);
+      }
+    } else {
+      // Fallback vers la logique normale si pas de mapping
+      const translatePathForLang = useTranslatedPath(lang);
+      targetUrl = translatePathForLang(currentPath, lang);
+    }
+
+    result[lang] = {
+      url: targetUrl,
+      isActive: currentLang === lang,
+      label: getLanguageName(lang),
+      flag: getLanguageFlag(lang),
+    };
+  }
+
+  return result;
+}
