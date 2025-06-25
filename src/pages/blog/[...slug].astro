@@ -3,7 +3,7 @@ import MainLayout from "../../layouts/MainLayout.astro";
 import TableOfContents from "../../components/TableOfContents.astro";
 import { getCollection } from "astro:content";
 import { getLangFromUrl, useTranslations } from "../../i18n/utils";
-import { siteUtils } from "../../config/site";
+import { siteConfig, siteUtils } from "../../config/site";
 import { estimateReadingTime } from "../../scripts/article-utils";
 import { buildTocHierarchy, shouldShowToc } from "../../scripts/toc-utils";
 
@@ -29,11 +29,6 @@ const title = entryData.title || "Article sans titre";
 const description = entryData.description || "";
 const ogImage = entryData.heroImage;
 
-// Gestion sécurisée de l'auteur avec fallback internationalisé
-const rawAuthor = entryData.author;
-const hasValidAuthor = rawAuthor && typeof rawAuthor === 'string' && rawAuthor.trim() !== '';
-const author = hasValidAuthor ? rawAuthor.trim() : t("blog.unknownAuthor");
-
 // Validation sécurisée de pubDate
 const pubDate = entryData.pubDate;
 const isValidDate = pubDate && pubDate instanceof Date && !isNaN(pubDate.getTime());
@@ -50,13 +45,12 @@ const tableOfContents = buildTocHierarchy(headings);
 const showToc = shouldShowToc(headings);
 
 // Génération du schéma JSON-LD avec la configuration centralisée
-// Seulement si nous avons un auteur valide pour éviter les données structurées incorrectes
 const blogPostSchema = siteUtils.generateBlogPostSchema({
   title,
   description,
   image: ogImage,
   datePublished: publishedTime,
-  author: hasValidAuthor ? author : t("blog.unknownAuthor"),
+  author: siteConfig.author, // Utiliser l'auteur du site depuis la config
 });
 ---
 
@@ -68,9 +62,7 @@ const blogPostSchema = siteUtils.generateBlogPostSchema({
   <!-- Métadonnées spécifiques aux articles -->
   <meta slot="head" property="og:type" content="article" />
   <meta slot="head" property="article:published_time" content={publishedTime} />
-  {hasValidAuthor && (
-    <meta slot="head" property="article:author" content={author} />
-  )}
+  <meta slot="head" property="article:author" content={siteConfig.author} />
   {tags.map(tag => (
     <meta slot="head" property="article:tag" content={tag} />
   ))}

@@ -6,7 +6,6 @@ export interface Props {
   description: string;
   heroImage?: string;
   pubDate: Date;
-  author: string;
   category?: string;
   tag?: string;
   slug: string;
@@ -18,7 +17,6 @@ const {
   description,
   heroImage,
   pubDate,
-  author,
   category = "Article",
   tag,
   slug,
@@ -96,14 +94,12 @@ const formattedDate = pubDate.toLocaleDateString("fr-FR", {
       {description}
     </p>
 
-    <!-- Footer avec auteur, temps de lecture et bouton -->
+    <!-- Footer avec temps de lecture et bouton -->
     <div class="flex items-center justify-between" data-cy="hero-footer">
       <div
         class="text-base-content/70 flex items-center gap-2 text-sm"
-        data-cy="hero-author-info"
+        data-cy="hero-reading-time-info"
       >
-        <span data-cy="hero-author">Par {author}</span>
-        <span>•</span>
         <span data-cy="hero-reading-time">{readingTime} min de lecture</span>
       </div>
 

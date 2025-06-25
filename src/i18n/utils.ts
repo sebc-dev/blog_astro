@@ -241,7 +241,7 @@ export function generateLanguageUrlsForArticle(
   currentPath: string,
   currentLang: Languages,
   translationMapping?: Record<string, string | null>,
-  pathPrefix: string = '/blog/',
+  pathPrefix = '/blog/',
 ): LanguageUrlsResult {
   const supportedLanguages = getSupportedLanguages();
 

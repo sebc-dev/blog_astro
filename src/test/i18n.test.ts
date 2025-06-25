@@ -74,10 +74,13 @@ describe("Dictionnaires de traduction (ui.ts)", () => {
 
   it("devrait contenir les clés essentielles du blog", () => {
     const essentialBlogKeys = [
+      "blog.read",
       "blog.readMore",
       "blog.publishedOn",
-      "blog.author",
       "blog.backToBlog",
+      "blog.relatedPosts",
+      "blog.noPostsFound",
+      "blog.searchPlaceholder",
     ];
 
     essentialBlogKeys.forEach((key) => {

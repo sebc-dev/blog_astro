@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { join } from "path";
 import { SLUG_REGEX } from "../scripts/validate-content-utils.js";
 
@@ -59,29 +59,35 @@ describe("Content Structure Validation", () => {
 
   describe("Content Validation", () => {
     it("should have valid frontmatter in English posts", () => {
-      const content = readFileSync(FIRST_POST_PATH, "utf-8");
-
-      // Vérifier la présence des champs obligatoires
-      expect(content).toContain("title:");
-      expect(content).toContain("description:");
-      expect(content).toContain("pubDate:");
-      expect(content).toContain("author:");
-      expect(content).toContain('lang: "en"');
-      expect(content).toContain("translationId:");
-      expect(content).toContain("canonicalSlug:");
+      const files = readdirSync(BLOG_DIR_EN);
+      files.forEach((file: string) => {
+        const content = readFileSync(
+          join(BLOG_DIR_EN, file),
+          "utf-8",
+        );
+        expect(content).toContain("title:");
+        expect(content).toContain("description:");
+        expect(content).toContain("pubDate:");
+        expect(content).toContain('lang: "en"');
+        expect(content).toContain("translationId:");
+        expect(content).toContain("canonicalSlug:");
+      });
     });
 
     it("should have valid frontmatter in French posts", () => {
-      const content = readFileSync(PREMIER_ARTICLE_PATH, "utf-8");
-
-      // Vérifier la présence des champs obligatoires
-      expect(content).toContain("title:");
-      expect(content).toContain("description:");
-      expect(content).toContain("pubDate:");
-      expect(content).toContain("author:");
-      expect(content).toContain('lang: "fr"');
-      expect(content).toContain("translationId:");
-      expect(content).toContain("canonicalSlug:");
+      const files = readdirSync(BLOG_DIR_FR);
+      files.forEach((file: string) => {
+        const content = readFileSync(
+          join(BLOG_DIR_FR, file),
+          "utf-8",
+        );
+        expect(content).toContain("title:");
+        expect(content).toContain("description:");
+        expect(content).toContain("pubDate:");
+        expect(content).toContain('lang: "fr"');
+        expect(content).toContain("translationId:");
+        expect(content).toContain("canonicalSlug:");
+      });
     });
 
     it("should have matching translation IDs", () => {

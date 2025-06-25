@@ -2,114 +2,89 @@
 title: "REST API: Best Practices and Modern Patterns"
 description: "Complete guide to best practices for designing robust, secure and maintainable REST APIs."
 pubDate: 2024-02-20
-author: "Pierre Moreau"
 lang: "en"
 translationId: "550e8400-e29b-41d4-a716-446655440005"
 canonicalSlug: "rest-api-best-practices-guide"
 heroImage: "https://images.unsplash.com/photo-1518186285589-2f7649de83e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=600&q=80"
 ---
-
 # REST APIs: Best Practices Guide for Developers
-
 A well-designed REST API is the backbone of a modern application. Here's a comprehensive guide to best practices for creating robust and maintainable APIs.
-
 ## 1. URL and Resource Design
-
 ### Use Plural Nouns
 ```
 ✅ GET /api/users/123
 ❌ GET /api/user/123
-
 ✅ POST /api/articles
 ❌ POST /api/article
 ```
-
 ### Logical Resource Hierarchy
 ```
 GET /api/users/123/articles          # User's articles
 GET /api/articles/456/comments       # Article's comments
 POST /api/users/123/articles         # Create article for user
 ```
-
 ### Avoid Verbs in URLs
 ```
 ✅ DELETE /api/users/123
 ❌ POST /api/users/delete/123
-
 ✅ GET /api/articles?status=published
 ❌ GET /api/articles/getPublished
 ```
-
 ## 2. Proper HTTP Method Usage
-
 ### GET - Read Only
 ```javascript
 // Retrieve a list
 GET /api/articles?page=1&limit=10
-
 // Retrieve specific item
 GET /api/articles/123
 ```
-
 ### POST - Creation
 ```javascript
 POST /api/articles
 Content-Type: application/json
-
 {
   "title": "My new article",
   "content": "Article content...",
   "author_id": 456
 }
 ```
-
 ### PUT - Complete Update
 ```javascript
 PUT /api/articles/123
 Content-Type: application/json
-
 {
   "title": "Updated title",
   "content": "New complete content...",
   "author_id": 456
 }
 ```
-
 ### PATCH - Partial Update
 ```javascript
 PATCH /api/articles/123
 Content-Type: application/json
-
 {
   "title": "New title only"
 }
 ```
-
 ### DELETE - Deletion
 ```javascript
 DELETE /api/articles/123
 ```
-
 ## 3. Appropriate HTTP Status Codes
-
 ### Success Codes
 - **200 OK**: Successful request with content
 - **201 Created**: Resource created successfully
 - **204 No Content**: Success without return content
-
 ### Client Error Codes
 - **400 Bad Request**: Invalid data
 - **401 Unauthorized**: Authentication required
 - **403 Forbidden**: Access denied
 - **404 Not Found**: Resource not found
 - **422 Unprocessable Entity**: Validation errors
-
 ### Server Error Codes
 - **500 Internal Server Error**: Generic server error
 - **503 Service Unavailable**: Service temporarily unavailable
-
 ## 4. Consistent Error Handling
-
 ### Standardized Error Format
 ```javascript
 {
@@ -131,13 +106,10 @@ DELETE /api/articles/123
   }
 }
 ```
-
 ## 5. Pagination and Filtering
-
 ### Offset Pagination
 ```javascript
 GET /api/articles?page=1&limit=20
-
 Response:
 {
   "data": [...],
@@ -151,32 +123,25 @@ Response:
   }
 }
 ```
-
 ### Filtering and Sorting
 ```javascript
 GET /api/articles?status=published&author=john&sort=created_at&order=desc
 ```
-
 ## 6. API Versioning
-
 ### Via Headers (Recommended)
 ```javascript
 GET /api/articles
 Accept: application/vnd.api+json;version=2
 ```
-
 ### Via URL (Alternative)
 ```javascript
 GET /api/v2/articles
 ```
-
 ## 7. Authentication and Security
-
 ### JWT Token
 ```javascript
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
-
 ### Data Validation
 ```javascript
 // Example with Joi (Node.js)
@@ -186,7 +151,6 @@ const articleSchema = Joi.object({
   tags: Joi.array().items(Joi.string()).max(10)
 });
 ```
-
 ### Rate Limiting
 ```javascript
 // Response headers
@@ -194,9 +158,7 @@ X-RateLimit-Limit: 1000
 X-RateLimit-Remaining: 999
 X-RateLimit-Reset: 1640995200
 ```
-
 ## 8. Documentation and Testing
-
 ### OpenAPI/Swagger Documentation
 ```yaml
 paths:
@@ -222,7 +184,6 @@ paths:
                     items:
                       $ref: '#/components/schemas/Article'
 ```
-
 ### Automated Testing
 ```javascript
 // Jest/Supertest test
@@ -237,29 +198,22 @@ describe('GET /api/articles', () => {
   });
 });
 ```
-
 ## 9. Performance and Caching
-
 ### ETags for Caching
 ```javascript
 Response Headers:
 ETag: "686897696a7c876b7e"
-
 Subsequent Request:
 If-None-Match: "686897696a7c876b7e"
-
 Response: 304 Not Modified (if unchanged)
 ```
-
 ### Compression
 ```javascript
 // Express.js with compression
 const compression = require('compression');
 app.use(compression());
 ```
-
 ## 10. Monitoring and Logging
-
 ### Structured Logging
 ```javascript
 {
@@ -273,14 +227,11 @@ app.use(compression());
   "ip": "192.168.1.1"
 }
 ```
-
 ## Conclusion
-
 A well-designed REST API follows these principles:
 - **Consistency**: Uniform conventions throughout the API
 - **Simplicity**: Intuitive and predictable URLs
 - **Security**: Proper authentication, validation, and protection
 - **Performance**: Pagination, caching, and optimizations
 - **Maintainability**: Clear documentation and comprehensive tests
-
 Investing time in API design from the beginning will save you hours of refactoring later! 
