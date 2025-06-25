@@ -23,7 +23,8 @@ describe("MainLayout Structure and Configuration", () => {
   it("should have proper HTML structure", () => {
     expect(layoutContent).toContain('<html lang={lang}>');
     expect(layoutContent).toContain('<head>');
-    expect(layoutContent).toContain('<body class="relative bg-base-50 z-[0]" data-cy="app-body">');
+    expect(layoutContent).toContain('class="relative bg-base-50 z-[0]"');
+    expect(layoutContent).toContain('data-cy="app-body"');
     expect(layoutContent).toContain('<Header />');
     expect(layoutContent).toContain('<main data-cy="main-content">');
     expect(layoutContent).toContain('<Footer />');

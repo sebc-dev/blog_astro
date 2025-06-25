@@ -216,28 +216,50 @@ export function generateLanguageUrls(
 }
 
 /**
+ * Type pour le résultat de génération d'URLs de langue
+ */
+type LanguageUrlsResult = Record<
+  Languages,
+  {
+    url: string;
+    isActive: boolean;
+    label: string;
+    flag: string;
+  }
+>;
+
+/**
  * Génère les URLs de langue pour les articles avec mapping de traductions pré-calculé
  * @param currentPath - Chemin actuel sans préfixe de langue
  * @param currentLang - Langue actuelle
  * @param translationMapping - Mapping des slugs par langue (optionnel)
+ * @param pathPrefix - Préfixe de chemin pour les articles (par défaut: '/blog/')
  * @returns Objet avec les URLs de toutes les langues supportées
  */
 export function generateLanguageUrlsForArticle(
   currentPath: string,
   currentLang: Languages,
-  translationMapping?: Record<Languages, string | null>,
-) {
+  translationMapping?: Record<string, string | null>,
+  pathPrefix: string = '/blog/',
+): LanguageUrlsResult {
   const supportedLanguages = getSupportedLanguages();
 
-  const result = {} as Record<
-    Languages,
-    {
-      url: string;
-      isActive: boolean;
-      label: string;
-      flag: string;
+  // Validation du translationMapping si fourni
+  if (translationMapping) {
+    const invalidKeys = Object.keys(translationMapping).filter(
+      (key) => !isValidLang(key),
+    );
+    if (invalidKeys.length > 0) {
+      throw new Error(
+        `Invalid language keys in translationMapping: ${invalidKeys.join(', ')}. Valid languages are: ${supportedLanguages.join(', ')}`,
+      );
     }
-  >;
+  }
+
+  const result = {} as LanguageUrlsResult;
+
+  // Normaliser le préfixe de chemin
+  const normalizedPrefix = pathPrefix.endsWith('/') ? pathPrefix : `${pathPrefix}/`;
 
   for (const lang of supportedLanguages) {
     let targetUrl: string;
@@ -246,8 +268,8 @@ export function generateLanguageUrlsForArticle(
     if (translationMapping) {
       const translatedSlug = translationMapping[lang];
       if (translatedSlug) {
-        // Pour les articles, générer l'URL selon le format Astro: /blog/{lang}/{slug}
-        targetUrl = `/blog/${lang}/${translatedSlug}`;
+        // Pour les articles, générer l'URL selon le format Astro: {prefix}{lang}/{slug}
+        targetUrl = `${normalizedPrefix}${lang}/${translatedSlug}`;
       } else {
         // Si pas de traduction trouvée, rediriger vers la page d'accueil de la langue cible
         const translatePathForLang = useTranslatedPath(lang);

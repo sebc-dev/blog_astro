@@ -33,11 +33,7 @@ export function extractSlugWithoutLanguagePrefix(fullSlug: string, language: str
   const languagePrefixPattern = new RegExp(`^${escapeRegExp(language)}/(.+)$`);
   const match = fullSlug.match(languagePrefixPattern);
   
-  if (match && match[1]) {
-    return match[1];
-  }
-  
-  return null;
+  return match?.[1] || null;
 }
 
 /**
@@ -198,7 +194,7 @@ export function analyzeLanguageContextPure(url: URL, allPosts?: BlogPost[]): Art
     return {
       isArticlePage: true,
       detectedLang: getLangFromUrl(url),
-      articleSlug: articleSlug || undefined,
+      articleSlug: articleSlug ?? undefined,
     };
   }
   

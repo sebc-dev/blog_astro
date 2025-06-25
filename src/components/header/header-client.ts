@@ -85,9 +85,7 @@ export class HeaderClient {
 let headerClient: HeaderClient | null = null;
 
 export function initHeaderClient(): HeaderClient {
-  if (!headerClient) {
-    headerClient = new HeaderClient();
-  }
+  headerClient ??= new HeaderClient();
   return headerClient;
 }
 

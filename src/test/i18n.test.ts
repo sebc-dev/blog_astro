@@ -16,6 +16,7 @@ import {
   formatDate,
   getLanguageName,
   getLanguageFlag,
+  generateLanguageUrlsForArticle,
 } from "../i18n/utils";
 
 // Mock console pour tester les warnings et erreurs
@@ -643,5 +644,97 @@ describe("Cohérence globale du système i18n", () => {
         expect(translation).not.toBe(key); // Pas de fallback vers la clé
       });
     });
+  });
+});
+
+describe("generateLanguageUrlsForArticle", () => {
+  it("should generate correct URLs for articles with default path prefix", () => {
+    const result = generateLanguageUrlsForArticle(
+      "/blog/en/test-article",
+      "en",
+      { en: "test-article", fr: "article-test" },
+    );
+
+    expect(result.en.url).toBe("/blog/en/test-article");
+    expect(result.fr.url).toBe("/blog/fr/article-test");
+    expect(result.en.isActive).toBe(true);
+    expect(result.fr.isActive).toBe(false);
+  });
+
+  it("should accept custom path prefix", () => {
+    const result = generateLanguageUrlsForArticle(
+      "/articles/en/test-article",
+      "en",
+      { en: "test-article", fr: "article-test" },
+      "/articles/",
+    );
+
+    expect(result.en.url).toBe("/articles/en/test-article");
+    expect(result.fr.url).toBe("/articles/fr/article-test");
+  });
+
+  it("should normalize path prefix by adding trailing slash", () => {
+    const result = generateLanguageUrlsForArticle(
+      "/posts/en/test-article",
+      "en",
+      { en: "test-article", fr: "article-test" },
+      "/posts",
+    );
+
+    expect(result.en.url).toBe("/posts/en/test-article");
+    expect(result.fr.url).toBe("/posts/fr/article-test");
+  });
+
+  it("should validate translationMapping keys", () => {
+    expect(() => {
+      generateLanguageUrlsForArticle(
+        "/blog/en/test-article",
+        "en",
+        { en: "test-article", es: "articulo-test", invalid: "test" },
+      );
+    }).toThrow("Invalid language keys in translationMapping: es, invalid");
+  });
+
+  it("should work without translationMapping (fallback to normal path translation)", () => {
+    const result = generateLanguageUrlsForArticle(
+      "/blog/test-article",
+      "en",
+    );
+
+    expect(result.en.url).toBe("/blog/test-article");
+    expect(result.fr.url).toBe("/fr/blog/test-article");
+  });
+
+  it("should handle null values in translationMapping gracefully", () => {
+    const result = generateLanguageUrlsForArticle(
+      "/blog/en/test-article",
+      "en",
+      { en: "test-article", fr: null },
+    );
+
+    expect(result.en.url).toBe("/blog/en/test-article");
+    expect(result.fr.url).toBe("/fr/"); // Fallback to homepage
+  });
+
+  it("should have proper return type structure", () => {
+    const result = generateLanguageUrlsForArticle(
+      "/blog/en/test-article",
+      "en",
+      { en: "test-article", fr: "article-test" },
+    );
+
+    // Verify structure matches expected type
+    expect(result).toHaveProperty("en");
+    expect(result).toHaveProperty("fr");
+    
+    expect(result.en).toHaveProperty("url");
+    expect(result.en).toHaveProperty("isActive");
+    expect(result.en).toHaveProperty("label");
+    expect(result.en).toHaveProperty("flag");
+    
+    expect(typeof result.en.url).toBe("string");
+    expect(typeof result.en.isActive).toBe("boolean");
+    expect(typeof result.en.label).toBe("string");
+    expect(typeof result.en.flag).toBe("string");
   });
 });

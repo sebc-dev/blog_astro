@@ -54,7 +54,8 @@ export function buildTocHierarchy(
       if (parent) {
         parent.subheadings.push(tocHeading);
       } else {
-        // Si pas de parent direct, chercher le parent de niveau inférieur
+        // Fallback : si pas de parent direct (ex: H2 → H4 sans H3),
+        // chercher le parent de niveau supérieur le plus proche
         for (let i = tocHeading.depth - 2; i >= minDepth; i--) {
           const fallbackParent = parentHeadings.get(i);
           if (fallbackParent) {
