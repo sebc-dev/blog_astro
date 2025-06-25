@@ -19,19 +19,35 @@ enum CollectionErrorType {
 function categorizeError(error: unknown): CollectionErrorType {
   if (error instanceof Error) {
     const message = error.message.toLowerCase();
+    const stack = error.stack?.toLowerCase() || '';
     
     // Erreurs réseau/connexion
-    if (message.includes('network') || message.includes('fetch') || message.includes('timeout')) {
+    if (
+      message.includes('network') ||
+      message.includes('fetch') ||
+      message.includes('timeout') ||
+      error.name === 'NetworkError' ||
+      error.name === 'TimeoutError'
+    ) {
       return CollectionErrorType.NETWORK_ERROR;
     }
     
     // Erreurs de permissions/accès
-    if (message.includes('permission') || message.includes('access') || message.includes('unauthorized')) {
+    if (
+      message.includes('permission') ||
+      message.includes('access') ||
+      message.includes('unauthorized') ||
+      stack.includes('permission denied')
+    ) {
       return CollectionErrorType.PERMISSION_ERROR;
     }
     
     // Erreurs de contenu/structure
-    if (message.includes('content') || message.includes('parse') || message.includes('schema')) {
+    if (
+      message.includes('content') ||
+      message.includes('parse') ||
+      message.includes('schema')
+    ) {
       return CollectionErrorType.CONTENT_ERROR;
     }
   }
