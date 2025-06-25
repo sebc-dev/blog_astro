@@ -21,7 +21,7 @@ export interface AstroHeading {
  */
 export function buildTocHierarchy(
   headings: AstroHeading[], 
-  minDepth: number = 2
+  minDepth = 2
 ): TocHeading[] {
   const toc: TocHeading[] = [];
   const parentHeadings = new Map<number, TocHeading>();
