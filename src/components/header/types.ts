@@ -25,8 +25,15 @@ export interface ThemeConfig {
   dark: Theme;
 }
 
-// === TYPES POUR LES LANGUES ===
-export type SupportedLanguage = "en" | "fr";
+// === TYPES POUR LES DRAPEAUX ===
+/**
+ * Union type for country flags used in language switching
+ * Includes emoji flags for supported languages and generic fallback
+ */
+export type CountryFlag = 
+  | "🇺🇸"  // United States (English)
+  | "🇫🇷"  // France (French)
+  | "🌐"; // Generic/fallback flag
 
 // === TYPES POUR LES ARTICLES ===
 export type ArticleTranslationMapping = Record<Languages, string | null>;
@@ -41,7 +48,7 @@ export interface ArticleLanguageContext {
 export interface LanguageUrlData {
   url: string;
   label: string;
-  flag: string;
+  flag: CountryFlag;
   isActive: boolean;
 }
 

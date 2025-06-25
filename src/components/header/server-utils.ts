@@ -105,8 +105,6 @@ export async function analyzeLanguageContext(url: URL): Promise<ArticleLanguageC
       case CollectionErrorType.CONTENT_ERROR:
         console.warn("Erreur de structure de contenu - vérifier le schema des articles");
         break;
-        
-      case CollectionErrorType.UNKNOWN_ERROR:
       default:
         console.error("Erreur inconnue lors de l'accès aux articles");
         break;

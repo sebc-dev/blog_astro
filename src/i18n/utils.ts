@@ -3,6 +3,7 @@
  */
 
 import { ui, defaultLang, type UIKeys, type Languages } from "./ui";
+import type { CountryFlag } from "../components/header/types";
 
 /**
  * Détecte la langue à partir de l'URL
@@ -169,8 +170,8 @@ export function getLanguageName(lang: Languages): string {
  * @param lang - Code de langue
  * @returns Emoji du drapeau
  */
-export function getLanguageFlag(lang: Languages): string {
-  const flags: Record<Languages, string> = {
+export function getLanguageFlag(lang: Languages): CountryFlag {
+  const flags: Record<Languages, CountryFlag> = {
     en: "🇺🇸",
     fr: "🇫🇷",
   };
@@ -209,7 +210,7 @@ export function generateLanguageUrls(
         url: string;
         isActive: boolean;
         label: string;
-        flag: string;
+        flag: CountryFlag;
       }
     >,
   );
@@ -224,7 +225,7 @@ type LanguageUrlsResult = Record<
     url: string;
     isActive: boolean;
     label: string;
-    flag: string;
+    flag: CountryFlag;
   }
 >;
 

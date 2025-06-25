@@ -1,8 +1,8 @@
 import { useTranslations, useTranslatedPath, getLangFromUrl } from "../../i18n/utils";
+import type { Languages } from "../../i18n/ui";
 import type {
   NavLink,
   TranslatedNavLink,
-  SupportedLanguage,
   TranslatePathFunction,
   HeaderData,
 } from "./types";
@@ -22,7 +22,7 @@ import { analyzeLanguageContext } from "./server-utils";
  */
 export function mapNavLinks(
   navLinks: NavLink[],
-  lang: SupportedLanguage,
+  lang: Languages,
   translatePath: TranslatePathFunction,
   currentUrl: URL,
 ): TranslatedNavLink[] {
