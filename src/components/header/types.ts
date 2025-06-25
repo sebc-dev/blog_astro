@@ -41,7 +41,7 @@ export type ArticleTranslationMapping = Record<Languages, string | null>;
 export interface ArticleLanguageContext {
   isArticlePage: boolean;
   detectedLang: Languages | null;
-  translationMapping?: Record<Languages, string | null>;
+  translationMapping?: ArticleTranslationMapping;
   articleSlug?: string;
 }
 
@@ -109,12 +109,12 @@ export interface HeaderError extends Error {
 
 // === TYPES POUR LE RETOUR DE prepareHeaderData ===
 export interface HeaderData {
-  lang: Languages;
-  languageContext: ArticleLanguageContext;
-  t: UseTranslationsFunction;
-  translatePath: TranslatePathFunction;
-  translatedNavLinks: TranslatedNavLink[];
-  languageUrls: LanguageUrls;
-  hreflangLinks: HreflangLink[];
-  usingLanguageFallback: boolean;
+  readonly lang: Languages;
+  readonly languageContext: ArticleLanguageContext;
+  readonly t: UseTranslationsFunction;
+  readonly translatePath: TranslatePathFunction;
+  readonly translatedNavLinks: TranslatedNavLink[];
+  readonly languageUrls: LanguageUrls;
+  readonly hreflangLinks: HreflangLink[];
+  readonly usingLanguageFallback: boolean;
 }

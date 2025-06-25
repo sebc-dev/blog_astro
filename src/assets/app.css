@@ -245,11 +245,15 @@
   --noise: 0;
 }
 
+:root {
+  --header-height: 6rem;
+}
+
 html {
   padding: 64px 0 0 0;
   margin: 0;
   scroll-behavior: smooth;
-  scroll-padding-top: 6rem; /* Offset pour les ancres avec header fixe */
+  scroll-padding-top: var(--header-height); /* Offset pour les ancres avec header fixe */
   overscroll-behavior: none;
   font-family:
     "Inter",
