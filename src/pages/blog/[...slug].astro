@@ -135,7 +135,7 @@ const blogPostSchema = siteUtils.generateBlogPostSchema({
       </article>
       
       <!-- Table des matières générée dynamiquement -->
-      <TableOfContents headings={tableOfContents} />
+      {showToc && <TableOfContents headings={tableOfContents} />}
     </div>
 </MainLayout>
 
