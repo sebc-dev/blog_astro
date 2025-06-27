@@ -21,20 +21,20 @@ const {
 ---
 
 {headings && headings.length > 0 && (
-  <aside class={`table-of-contents ${className}`} aria-label={title}>
-    <h2 class="toc-title">{title}</h2>
-    <nav class="toc-nav">
-      <ul class="toc-list">
+  <aside class={`table-of-contents ${className}`} aria-label={title} data-cy="table-of-contents">
+    <h2 class="toc-title" data-cy="toc-title">{title}</h2>
+    <nav class="toc-nav" data-cy="toc-nav">
+      <ul class="toc-list" data-cy="toc-list">
         {headings.map((heading) => (
-          <li class="toc-item">
-            <a href={`#${heading.slug}`} class="toc-link">
+          <li class="toc-item" data-cy="toc-item">
+            <a href={`#${heading.slug}`} class="toc-link" data-cy="toc-link">
               {heading.text}
             </a>
             {heading.subheadings && heading.subheadings.length > 0 && (
-              <ul class="toc-sublist">
+              <ul class="toc-sublist" data-cy="toc-sublist">
                 {heading.subheadings.map((subheading) => (
-                  <li class="toc-subitem">
-                    <a href={`#${subheading.slug}`} class="toc-sublink">
+                  <li class="toc-subitem" data-cy="toc-subitem">
+                    <a href={`#${subheading.slug}`} class="toc-sublink" data-cy="toc-sublink">
                       {subheading.text}
                     </a>
                   </li>

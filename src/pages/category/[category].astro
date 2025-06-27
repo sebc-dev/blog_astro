@@ -1,0 +1,225 @@
+---
+import MainLayout from "../../layouts/MainLayout.astro";
+import ArticleCard from "../../components/ArticleCard.astro";
+import { getCollection } from "astro:content";
+import { getLangFromUrl, useTranslations } from "../../i18n/utils";
+import { siteConfig, siteUtils } from "../../config/site";
+import { 
+  estimateReadingTime,
+  getPostCategory,
+  getPostTag 
+} from "../../scripts/article-utils";
+import { 
+  getUniqueCategories,
+  filterPostsByCategory,
+  normalizeCategoryForUrl,
+  denormalizeCategoryFromUrl,
+  type CategoryTranslations,
+  type SortOption
+} from "../../scripts/category-utils";
+
+export async function getStaticPaths() {
+  // Récupérer tous les articles
+  const allPosts = await getCollection("blog");
+  
+  // Générer les paths pour chaque langue et chaque catégorie
+  const paths = [];
+  
+  // Filtrer uniquement les articles anglais
+  const englishPosts = allPosts.filter(post => post.data.lang === "en");
+  
+  // Traductions anglaises des catégories
+  const englishTranslations: CategoryTranslations = {
+    framework: "Framework",
+    language: "Language",
+    performance: "Performance", 
+    styling: "Styling",
+    backend: "Backend",
+    article: "Article"
+  };
+  
+  // Extraire les catégories uniques des articles anglais
+  const categories = getUniqueCategories(englishPosts, englishTranslations);
+  
+  for (const category of categories) {
+    const urlCategory = normalizeCategoryForUrl(category);
+    const categoryPosts = filterPostsByCategory(englishPosts, category, englishTranslations);
+    
+    paths.push({
+      params: { category: urlCategory },
+      props: { 
+        category,
+        posts: categoryPosts,
+        lang: "en",
+        translations: englishTranslations
+      }
+    });
+  }
+  
+  return paths;
+}
+
+const { category, posts, lang, translations } = Astro.props;
+
+// Système d'internationalisation (anglais uniquement)
+const t = useTranslations("en");
+
+// Métadonnées SEO
+const title = t("category.page.title").replace("{category}", category);
+const description = t("category.page.subtitle").replace("{category}", category);
+const canonicalUrl = siteUtils.getCanonicalUrl(`/category/${normalizeCategoryForUrl(category)}`);
+
+// Préparer les données pour le tri côté client
+const postsData = posts.map((post: any) => ({
+  ...post,
+  category: getPostCategory(post, { translations }),
+  tag: getPostTag(post, {
+    translations: {
+      guide: t("tag.guide"),
+      optimization: t("tag.optimization"),
+      bestPractices: t("tag.bestPractices"),
+      comparison: t("tag.comparison")
+    }
+  }),
+  readingTime: estimateReadingTime(post, "en"),
+  formattedDate: post.data.pubDate.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long", 
+    day: "numeric"
+  })
+}));
+
+// Tri initial par date (plus récent en premier)
+const initialSortedPosts = [...postsData].sort((a, b) => 
+  new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime()
+);
+---
+
+<MainLayout 
+  title={title}
+  description={description}
+>
+  <!-- Métadonnées SEO spécifiques -->
+  <meta slot="head" property="og:type" content="website" />
+  <meta slot="head" name="robots" content="index, follow" />
+  <link slot="head" rel="canonical" href={canonicalUrl} />
+  <meta slot="head" property="og:locale" content="en_US" />
+  <link slot="head" rel="alternate" hreflang="en" href={canonicalUrl} />
+  <link slot="head" rel="alternate" hreflang="fr" href={siteUtils.getCanonicalUrl(`/fr/categorie/${normalizeCategoryForUrl(category)}`)} />
+  
+
+
+  <div class="category-page max-w-7xl mx-auto px-4 py-8">
+    <!-- En-tête de la page -->
+    <header class="category-header mb-12 text-center bg-base-300 rounded-lg p-8 shadow-lg border border-base-content/10">
+      <!-- Breadcrumb -->
+      <nav class="breadcrumb mb-6" aria-label="Breadcrumb">
+        <ol class="flex items-center justify-center gap-2 text-sm text-muted-accessible">
+          <li>
+            <a href="/" class="link link-hover">
+              {t("category.page.backToHome")}
+            </a>
+          </li>
+          <li class="opacity-60">/</li>
+          <li>
+            <span class="text-primary font-medium">{category}</span>
+          </li>
+        </ol>
+      </nav>
+
+      <!-- Titre et description -->
+      <h1 class="text-4xl font-bold mb-4 text-base-content">
+        {title}
+      </h1>
+      <p class="text-lg text-muted-accessible max-w-2xl mx-auto">
+        {description}
+      </p>
+    </header>
+
+    <!-- Contrôles de tri -->
+    <div class="category-controls mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div class="sort-controls">
+        <label for="sort-select" class="block text-sm font-medium text-base-content mb-2">
+          {t("sort.label")}
+        </label>
+        <select 
+          id="sort-select" 
+          class="select select-bordered w-full max-w-xs"
+          data-cy="category-sort-select"
+        >
+          <option value="date-desc" selected>{t("sort.dateDesc")}</option>
+          <option value="date-asc">{t("sort.dateAsc")}</option>
+          <option value="title-asc">{t("sort.titleAsc")}</option>
+          <option value="title-desc">{t("sort.titleDesc")}</option>
+          <option value="reading-time-asc">{t("sort.readingTimeAsc")}</option>
+          <option value="reading-time-desc">{t("sort.readingTimeDesc")}</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Grille d'articles -->
+    {initialSortedPosts.length > 0 ? (
+      <div 
+        id="articles-grid"
+        class="articles-grid grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+        data-cy="category-articles-grid"
+      >
+        {initialSortedPosts.map((post) => (
+          <ArticleCard
+            title={post.data.title}
+            description={post.data.description}
+            heroImage={post.data.heroImage}
+            pubDate={post.data.pubDate}
+            category={post.category}
+            tag={post.tag}
+            slug={post.slug}
+            readingTime={post.readingTime}
+          />
+        ))}
+      </div>
+    ) : (
+      <div class="no-articles py-16 text-center" data-cy="no-articles">
+        <div class="bg-base-200 mx-auto max-w-md rounded-lg p-8">
+          <h3 class="mb-2 text-xl font-semibold">
+            {t("category.page.noArticles")}
+          </h3>
+          <p class="text-muted-accessible mb-4">
+            {t("category.page.noArticlesDesc")}
+          </p>
+          <a href="/" class="btn btn-primary">
+            {t("category.page.backToHome")}
+          </a>
+        </div>
+      </div>
+    )}
+  </div>
+
+  <!-- Données cachées pour le script de tri -->
+  <script type="application/json" id="posts-data" set:text={JSON.stringify(postsData)}></script>
+  <script type="application/json" id="translations-data" set:text={JSON.stringify({
+    sortLabel: t("sort.label"),
+    sortDateDesc: t("sort.dateDesc"),
+    sortDateAsc: t("sort.dateAsc"),
+    sortTitleAsc: t("sort.titleAsc"),
+    sortTitleDesc: t("sort.titleDesc"),
+    sortReadingTimeAsc: t("sort.readingTimeAsc"),
+    sortReadingTimeDesc: t("sort.readingTimeDesc"),
+    readText: t("blog.read"),
+    categoryText: category
+  })}></script>
+
+  <!-- Script de tri optimisé -->
+  <script>
+    import('../../scripts/category-sort.ts');
+  </script>
+
+  <!-- Styles pour les lignes clampées -->
+  <style>
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  </style>
+</MainLayout> 
