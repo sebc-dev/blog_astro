@@ -1,12 +1,12 @@
 ---
-import CategoryPage from "../../../components/CategoryPage.astro";
+import CategoryPage from "../../../components/pages/CategoryPage.astro";
 import { getCollection } from "astro:content";
 import {
   getUniqueCategories,
   filterPostsByCategory,
   normalizeCategoryForUrl,
   type CategoryTranslations,
-} from "../../../scripts/category-utils";
+} from "../../../lib/article/category-utils";
 import { getCategoryTranslations } from "../../../i18n/category-translations";
 
 export async function getStaticPaths() {

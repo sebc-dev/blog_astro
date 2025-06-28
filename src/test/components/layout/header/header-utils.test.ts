@@ -3,24 +3,24 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { generateCriticalCSS } from "../../components/header/header-styles";
-import { prepareHeaderData } from "../../components/header/utils";
-import { NormalMapper } from "../../components/header/page-mappers/normal-mapper";
+import { generateCriticalCSS } from "../../../../components/header/header-styles";
+import { prepareHeaderData } from "../../../../components/header/utils";
+import { NormalMapper } from "../../../../components/header/page-mappers/normal-mapper";
 import type { NormalPageInfo } from "../../components/header/page-detectors/types";
 
 // Mock server-utils
-vi.mock("../../components/header/server-utils", () => ({
+vi.mock("../../../../components/header/server-utils", () => ({
   analyzeLanguageContext: vi.fn(),
 }));
 
 // Mock article-utils
-vi.mock("../../components/header/article-utils", () => ({
+vi.mock("../../../../components/header/article-utils", () => ({
   generateContextualLanguageUrls: vi.fn(),
   generateHreflangLinks: vi.fn(),
 }));
 
 // Mock i18n utils
-vi.mock("../../i18n/utils", () => ({
+vi.mock("../../../../i18n/utils", () => ({
   getLangFromUrl: vi.fn(),
   useTranslations: vi.fn(),
   useTranslatedPath: vi.fn(),
@@ -34,12 +34,12 @@ import {
   useTranslatedPath,
   getPathWithoutLang,
   generateLanguageUrls,
-} from "../../i18n/utils";
-import { analyzeLanguageContext } from "../../components/header/server-utils";
+} from "../../../../i18n/utils";
+import { analyzeLanguageContext } from "../../../../components/header/server-utils";
 import {
   generateContextualLanguageUrls,
   generateHreflangLinks,
-} from "../../components/header/article-utils";
+} from "../../../../components/header/article-utils";
 
 // Mock des fonctions
 const mockGetLangFromUrl = vi.mocked(getLangFromUrl);

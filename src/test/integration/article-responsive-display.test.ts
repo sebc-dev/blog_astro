@@ -5,7 +5,7 @@ import { join } from "path";
 describe("Article Responsive Display Tests", () => {
   const latestArticlesSectionPath = join(
     process.cwd(),
-    "src/components/LatestArticlesSection.astro",
+    "src/components/sections/LatestArticlesSection.astro",
   );
   const componentContent = readFileSync(latestArticlesSectionPath, "utf-8");
 

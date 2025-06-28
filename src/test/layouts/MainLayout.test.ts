@@ -13,7 +13,7 @@ describe("MainLayout Structure and Configuration", () => {
       'import Header from "../components/header/Header.astro"',
     );
     expect(layoutContent).toContain(
-      'import Footer from "../components/Footer.astro"',
+      'import Footer from "../components/layout/Footer.astro"',
     );
     expect(layoutContent).toContain(
       'import { getLangFromUrl, useTranslations } from "../i18n/utils"',

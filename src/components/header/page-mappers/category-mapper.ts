@@ -1,6 +1,7 @@
 import type { Languages } from "../../../i18n/ui";
 import { getCategoryTranslations } from "../../../i18n/category-translations";
-import { normalizeCategoryForUrl, denormalizeCategoryFromUrl } from "../../../scripts/category-utils";
+import { getSupportedLanguages } from "../../../i18n/utils";
+import { normalizeCategoryForUrl, denormalizeCategoryFromUrl } from "../../../lib/article/category-utils";
 import type { UrlMapper, PageInfo, PageType } from "../page-detectors/types";
 
 /**
@@ -58,7 +59,7 @@ export class CategoryMapper implements UrlMapper {
     // Créer le mapping pour toutes les langues
     const mapping: Record<string, string> = {};
     
-    const supportedLanguages: Languages[] = ['en', 'fr'];
+    const supportedLanguages = getSupportedLanguages();
     
     for (const lang of supportedLanguages) {
       const translations = getCategoryTranslations(lang);

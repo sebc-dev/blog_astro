@@ -1,8 +1,8 @@
 ---
 import { getCollection } from "astro:content";
 import type { CollectionEntry } from "astro:content";
-import ArticleHero from "./ArticleHero.astro";
-import ArticleCard from "./ArticleCard.astro";
+import ArticleHero from "../ui/ArticleHero.astro";
+import ArticleCard from "../ui/ArticleCard.astro";
 import {
   getLangFromUrl,
   useTranslations,
@@ -12,7 +12,7 @@ import {
   estimateReadingTime as utilEstimateReadingTime,
   getPostCategory as utilGetPostCategory,
   getPostTag as utilGetPostTag,
-} from "../scripts/article-utils";
+} from "../../lib/article/article-utils";
 
 interface Props {
   maxArticles?: number;

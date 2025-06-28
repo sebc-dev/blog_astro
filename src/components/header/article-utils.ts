@@ -38,7 +38,7 @@ export function extractSlugWithoutLanguagePrefix(
   // Utiliser une regex pour matcher précisément le préfixe de langue au début
   // Pattern: ^{language}/ suivi du reste du slug
   const languagePrefixPattern = new RegExp(`^${escapeRegExp(language)}/(.+)$`);
-  const match = RegExp(languagePrefixPattern).exec(fullSlug);
+  const match = languagePrefixPattern.exec(fullSlug);
 
   return match?.[1] ?? null;
 }
@@ -135,11 +135,13 @@ export function detectCategoryLanguage(url: URL): Languages | null {
  * @deprecated Utiliser CategoryMapper directement
  * @param urlCategoryName - Nom de catégorie normalisé depuis l'URL
  * @param sourceLang - Langue source
+ * @param currentUrl - URL courante nécessaire pour le mapping
  * @returns Mapping des URLs de catégories par langue ou null si pas trouvé
  */
 export function createCategoryUrlMapping(
   urlCategoryName: string,
   sourceLang: Languages,
+  currentUrl: URL,
 ): Record<string, string> | null {
   // Simuler une PageInfo pour utiliser le nouveau système
   const pageInfo = {
@@ -148,7 +150,7 @@ export function createCategoryUrlMapping(
     category: urlCategoryName,
   };
 
-  return pageDetectionManager.createUrlMapping(pageInfo);
+  return pageDetectionManager.createUrlMapping(pageInfo, currentUrl);
 }
 
 /**
@@ -267,7 +269,7 @@ export function analyzeLanguageContextPure(
     };
   } else if (pageInfo.pageType === "category") {
     // Logique pour les catégories
-    const categoryUrlMapping = pageDetectionManager.createUrlMapping(pageInfo);
+    const categoryUrlMapping = pageDetectionManager.createUrlMapping(pageInfo, url);
 
     return {
       isArticlePage: false,

@@ -1,4 +1,4 @@
-import type { CategoryTranslations } from "../scripts/category-utils";
+import type { CategoryTranslations } from "../lib/article/category-utils";
 
 /**
  * Centralized category translations for all supported languages

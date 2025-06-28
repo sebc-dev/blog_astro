@@ -1,12 +1,12 @@
 ---
 import MainLayout from "../../layouts/MainLayout.astro";
-import TableOfContents from "../../components/TableOfContents.astro";
+import TableOfContents from "../../components/ui/TableOfContents.astro";
 import { getCollection } from "astro:content";
 import { getLangFromUrl, useTranslations } from "../../i18n/utils";
 import { siteConfig, siteUtils } from "../../config/site";
-import { estimateReadingTime } from "../../scripts/article-utils";
-import { buildTocHierarchy, shouldShowToc } from "../../scripts/toc-utils";
-import "../../styles/blog-article.css";
+import { estimateReadingTime } from "../../lib/article/article-utils";
+import { buildTocHierarchy, shouldShowToc } from "../../lib/content/toc-utils";
+import "../../styles/components/blog-article.css";
 
 export async function getStaticPaths() {
   const blogEntries = await getCollection("blog");

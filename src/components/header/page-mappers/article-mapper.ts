@@ -25,9 +25,6 @@ export class ArticleMapper implements UrlMapper {
     const translationMapping = additionalData?.translationMapping;
     if (!translationMapping || typeof translationMapping !== 'object') {
       return null;
-    }    
-    if (!translationMapping) {
-      return null;
     }
 
     // Utiliser la fonction existante pour générer les URLs d'articles
