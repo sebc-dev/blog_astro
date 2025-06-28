@@ -67,7 +67,7 @@ describe("Content Background Layout", () => {
         expect(computedStyle.transform).to.not.equal("none");
         
         // Vérifier le positionnement de centrage (left est calculé en pixels, vérifier qu'il est raisonnable)
-        const leftValue = parseFloat(computedStyle.left);
+        const leftValue = Number.parseFloat(computedStyle.left);
         expect(leftValue).to.be.greaterThan(100); // Doit être un décalage significatif pour le centrage
       });
     });

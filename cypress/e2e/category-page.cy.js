@@ -1,3 +1,11 @@
+// Test data constants to avoid duplication
+const TEST_CATEGORIES = {
+  en: ['framework', 'language', 'backend', 'styling'],
+  fr: ['framework', 'langage', 'backend', 'style']
+};
+
+const SORT_OPTIONS = ['date-desc', 'date-asc', 'title-asc', 'title-desc', 'reading-time-asc', 'reading-time-desc'];
+
 describe('Category Page', () => {
   // Gestion des erreurs JavaScript globales
   beforeEach(() => {
@@ -59,9 +67,7 @@ describe('Category Page', () => {
     });
 
     it('should work for different English categories', () => {
-      const categories = ['framework', 'language', 'backend', 'styling'];
-      
-      categories.forEach((category) => {
+      TEST_CATEGORIES.en.forEach((category) => {
         cy.visit(`/category/${category}`);
         cy.wait(300); // Attendre le chargement
         
@@ -126,9 +132,7 @@ describe('Category Page', () => {
     });
 
     it('should work for different French categories', () => {
-      const categories = ['framework', 'langage', 'backend', 'style'];
-      
-      categories.forEach((category) => {
+      TEST_CATEGORIES.fr.forEach((category) => {
         cy.visit(`/fr/categorie/${category}`);
         cy.wait(300); // Attendre le chargement
         
@@ -181,9 +185,7 @@ describe('Category Page', () => {
         });
 
         it('should test different sort options without JavaScript errors', () => {
-          const sortOptions = ['date-desc', 'date-asc', 'title-asc', 'title-desc', 'reading-time-asc', 'reading-time-desc'];
-
-          sortOptions.forEach((option) => {
+          SORT_OPTIONS.forEach((option) => {
             cy.get('[data-cy="category-sort-select"]').select(option);
             cy.wait(300); // Attendre l'application du tri
             

@@ -66,7 +66,7 @@ export function filterPostsByCategory(
 export function sortPosts(
   posts: CollectionEntry<"blog">[],
   sortOption: SortOption,
-  lang: string = "fr"
+  lang = "fr"
 ): CollectionEntry<"blog">[] {
   const sortedPosts = [...posts];
   
@@ -116,7 +116,7 @@ export function sortPosts(
  */
 function estimateReadingTimeForSort(
   post: CollectionEntry<"blog">,
-  lang: string = "fr"
+  lang = "fr"
 ): number {
   const wordsPerMinute = lang === "fr" ? 200 : 220;
   const descWords = post.data.description.split(/\s+/).length;
