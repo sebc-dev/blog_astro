@@ -2,6 +2,18 @@ import type { CollectionEntry } from "astro:content";
 import { getPostCategory } from "./article-utils";
 
 /**
+ * Configuration des multiplicateurs de temps de lecture par mots-clés
+ */
+const READING_TIME_MULTIPLIERS = {
+  guide: { multiplier: 2.5, checkIn: ['slug', 'title'] as const },
+  vs: { multiplier: 1.8, checkIn: ['slug', 'title'] as const },
+  api: { multiplier: 2.2, checkIn: ['slug', 'title'] as const },
+  techniques: { multiplier: 2.0, checkIn: ['title'] as const },
+  optimisation: { multiplier: 2.0, checkIn: ['title'] as const },
+  optimization: { multiplier: 2.0, checkIn: ['title'] as const },
+} as const;
+
+/**
  * Type pour les options de tri des articles
  */
 export type SortOption =
@@ -135,18 +147,18 @@ function estimateReadingTimeForSort(
   const slug = post.slug;
   const title = post.data.title.toLowerCase();
 
-  if (slug.includes("guide") || title.includes("guide")) {
-    estimatedWords *= 2.5;
-  } else if (slug.includes("vs") || title.includes("vs")) {
-    estimatedWords *= 1.8;
-  } else if (slug.includes("api") || title.includes("api")) {
-    estimatedWords *= 2.2;
-  } else if (
-    title.includes("techniques") ||
-    title.includes("optimisation") ||
-    title.includes("optimization")
-  ) {
-    estimatedWords *= 2.0;
+  // Appliquer les multiplicateurs basés sur les mots-clés
+  for (const [keyword, config] of Object.entries(READING_TIME_MULTIPLIERS)) {
+    const shouldCheck = config.checkIn.some(location => {
+      if (location === 'slug') return slug.includes(keyword);
+      if (location === 'title') return title.includes(keyword);
+      return false;
+    });
+
+    if (shouldCheck) {
+      estimatedWords *= config.multiplier;
+      break; // Appliquer seulement le premier multiplicateur trouvé
+    }
   }
 
   return Math.max(1, Math.ceil(estimatedWords / wordsPerMinute));
