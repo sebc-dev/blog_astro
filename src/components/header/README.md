@@ -1,285 +1,253 @@
-# Header Component - Modular TypeScript Architecture
+# Header Component - Architecture Générique
 
-## Overview
+## 🏗️ Vue d'ensemble
 
-Ce dossier contient l'architecture modulaire refactorisée du composant Header. Le gros script inline (330+ lignes) a été divisé en modules TypeScript dédiés pour améliorer la maintenabilité, le typage, et les performances.
+Le composant Header utilise maintenant une **architecture modulaire et extensible** pour gérer la détection de pages et le changement de langue. Cette architecture permet d'ajouter facilement de nouveaux types de pages sans modifier le code existant.
 
-## Architecture
-
-### Structure des Fichiers
+## 📁 Structure des Dossiers
 
 ```
 src/components/header/
-├── Header.astro              # Composant principal (templates HTML + styles)
-├── header-client.ts          # Module principal coordonnateur
-├── theme-manager.ts          # Gestion du thème clair/sombre
-├── mobile-menu.ts            # Gestion du menu mobile
-├── dropdown-manager.ts       # Gestion des dropdowns
-├── scroll-effects.ts         # Effets de scroll sur le header
-├── header-styles.ts          # Styles et configurations (existant)
-├── types.ts                  # Types TypeScript (existant)
-├── utils.ts                  # Utilitaires helper (existant)
-└── README.md                 # Cette documentation
+├── page-detectors/           # Détecteurs de pages modulaires
+│   ├── types.ts             # Types et interfaces communes
+│   ├── article-detector.ts  # Détecteur pour les articles
+│   ├── category-detector.ts # Détecteur pour les catégories
+│   └── normal-detector.ts   # Détecteur fallback pour pages normales
+├── page-mappers/            # Mappers d'URLs par type de page
+│   ├── article-mapper.ts    # Mapping URLs articles
+│   ├── category-mapper.ts   # Mapping URLs catégories
+│   └── normal-mapper.ts     # Mapping URLs pages normales
+├── page-utils.ts            # Orchestrateur principal
+├── article-utils.ts         # Fonctions de compatibilité (deprecated)
+├── Header.astro             # Composant principal
+└── README.md               # Cette documentation
 ```
 
-## Modules
+## 🔧 Fonctionnement
 
-### 🎨 `theme-manager.ts` - Gestion des Thèmes
+### 1. Système de Détection de Pages
 
-**Responsabilités :**
-
-- Gestion du localStorage pour la persistance
-- Détection du thème système préféré
-- Mise à jour des icônes de thème
-- API publique pour contrôle externe
-
-**Classes Principales :**
-
-- `ThemeManager` : Classe principale de gestion
-- `initThemeManager()` : Fonction d'initialisation
-
-**Utilisation :**
+Le système utilise le **pattern Strategy** pour détecter le type de page :
 
 ```typescript
-import { initThemeManager } from "./theme-manager";
-const themeManager = initThemeManager();
-console.log(themeManager.getCurrentTheme()); // 'light-blue' | 'dark-blue'
+// Chaque détecteur implémente PageDetector
+interface PageDetector {
+  isPageType(url: URL): boolean;        // Détecte le type
+  extractPageInfo(url: URL): PageInfo;  // Extrait les infos
+  detectLanguage(url: URL): Languages;  // Détecte la langue
+  readonly pageType: PageType;          // Type géré
+}
 ```
 
-### 📱 `mobile-menu.ts` - Menu Mobile
+### 2. Système de Mapping d'URLs
 
-**Responsabilités :**
-
-- Ouverture/fermeture du menu mobile
-- Gestion des overlays et échappement
-- Contrôle du scroll de la page
-- États ARIA pour l'accessibilité
-
-**Classes Principales :**
-
-- `MobileMenuManager` : Gestionnaire du menu mobile
-- `initMobileMenuManager()` : Fonction d'initialisation
-
-**Utilisation :**
+Chaque type de page a son propre mapper :
 
 ```typescript
-import { initMobileMenuManager } from "./mobile-menu";
-const menuManager = initMobileMenuManager();
-menuManager.open(); // Ouvre le menu
-menuManager.close(); // Ferme le menu
+interface UrlMapper {
+  readonly pageType: PageType;
+  createUrlMapping(pageInfo: PageInfo): Record<string, string> | null;
+}
 ```
 
-### 🔽 `dropdown-manager.ts` - Dropdowns
+### 3. Gestionnaire Principal
 
-**Responsabilités :**
-
-- Gestion des dropdowns de navigation
-- Fermeture automatique sur clic externe
-- Support clavier (Escape)
-- Exclusion mutuelle (un seul dropdown ouvert)
-
-**Classes Principales :**
-
-- `DropdownManager` : Gestionnaire des dropdowns
-- `initDropdownManager()` : Fonction d'initialisation
-
-**Utilisation :**
+Le `PageDetectionManager` orchestre les détecteurs et mappers :
 
 ```typescript
-import { initDropdownManager } from "./dropdown-manager";
-const dropdownManager = initDropdownManager();
-dropdownManager.closeAll(); // Ferme tous les dropdowns
+const pageDetectionManager = new PageDetectionManager();
+
+// Détection automatique
+const detection = pageDetectionManager.detectPage(url);
+
+// Génération du mapping
+const urlMapping = pageDetectionManager.createUrlMapping(pageInfo);
 ```
 
-### 🔄 `scroll-effects.ts` - Effets de Scroll
+## 🚀 Utilisation
 
-**Responsabilités :**
-
-- Détection du scroll et seuils
-- Application des classes CSS (`scrolled`)
-- Optimisation des performances (throttling)
-- Effet de backdrop-filter
-
-**Classes Principales :**
-
-- `ScrollEffectsManager` : Gestionnaire des effets de scroll
-- `initScrollEffectsManager(threshold?: number)` : Fonction d'initialisation
-
-**Utilisation :**
+### Pour les Développeurs Header
 
 ```typescript
-import { initScrollEffectsManager } from "./scroll-effects";
-const scrollManager = initScrollEffectsManager(50); // Seuil personnalisé
-console.log(scrollManager.isScrolled()); // true/false
+import { pageDetectionManager } from './page-utils';
+
+// Dans Header.astro
+const detection = pageDetectionManager.detectPage(url);
+const urlMapping = pageDetectionManager.createUrlMapping(detection.pageInfo);
 ```
 
-### 🎛️ `header-client.ts` - Coordinateur Principal
+### Compatibilité avec l'Ancien Système
 
-**Responsabilités :**
-
-- Initialisation de tous les modules
-- API unifiée d'accès aux managers
-- Gestion des erreurs et logging
-- Auto-initialisation sur chargement
-
-**Classes Principales :**
-
-- `HeaderClient` : Classe coordinatrice
-- `initHeaderClient()` : Fonction d'initialisation
-- `getHeaderClient()` : Accès à l'instance globale
-
-**Utilisation :**
+Les fonctions existantes restent disponibles mais sont **deprecated** :
 
 ```typescript
-import { getHeaderClient } from "./header-client";
-const client = getHeaderClient();
-const themeManager = client?.getThemeManager();
+// ❌ Ancien système (deprecated)
+const isArticle = isArticlePage(url);
+const isCategory = isCategoryPage(url);
+
+// ✅ Nouveau système (recommandé)
+const detection = pageDetectionManager.detectPage(url);
+const isArticle = detection.pageType === "article";
+const isCategory = detection.pageType === "category";
 ```
 
-## Intégration dans Astro
+## 🔥 Avantages de la Nouvelle Architecture
 
-### Remplacement du Script Inline
+### ✅ **Extensibilité**
+- Ajout de nouveaux types de pages en créant un détecteur + mapper
+- Aucune modification du code existant nécessaire
+- Architecture prête pour les pages produits, utilisateurs, etc.
 
-**Avant (script inline ~130 lignes) :**
+### ✅ **Maintenabilité**
+- Séparation claire des responsabilités
+- Code modulaire et testable
+- Interface commune pour tous les types
 
-```astro
-<script is:inline>
-  (() => {
-    // 130+ lignes de JavaScript inline
-  })();
-</script>
-```
+### ✅ **Performance**
+- Détection optimisée avec arrêt au premier match
+- Pas de regex complexes répétées
+- Cache possible au niveau du gestionnaire
 
-**Après (import modulaire) :**
+### ✅ **Robustesse**
+- Système de fallback intégré
+- Gestion d'erreurs centralisée
+- Types TypeScript stricts
 
-```astro
-<script>
-  import "./header-client";
-</script>
-```
+## 🆕 Ajouter un Nouveau Type de Page
 
-### Avantages de la Refactorisation
-
-1. **🏗️ Maintenabilité**
-
-   - Code organisé par responsabilité
-   - Modules indépendants et testables
-   - API publique claire pour chaque module
-
-2. **📝 TypeScript**
-
-   - Typage strict pour toutes les interactions DOM
-   - IntelliSense et autocomplétion
-   - Détection d'erreurs à la compilation
-
-3. **⚡ Performances**
-
-   - Tree-shaking automatique par Vite
-   - Cache navigateur pour les modules
-   - Chargement asynchrone des modules
-
-4. **🧪 Testabilité**
-
-   - Modules isolés facilement mockables
-   - API publique testable unitairement
-   - Séparation des responsabilités
-
-5. **🔧 Réutilisabilité**
-   - Modules réutilisables dans d'autres composants
-   - Configuration flexible via constructeurs
-   - Extensibilité via héritage de classes
-
-## Optimisations Build
-
-### Bundle Size
-
-- **Before** : ~130 lignes de script inline répété sur chaque page
-- **After** : Module externe de 5.88 kB (gzipped: 1.67 kB) mis en cache
-
-### Performance Metrics
-
-```
-📊 JS Bundle - Total: 5876B (Max: 20480B)
-📊 Inline Scripts: 0 (Max: 5)
-🎯 Gzipped: 1.67 kB
-```
-
-### Optimisations Astro
-
-- Modules ES6 natifs (non-bloquants)
-- Préloading automatique par Astro
-- Tree-shaking des imports inutilisés
-- Cache navigateur optimal
-
-## Compatibilité
-
-### Browsers Support
-
-- ES6 Modules (tous navigateurs modernes)
-- TypeScript compilé vers ES2020
-- Support des classes et async/await
-
-### Astro Integration
-
-- Compatible Astro v5.8+
-- Fonctionne avec le SSR et SSG
-- Support des directives client:\* si nécessaire
-
-## Debugging
-
-### Console Logs
-
-```javascript
-// Production : messages de succès
-Header client initialized successfully
-
-// Développement : warnings détaillés
-Mobile menu elements not found
-No dropdown buttons found
-No header elements found with class .header-critical
-```
-
-### Debug en Développement
+### Étape 1 : Créer le Détecteur
 
 ```typescript
-import { getHeaderClient } from "./header-client";
-
-// Accès aux managers pour debugging
-const client = getHeaderClient();
-console.log("Theme:", client?.getThemeManager()?.getCurrentTheme());
-console.log("Menu Open:", client?.getMobileMenuManager()?.getIsOpen());
-console.log("Scrolled:", client?.getScrollEffectsManager()?.isScrolled());
+// src/components/header/page-detectors/product-detector.ts
+export class ProductDetector implements PageDetector {
+  readonly pageType: PageType = "product";
+  
+  isPageType(url: URL): boolean {
+    return url.pathname.startsWith("/product/");
+  }
+  
+  extractPageInfo(url: URL): PageInfo | null {
+    // Logique d'extraction spécifique
+  }
+  
+  detectLanguage(url: URL): Languages | null {
+    // Logique de détection de langue
+  }
+}
 ```
 
-## Migration et Rétrocompatibilité
+### Étape 2 : Créer le Mapper
 
-La refactorisation maintient 100% de compatibilité fonctionnelle :
-
-- ✅ Tous les sélecteurs CSS restent identiques
-- ✅ Tous les attributs data-\* restent identiques
-- ✅ Tous les tests E2E passent sans modification
-- ✅ API publique disponible pour extensions futures
-
-## Tests
-
-### Coverage
-
-- Tests unitaires : `src/test/header.test.ts` (16 tests)
-- Tests d'intégration : `src/test/integration/` (38 tests)
-- Tests E2E : `cypress/e2e/header-navigation.cy.js` (26 tests)
-- Tests de build : `src/test/build-static.test.ts` (14 tests)
-
-**Total : 94 tests couvrant toutes les fonctionnalités**
-
-### Commandes de Test
-
-```bash
-# Tests header spécifiques
-pnpm test src/test/header.test.ts
-
-# Tests E2E header
-pnpm test:e2e --spec cypress/e2e/header-navigation.cy.js
-
-# Tous les tests
-pnpm test
+```typescript
+// src/components/header/page-mappers/product-mapper.ts
+export class ProductMapper implements UrlMapper {
+  readonly pageType: PageType = "product";
+  
+  createUrlMapping(pageInfo: PageInfo): Record<string, string> | null {
+    // Logique de mapping spécifique
+  }
+}
 ```
+
+### Étape 3 : Enregistrer dans le Gestionnaire
+
+```typescript
+// src/components/header/page-utils.ts
+constructor() {
+  this.detectors = [
+    new ArticleDetector(),
+    new CategoryDetector(),
+    new ProductDetector(), // ← Nouveau détecteur
+    new NormalDetector(),
+  ];
+
+  this.mappers = new Map([
+    ["article", new ArticleMapper()],
+    ["category", new CategoryMapper()],
+    ["product", new ProductMapper()], // ← Nouveau mapper
+    ["normal", new NormalMapper()],
+  ]);
+}
+```
+
+### Étape 4 : Mettre à Jour les Types
+
+```typescript
+// src/components/header/page-detectors/types.ts
+export type PageType = "article" | "category" | "product" | "normal";
+```
+
+## 🧪 Tests
+
+### Structure de Tests Recommandée
+
+```typescript
+describe("ProductDetector", () => {
+  it("should detect product pages", () => {
+    const detector = new ProductDetector();
+    const url = new URL("http://localhost/product/laptop-gaming");
+    expect(detector.isPageType(url)).toBe(true);
+  });
+});
+
+describe("ProductMapper", () => {
+  it("should create correct URL mapping", () => {
+    const mapper = new ProductMapper();
+    const pageInfo = { pageType: "product", productSlug: "laptop" };
+    const mapping = mapper.createUrlMapping(pageInfo);
+    expect(mapping.en).toBe("/product/laptop");
+    expect(mapping.fr).toBe("/fr/produit/laptop");
+  });
+});
+```
+
+## 🔄 Migration depuis l'Ancien Système
+
+### Remplacement Progressif
+
+1. **Phase 1** : Nouveau système en parallèle (✅ **Terminé**)
+2. **Phase 2** : Marquage des anciennes fonctions comme deprecated (✅ **Terminé**)
+3. **Phase 3** : Migration progressive des utilisateurs
+4. **Phase 4** : Suppression de l'ancien système
+
+### Guide de Migration
+
+```typescript
+// Avant
+const context = analyzeLanguageContextPure(url, allPosts);
+if (context.isArticlePage) {
+  // logique article
+} else if (context.isCategoryPage) {
+  // logique catégorie
+}
+
+// Après
+const detection = pageDetectionManager.detectPage(url);
+switch (detection.pageType) {
+  case "article":
+    // logique article
+    break;
+  case "category":
+    // logique catégorie
+    break;
+  default:
+    // logique normale
+}
+```
+
+## 📋 Checklist pour Nouveaux Types
+
+- [ ] Créer le détecteur avec tests unitaires
+- [ ] Créer le mapper avec tests unitaires  
+- [ ] Ajouter le type dans `PageType`
+- [ ] Enregistrer dans `PageDetectionManager`
+- [ ] Ajouter tests d'intégration
+- [ ] Ajouter tests end-to-end si nécessaire
+- [ ] Mettre à jour cette documentation
+
+## 🔗 Liens Utiles
+
+- [Types et Interfaces](./page-detectors/types.ts)
+- [Gestionnaire Principal](./page-utils.ts)
+- [Tests d'Exemple](../../test/components/header-article-utils.test.ts)
+- [Tests E2E](../../../cypress/e2e/category-page.cy.js)

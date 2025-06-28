@@ -39,10 +39,15 @@ export type CountryFlag =
 export type ArticleTranslationMapping = Record<Languages, string | null>;
 
 export interface ArticleLanguageContext {
-  isArticlePage: boolean;
-  detectedLang: Languages | null;
-  translationMapping?: ArticleTranslationMapping;
-  articleSlug?: string;
+  readonly isArticlePage: boolean;
+  readonly detectedLang: Languages | null;
+  readonly articleSlug?: string;
+  readonly translationMapping?: Record<Languages, string | null>;
+  
+  // Nouveaux champs pour les pages de catégories
+  readonly isCategoryPage?: boolean;
+  readonly categorySlug?: string;
+  readonly categoryUrlMapping?: Record<string, string>;
 }
 
 export interface LanguageUrlData {

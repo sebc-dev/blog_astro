@@ -7,6 +7,10 @@ import {
   createArticleTranslationMappingPure,
   analyzeLanguageContextPure,
   generateHreflangLinks,
+  isCategoryPage,
+  extractCategoryFromUrl,
+  detectCategoryLanguage,
+  createCategoryUrlMapping,
 } from "../../components/header/article-utils";
 
 // Mock data pour les tests (simplified for testing purposes)
@@ -285,6 +289,153 @@ describe("Header Article Utils", () => {
         { hreflang: "en", href: "/blog/en/rest-api-guide" },
         { hreflang: "fr", href: "/blog/fr/guide-api-rest" },
       ]);
+    });
+  });
+
+  describe("Category page detection and mapping", () => {
+    describe("isCategoryPage", () => {
+      it("should detect English category pages", () => {
+        const url = new URL("http://localhost:4321/category/framework");
+        expect(isCategoryPage(url)).toBe(true);
+      });
+
+      it("should detect French category pages", () => {
+        const url = new URL("http://localhost:4321/fr/categorie/langage");
+        expect(isCategoryPage(url)).toBe(true);
+      });
+
+      it("should not detect non-category pages", () => {
+        const url = new URL("http://localhost:4321/blog/en/some-article");
+        expect(isCategoryPage(url)).toBe(false);
+      });
+
+      it("should not detect home pages", () => {
+        const url = new URL("http://localhost:4321/");
+        expect(isCategoryPage(url)).toBe(false);
+      });
+    });
+
+    describe("extractCategoryFromUrl", () => {
+      it("should extract category from English URLs", () => {
+        const url = new URL("http://localhost:4321/category/framework");
+        expect(extractCategoryFromUrl(url)).toBe("framework");
+      });
+
+      it("should extract category from French URLs", () => {
+        const url = new URL("http://localhost:4321/fr/categorie/langage");
+        expect(extractCategoryFromUrl(url)).toBe("langage");
+      });
+
+      it("should return null for non-category pages", () => {
+        const url = new URL("http://localhost:4321/blog/en/some-article");
+        expect(extractCategoryFromUrl(url)).toBe(null);
+      });
+    });
+
+    describe("detectCategoryLanguage", () => {
+      it("should detect English for category pages without language prefix", () => {
+        const url = new URL("http://localhost:4321/category/framework");
+        expect(detectCategoryLanguage(url)).toBe("en");
+      });
+
+      it("should detect French for category pages with fr prefix", () => {
+        const url = new URL("http://localhost:4321/fr/categorie/langage");
+        expect(detectCategoryLanguage(url)).toBe("fr");
+      });
+
+      it("should return null for non-category pages", () => {
+        const url = new URL("http://localhost:4321/blog/en/some-article");
+        expect(detectCategoryLanguage(url)).toBe(null);
+      });
+    });
+
+    describe("createCategoryUrlMapping", () => {
+      it("should create correct URL mapping for English categories", () => {
+        const mapping = createCategoryUrlMapping("language", "en");
+        
+        expect(mapping).toEqual({
+          en: "/category/language",
+          fr: "/fr/categorie/langage",
+        });
+      });
+
+      it("should create correct URL mapping for French categories", () => {
+        const mapping = createCategoryUrlMapping("langage", "fr");
+        
+        expect(mapping).toEqual({
+          en: "/category/language",
+          fr: "/fr/categorie/langage",
+        });
+      });
+
+      it("should handle framework category (same in both languages)", () => {
+        const mapping = createCategoryUrlMapping("framework", "en");
+        
+        expect(mapping).toEqual({
+          en: "/category/framework",
+          fr: "/fr/categorie/framework",
+        });
+      });
+
+      it("should handle style/styling difference", () => {
+        const mappingFromEn = createCategoryUrlMapping("styling", "en");
+        expect(mappingFromEn).toEqual({
+          en: "/category/styling",
+          fr: "/fr/categorie/style",
+        });
+
+        const mappingFromFr = createCategoryUrlMapping("style", "fr");
+        expect(mappingFromFr).toEqual({
+          en: "/category/styling",
+          fr: "/fr/categorie/style",
+        });
+      });
+
+      it("should return null for unknown categories", () => {
+        const mapping = createCategoryUrlMapping("unknown-category", "en");
+        expect(mapping).toBe(null);
+      });
+    });
+  });
+
+  describe("analyzeLanguageContextPure with categories", () => {
+    it("should correctly analyze English category context", () => {
+      const url = new URL("http://localhost:4321/category/framework");
+      const context = analyzeLanguageContextPure(url);
+
+      expect(context.isArticlePage).toBe(false);
+      expect(context.isCategoryPage).toBe(true);
+      expect(context.detectedLang).toBe("en");
+      expect(context.categorySlug).toBe("framework");
+      expect(context.categoryUrlMapping).toEqual({
+        en: "/category/framework",
+        fr: "/fr/categorie/framework",
+      });
+    });
+
+    it("should correctly analyze French category context", () => {
+      const url = new URL("http://localhost:4321/fr/categorie/langage");
+      const context = analyzeLanguageContextPure(url);
+
+      expect(context.isArticlePage).toBe(false);
+      expect(context.isCategoryPage).toBe(true);
+      expect(context.detectedLang).toBe("fr");
+      expect(context.categorySlug).toBe("langage");
+      expect(context.categoryUrlMapping).toEqual({
+        en: "/category/language",
+        fr: "/fr/categorie/langage",
+      });
+    });
+
+    it("should handle normal pages correctly", () => {
+      const url = new URL("http://localhost:4321/about");
+      const context = analyzeLanguageContextPure(url);
+
+      expect(context.isArticlePage).toBe(false);
+      expect(context.isCategoryPage).toBe(false);
+      expect(context.detectedLang).toBe("en");
+      expect(context.categorySlug).toBeUndefined();
+      expect(context.categoryUrlMapping).toBeUndefined();
     });
   });
 });

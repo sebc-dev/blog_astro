@@ -278,4 +278,110 @@ describe("Category Page", () => {
       cy.url().should("include", "/blog/");
     });
   });
+
+  // Tests pour le changement de langue sur les pages de catégories
+  describe("Language Switching on Category Pages", () => {
+    beforeEach(() => {
+      // S'assurer que nous sommes en résolution desktop pour voir le header desktop
+      cy.viewport(1280, 720);
+    });
+
+    it("should switch from English category to French category correctly", () => {
+      // Commencer par une catégorie anglaise
+      cy.visit("/category/framework");
+      cy.wait(500);
+
+      // Vérifier qu'on est sur la page anglaise
+      cy.get("h1").should("contain", "Articles in category: Framework");
+
+      // Cliquer sur le changement de langue vers le français
+      cy.get('[data-cy="language-selector-desktop"]')
+        .should("be.visible")
+        .within(() => {
+          cy.get('[data-cy="language-toggle-desktop"]').click();
+          cy.get('[data-cy="language-option-fr-desktop"]').click();
+        });
+
+      // Vérifier que nous sommes maintenant sur la page française correspondante
+      cy.url().should("include", "/fr/categorie/framework");
+      cy.get("h1").should("contain", "Articles dans la catégorie : Framework");
+    });
+
+    it("should switch from French category to English category correctly", () => {
+      // Commencer par une catégorie française
+      cy.visit("/fr/categorie/langage");
+      cy.wait(500);
+
+      // Vérifier qu'on est sur la page française
+      cy.get("h1").should("contain", "Articles dans la catégorie : Langage");
+
+      // Cliquer sur le changement de langue vers l'anglais
+      cy.get('[data-cy="language-selector-desktop"]')
+        .should("be.visible")
+        .within(() => {
+          cy.get('[data-cy="language-toggle-desktop"]').click();
+          cy.get('[data-cy="language-option-en-desktop"]').click();
+        });
+
+      // Vérifier que nous sommes maintenant sur la page anglaise correspondante
+      cy.url().should("include", "/category/language");
+      cy.get("h1").should("contain", "Articles in category: Language");
+    });
+
+    it("should handle language switching for all category types", () => {
+      const categoryMappings = [
+        { en: "framework", fr: "framework" },
+        { en: "language", fr: "langage" },
+        { en: "backend", fr: "backend" },
+        { en: "styling", fr: "style" },
+        { en: "performance", fr: "performance" },
+      ];
+
+      categoryMappings.forEach(({ en, fr }) => {
+        // Test EN → FR
+        cy.visit(`/category/${en}`);
+        cy.wait(300);
+        
+        cy.get('[data-cy="language-selector-desktop"]')
+          .should("be.visible")
+          .within(() => {
+            cy.get('[data-cy="language-toggle-desktop"]').click();
+            cy.get('[data-cy="language-option-fr-desktop"]').click();
+          });
+
+        cy.url().should("include", `/fr/categorie/${fr}`);
+        cy.wait(300);
+
+        // Test FR → EN (retour)
+        cy.get('[data-cy="language-selector-desktop"]')
+          .should("be.visible")
+          .within(() => {
+            cy.get('[data-cy="language-toggle-desktop"]').click();
+            cy.get('[data-cy="language-option-en-desktop"]').click();
+          });
+
+        cy.url().should("include", `/category/${en}`);
+        cy.wait(300);
+      });
+    });
+
+    it("should work on mobile for category language switching", () => {
+      // Test en mode mobile
+      cy.viewport(375, 667);
+      
+      cy.visit("/category/framework");
+      cy.wait(500);
+
+      // Ouvrir le menu mobile
+      cy.get('[data-cy="menu-toggle-mobile"]').click();
+      cy.wait(200);
+
+      // Changer la langue en français
+      cy.get('[data-cy="language-option-fr-mobile"]').click();
+
+      // Vérifier la redirection
+      cy.url().should("include", "/fr/categorie/framework");
+      cy.get("h1").should("contain", "Articles dans la catégorie : Framework");
+    });
+  });
 });
