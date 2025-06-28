@@ -1,4 +1,5 @@
 import { generateLanguageUrls } from "../../../i18n/utils";
+import { getPathWithoutLang } from "../../../i18n/utils";
 import type { UrlMapper, PageInfo, PageType } from "../page-detectors/types";
 
 /**
@@ -10,9 +11,10 @@ export class NormalMapper implements UrlMapper {
   /**
    * Crée le mapping des URLs entre les langues pour les pages normales
    * @param pageInfo - Informations de la page normale
+   * @param additionalData - Données supplémentaires contenant l'URL courante
    * @returns Mapping des URLs par langue
    */
-  createUrlMapping(pageInfo: PageInfo): Record<string, string> | null {
+  createUrlMapping(pageInfo: PageInfo, additionalData?: Record<string, unknown>): Record<string, string> | null {
     if (!pageInfo) {
       return null;
     }
@@ -20,11 +22,13 @@ export class NormalMapper implements UrlMapper {
       return null;
     }
 
-    // Pour les pages normales, on utilise la logique standard de traduction de chemins
-    // On récupère le chemin sans langue depuis l'URL actuelle
-    // Note: Dans un vrai scénario, nous devrions avoir accès à l'URL courante
-    // Pour l'instant, nous utilisons un chemin par défaut
-    const currentPath = "/"; // Chemin par défaut pour les pages normales
+    // Extraire l'URL courante depuis additionalData ou utiliser "/" comme fallback
+    let currentPath = "/";
+    
+    if (additionalData?.currentUrl && additionalData.currentUrl instanceof URL) {
+      // Extraire le chemin sans le préfixe de langue pour les pages normales
+      currentPath = getPathWithoutLang(additionalData.currentUrl);
+    }
     
     const result = generateLanguageUrls(currentPath, pageInfo.detectedLang);
     

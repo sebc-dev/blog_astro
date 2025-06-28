@@ -75,11 +75,13 @@ export class PageDetectionManager {
   /**
    * Crée le mapping des URLs pour une page détectée
    * @param pageInfo - Informations de la page
+   * @param currentUrl - URL courante pour extraction du chemin
    * @param additionalData - Données supplémentaires (pour les articles)
    * @returns Mapping des URLs ou null
    */
   createUrlMapping(
-    pageInfo: PageInfo, 
+    pageInfo: PageInfo,
+    currentUrl: URL,
     additionalData?: Record<string, unknown>
   ): Record<string, string> | null {
     const mapper = this.mappers.get(pageInfo.pageType);
@@ -88,7 +90,13 @@ export class PageDetectionManager {
       return null;
     }
 
-    return mapper.createUrlMapping(pageInfo, additionalData);
+    // Enrichir additionalData avec l'URL courante pour tous les mappers
+    const enrichedData = {
+      ...additionalData,
+      currentUrl,
+    };
+
+    return mapper.createUrlMapping(pageInfo, enrichedData);
   }
 
   /**
@@ -114,7 +122,7 @@ export class PageDetectionManager {
       const translationMapping = createArticleTranslationMappingPure(url, allPosts);
       if (translationMapping) {
         additionalData = { translationMapping };
-        urlMapping = this.createUrlMapping(detection.pageInfo, additionalData);
+        urlMapping = this.createUrlMapping(detection.pageInfo, url, additionalData);
         
         // Enrichir les informations de l'article avec le mapping de traduction
         const enrichedPageInfo: ArticlePageInfoExtended = {
@@ -129,7 +137,7 @@ export class PageDetectionManager {
     }
 
     // Pour les autres types de pages
-    urlMapping = this.createUrlMapping(detection.pageInfo);
+    urlMapping = this.createUrlMapping(detection.pageInfo, url);
 
     // Créer l'objet étendu basé sur le type de page
     switch (detection.pageInfo.pageType) {

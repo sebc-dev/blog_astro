@@ -8,14 +8,23 @@ export class CategoryDetector implements PageDetector {
   readonly pageType: PageType = "category";
 
   /**
+   * Extrait les segments de chemin d'une URL
+   * @param url - URL à analyser
+   * @returns Tableau des segments de chemin filtrés (sans segments vides)
+   */
+  private getPathSegments(url: URL): string[] {
+    return url.pathname
+      .split("/")
+      .filter((segment) => segment !== "");
+  }
+
+  /**
    * Détecte si l'URL correspond à une page de catégorie
    * @param url - URL courante
    * @returns true si c'est une page de catégorie
    */
   isPageType(url: URL): boolean {
-    const pathSegments = url.pathname
-      .split("/")
-      .filter((segment) => segment !== "");
+    const pathSegments = this.getPathSegments(url);
 
     // Pour les URLs en anglais: /category/[category-name]
     if (pathSegments.length === 2 && pathSegments[0] === "category") {
@@ -68,9 +77,7 @@ export class CategoryDetector implements PageDetector {
       return null;
     }
 
-    const pathSegments = url.pathname
-      .split("/")
-      .filter((segment) => segment !== "");
+    const pathSegments = this.getPathSegments(url);
 
     // URLs françaises commencent par /fr/
     if (pathSegments[0] === "fr") {
@@ -91,9 +98,7 @@ export class CategoryDetector implements PageDetector {
       return null;
     }
 
-    const pathSegments = url.pathname
-      .split("/")
-      .filter((segment) => segment !== "");
+    const pathSegments = this.getPathSegments(url);
 
     // Pour les URLs en anglais: /category/[category-name]
     if (pathSegments.length === 2 && pathSegments[0] === "category") {
