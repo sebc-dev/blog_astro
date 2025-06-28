@@ -182,15 +182,60 @@ describe("Category Page Logic", () => {
     });
 
     it("should sort posts by reading time", () => {
+      // Test avec debug pour comprendre les temps de lecture
       const sortedAsc = sortPosts(mockPosts, "reading-time-asc", "fr");
       const sortedDesc = sortPosts(mockPosts, "reading-time-desc", "fr");
       
-      // Vérifier que le tri fonctionne - les éléments ne doivent pas être dans le même ordre
-      expect(sortedAsc).not.toEqual(sortedDesc);
+      // Debug: calculer les temps de lecture pour chaque article
+      const readingTimes = mockPosts.map(post => {
+        const wordsPerMinute = 200;
+        const descWords = post.data.description.split(/\s+/).length;
+        let estimatedWords = descWords * 15;
+        
+        const slug = post.slug;
+        const title = post.data.title.toLowerCase();
+        
+        if (slug.includes("guide") || title.includes("guide")) {
+          estimatedWords *= 2.5;
+        } else if (slug.includes("vs") || title.includes("vs")) {
+          estimatedWords *= 1.8;
+        } else if (slug.includes("api") || title.includes("api")) {
+          estimatedWords *= 2.2;
+        } else if (title.includes("techniques") || title.includes("optimisation") || title.includes("optimization")) {
+          estimatedWords *= 2.0;
+        }
+        
+        return {
+          slug: post.slug,
+          descWords,
+          estimatedWords,
+          readingTime: Math.max(1, Math.ceil(estimatedWords / wordsPerMinute))
+        };
+      });
+
+      // Vérifier que le tri fonctionne - les temps de lecture doivent être ordonnés
+      const readingTimesAsc = sortedAsc.map(post => {
+        const rt = readingTimes.find(r => r.slug === post.slug);
+        return rt?.readingTime || 0;
+      });
       
-      // Vérifier que l'ordre est bien inversé
-      expect(sortedAsc[0].slug).toBe(sortedDesc[sortedDesc.length - 1].slug);
-      expect(sortedAsc[sortedAsc.length - 1].slug).toBe(sortedDesc[0].slug);
+      const readingTimesDesc = sortedDesc.map(post => {
+        const rt = readingTimes.find(r => r.slug === post.slug);
+        return rt?.readingTime || 0;
+      });
+
+      // Vérifier que l'ordre ascendant est croissant
+      for (let i = 1; i < readingTimesAsc.length; i++) {
+        expect(readingTimesAsc[i]).toBeGreaterThanOrEqual(readingTimesAsc[i - 1]);
+      }
+
+      // Vérifier que l'ordre descendant est décroissant
+      for (let i = 1; i < readingTimesDesc.length; i++) {
+        expect(readingTimesDesc[i]).toBeLessThanOrEqual(readingTimesDesc[i - 1]);
+      }
+
+      // Vérifier que les deux tris ne sont pas identiques (sauf cas particulier d'égalité parfaite)
+      expect(sortedAsc).not.toEqual(sortedDesc);
     });
   });
 
