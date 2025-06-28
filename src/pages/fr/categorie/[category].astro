@@ -1,0 +1,60 @@
+---
+import CategoryPage from "../../../components/CategoryPage.astro";
+import { getCollection } from "astro:content";
+import {
+  getUniqueCategories,
+  filterPostsByCategory,
+  normalizeCategoryForUrl,
+  type CategoryTranslations,
+} from "../../../scripts/category-utils";
+import { getCategoryTranslations } from "../../../i18n/category-translations";
+
+export async function getStaticPaths() {
+  // Récupérer tous les articles
+  const allPosts = await getCollection("blog");
+
+  // Filtrer uniquement les articles français
+  const frenchPosts = allPosts.filter((post) => post.data.lang === "fr");
+
+  // Récupérer les traductions françaises des catégories depuis le fichier centralisé
+  const frenchTranslations = getCategoryTranslations("fr");
+
+  // Extraire les catégories uniques des articles français
+  const categories = getUniqueCategories(frenchPosts, frenchTranslations);
+
+  const paths = [];
+
+  for (const category of categories) {
+    const urlCategory = normalizeCategoryForUrl(category);
+    const categoryPosts = filterPostsByCategory(
+      frenchPosts,
+      category,
+      frenchTranslations,
+    );
+
+    paths.push({
+      params: { category: urlCategory },
+      props: {
+        category,
+        posts: categoryPosts,
+        lang: "fr",
+        translations: frenchTranslations,
+      },
+    });
+  }
+
+  return paths;
+}
+
+const { category, posts, lang, translations } = Astro.props;
+---
+
+<CategoryPage
+  category={category}
+  posts={posts}
+  lang={lang as "fr"}
+  translations={translations}
+  homeUrl="/fr"
+  categoryBaseUrl="/fr/categorie/"
+/>
+

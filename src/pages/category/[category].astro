@@ -1,0 +1,60 @@
+---
+import CategoryPage from "../../components/CategoryPage.astro";
+import { getCollection } from "astro:content";
+import {
+  getUniqueCategories,
+  filterPostsByCategory,
+  normalizeCategoryForUrl,
+  type CategoryTranslations,
+} from "../../scripts/category-utils";
+import { getCategoryTranslations } from "../../i18n/category-translations";
+
+export async function getStaticPaths() {
+  // Récupérer tous les articles
+  const allPosts = await getCollection("blog");
+
+  // Filtrer uniquement les articles anglais
+  const englishPosts = allPosts.filter((post) => post.data.lang === "en");
+
+  // Récupérer les traductions anglaises des catégories depuis le fichier centralisé
+  const englishTranslations = getCategoryTranslations("en");
+
+  // Extraire les catégories uniques des articles anglais
+  const categories = getUniqueCategories(englishPosts, englishTranslations);
+
+  const paths = [];
+
+  for (const category of categories) {
+    const urlCategory = normalizeCategoryForUrl(category);
+    const categoryPosts = filterPostsByCategory(
+      englishPosts,
+      category,
+      englishTranslations,
+    );
+
+    paths.push({
+      params: { category: urlCategory },
+      props: {
+        category,
+        posts: categoryPosts,
+        lang: "en",
+        translations: englishTranslations,
+      },
+    });
+  }
+
+  return paths;
+}
+
+const { category, posts, lang, translations } = Astro.props;
+---
+
+<CategoryPage
+  category={category}
+  posts={posts}
+  lang={lang as "en"}
+  translations={translations}
+  homeUrl="/"
+  categoryBaseUrl="/category/"
+/>
+

@@ -61,10 +61,7 @@ describe("Content Structure Validation", () => {
     it("should have valid frontmatter in English posts", () => {
       const files = readdirSync(BLOG_DIR_EN);
       files.forEach((file: string) => {
-        const content = readFileSync(
-          join(BLOG_DIR_EN, file),
-          "utf-8",
-        );
+        const content = readFileSync(join(BLOG_DIR_EN, file), "utf-8");
         expect(content).toContain("title:");
         expect(content).toContain("description:");
         expect(content).toContain("pubDate:");
@@ -77,10 +74,7 @@ describe("Content Structure Validation", () => {
     it("should have valid frontmatter in French posts", () => {
       const files = readdirSync(BLOG_DIR_FR);
       files.forEach((file: string) => {
-        const content = readFileSync(
-          join(BLOG_DIR_FR, file),
-          "utf-8",
-        );
+        const content = readFileSync(join(BLOG_DIR_FR, file), "utf-8");
         expect(content).toContain("title:");
         expect(content).toContain("description:");
         expect(content).toContain("pubDate:");

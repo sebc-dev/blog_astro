@@ -5,7 +5,6 @@ import { getLangFromUrl, useTranslations } from "../i18n/utils";
 import { siteConfig, siteUtils } from "../config/site";
 import "../assets/app.css";
 
-
 // Props pour le layout
 interface Props {
   title?: string;
@@ -40,18 +39,18 @@ const canonicalUrl = siteUtils.getCanonicalUrl(Astro.url.pathname);
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
-    
+
     <!-- Titre et métadonnées de base -->
     <title>{finalTitle}</title>
     <meta name="description" content={finalDescription} />
     <meta name="language" content={lang} />
-    
+
     <!-- URL canonique -->
     <link rel="canonical" href={canonicalUrl} />
-    
+
     <!-- Directive robots -->
     {noindex && <meta name="robots" content="noindex, nofollow" />}
-    
+
     <!-- Open Graph / Facebook -->
     <meta property="og:title" content={finalTitle} />
     <meta property="og:description" content={finalDescription} />
@@ -60,21 +59,20 @@ const canonicalUrl = siteUtils.getCanonicalUrl(Astro.url.pathname);
     <meta property="og:image" content={siteUtils.getAssetUrl(ogImage)} />
     <meta property="og:locale" content={lang === "fr" ? "fr_FR" : "en_US"} />
     <meta property="og:site_name" content={siteConfig.title} />
-    
+
     <!-- Twitter Cards -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={finalTitle} />
     <meta name="twitter:description" content={finalDescription} />
     <meta name="twitter:image" content={siteUtils.getAssetUrl(ogImage)} />
-    
+
     <!-- Slot pour métadonnées additionnelles -->
     <slot name="head" />
   </head>
-  <body class="relative bg-base-50 z-[0]" data-cy="app-body">
-
+  <body class="bg-base-50 relative z-[0]" data-cy="app-body">
     <!-- Container de fond avec couleur base-300 -->
     <div class="content-background" data-cy="content-background"></div>
-    
+
     <Header />
     <main data-cy="main-content">
       <slot />
@@ -84,7 +82,6 @@ const canonicalUrl = siteUtils.getCanonicalUrl(Astro.url.pathname);
 </html>
 
 <style>
-
   .content-background {
     position: fixed;
     top: 0;
@@ -98,7 +95,7 @@ const canonicalUrl = siteUtils.getCanonicalUrl(Astro.url.pathname);
     padding-left: 1rem; /* px-4 = 16px = 1rem */
     padding-right: 1rem;
     box-sizing: border-box;
-    
+
     /* Couleur de fond base-200 pour un contraste plus prononcé */
     background-color: var(--color-base-200);
   }
@@ -132,10 +129,10 @@ const canonicalUrl = siteUtils.getCanonicalUrl(Astro.url.pathname);
       --mask-start: rgba(0, 0, 0, 0.9);
       --mask-mid: rgba(0, 0, 0, 0.3);
       --mask-end: rgba(0, 0, 0, 0);
-      
+
       /* Réutilisation cohérente du même fichier SVG */
       background-image: var(--grid-bg-url);
-      
+
       /* Masque optimisé pour visibilité mobile */
       mask: linear-gradient(
         to bottom,

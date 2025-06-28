@@ -49,6 +49,25 @@ export const ui = {
     "tag.bestPractices": "Best Practices",
     "tag.comparison": "Comparison",
 
+    // Category pages
+    "category.page.title": "Articles in category: {category}",
+    "category.page.subtitle":
+      "Discover all our articles in the {category} category",
+    "category.page.noArticles": "No articles found",
+    "category.page.noArticlesDesc":
+      "No articles have been published in this category yet.",
+    "category.page.backToHome": "Back to home",
+    "category.page.allCategories": "All categories",
+
+    // Sorting
+    "sort.label": "Sort by",
+    "sort.dateDesc": "Most recent",
+    "sort.dateAsc": "Oldest first",
+    "sort.titleAsc": "Title A-Z",
+    "sort.titleDesc": "Title Z-A",
+    "sort.readingTimeAsc": "Shortest read",
+    "sort.readingTimeDesc": "Longest read",
+
     // Interface générale
     "languageSwitcher.label": "Switch language",
     "languageSwitcher.current": "Current language",
@@ -78,7 +97,7 @@ export const ui = {
       "Latest articles and tutorials about web development, programming and technology",
     "meta.description.about": "Learn more about our team and our mission",
     "meta.description.contact": "Get in touch with us",
-    
+
     // Titres de pages
     "page.title.home": "Home",
     "page.title.blog": "Blog",
@@ -131,6 +150,25 @@ export const ui = {
     "tag.bestPractices": "Bonnes Pratiques",
     "tag.comparison": "Comparaison",
 
+    // Category pages
+    "category.page.title": "Articles dans la catégorie : {category}",
+    "category.page.subtitle":
+      "Découvrez tous nos articles dans la catégorie {category}",
+    "category.page.noArticles": "Aucun article trouvé",
+    "category.page.noArticlesDesc":
+      "Aucun article n'a encore été publié dans cette catégorie.",
+    "category.page.backToHome": "Retour à l'accueil",
+    "category.page.allCategories": "Toutes les catégories",
+
+    // Sorting
+    "sort.label": "Trier par",
+    "sort.dateDesc": "Plus récent",
+    "sort.dateAsc": "Plus ancien",
+    "sort.titleAsc": "Titre A-Z",
+    "sort.titleDesc": "Titre Z-A",
+    "sort.readingTimeAsc": "Lecture rapide",
+    "sort.readingTimeDesc": "Lecture longue",
+
     // Interface générale
     "languageSwitcher.label": "Changer de langue",
     "languageSwitcher.current": "Langue actuelle",
@@ -161,7 +199,7 @@ export const ui = {
     "meta.description.about":
       "En savoir plus sur notre équipe et notre mission",
     "meta.description.contact": "Contactez-nous",
-    
+
     // Titres de pages
     "page.title.home": "Accueil",
     "page.title.blog": "Blog",

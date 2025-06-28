@@ -24,16 +24,25 @@ vi.mock("../../i18n/utils", () => ({
   useTranslatedPath: vi.fn(),
 }));
 
-import { getLangFromUrl, useTranslations, useTranslatedPath } from "../../i18n/utils";
+import {
+  getLangFromUrl,
+  useTranslations,
+  useTranslatedPath,
+} from "../../i18n/utils";
 import { analyzeLanguageContext } from "../../components/header/server-utils";
-import { generateContextualLanguageUrls, generateHreflangLinks } from "../../components/header/article-utils";
+import {
+  generateContextualLanguageUrls,
+  generateHreflangLinks,
+} from "../../components/header/article-utils";
 
 // Mock des fonctions
 const mockGetLangFromUrl = vi.mocked(getLangFromUrl);
 const mockUseTranslations = vi.mocked(useTranslations);
 const mockUseTranslatedPath = vi.mocked(useTranslatedPath);
 const mockAnalyzeLanguageContext = vi.mocked(analyzeLanguageContext);
-const mockGenerateContextualLanguageUrls = vi.mocked(generateContextualLanguageUrls);
+const mockGenerateContextualLanguageUrls = vi.mocked(
+  generateContextualLanguageUrls,
+);
 const mockGenerateHreflangLinks = vi.mocked(generateHreflangLinks);
 
 describe("Header Utils - CSS Critique", () => {
@@ -112,13 +121,13 @@ describe("prepareHeaderData - Gestion d'erreur gracieuse", () => {
 
     // Vérifier que getLangFromUrl a été utilisé comme fallback
     expect(mockGetLangFromUrl).toHaveBeenCalledWith(mockUrl);
-    
+
     // Vérifier que le résultat contient la langue par défaut
     expect(result.lang).toBe("en");
-    
+
     // Vérifier que le flag de fallback est true
     expect(result.usingLanguageFallback).toBe(true);
-    
+
     // Vérifier la structure complète du résultat
     expect(result).toHaveProperty("languageContext");
     expect(result).toHaveProperty("t");
@@ -130,9 +139,7 @@ describe("prepareHeaderData - Gestion d'erreur gracieuse", () => {
 
   it("devrait ne pas utiliser le fallback quand detectedLang est valide", async () => {
     const mockUrl = new URL("https://example.com/fr/about");
-    const mockNavLinks = [
-      { href: "/", key: "nav.home" as const },
-    ];
+    const mockNavLinks = [{ href: "/", key: "nav.home" as const }];
 
     // Mock du contexte avec detectedLang valide
     const mockLanguageContext = {
@@ -156,11 +163,11 @@ describe("prepareHeaderData - Gestion d'erreur gracieuse", () => {
 
     // Vérifier que getLangFromUrl n'a pas été appelé
     expect(mockGetLangFromUrl).not.toHaveBeenCalled();
-    
+
     // Vérifier que la langue détectée est utilisée
     expect(result.lang).toBe("fr");
-    
+
     // Vérifier que le flag de fallback est false
     expect(result.usingLanguageFallback).toBe(false);
   });
-}); 
+});

@@ -19,7 +19,7 @@ interface SiteConfig {
     /** Nom de l'organisation pour Schema.org */
     name: string;
     /** Type d'organisation Schema.org */
-    type: 'Organization' | 'Person';
+    type: "Organization" | "Person";
     /** URL de l'organisation */
     url: string;
   };
@@ -38,16 +38,16 @@ interface SiteConfig {
 function getBaseUrl(): string {
   // En priorité, utiliser SITE_URL si définie
   if (import.meta.env.SITE_URL) {
-    return import.meta.env.SITE_URL.replace(/\/$/, '');
+    return import.meta.env.SITE_URL.replace(/\/$/, "");
   }
-  
+
   // Sinon, utiliser ASTRO_SITE (utilisée par Astro pour le sitemap)
   if (import.meta.env.ASTRO_SITE) {
-    return import.meta.env.ASTRO_SITE.replace(/\/$/, '');
+    return import.meta.env.ASTRO_SITE.replace(/\/$/, "");
   }
-  
+
   // URL par défaut pour le développement (cohérent avec env.example)
-  return 'https://sebc.dev';
+  return "https://sebc.dev";
 }
 
 /**
@@ -55,15 +55,18 @@ function getBaseUrl(): string {
  */
 export const siteConfig: SiteConfig = {
   baseUrl: getBaseUrl(),
-  title: 'sebc.dev',
-  description: 'Blog de développement web moderne - Astro, TypeScript, et bonnes pratiques',
-  defaultOgImage: '/assets/og-default.jpg',
-  author: 'Sebastien',
+  title: "sebc.dev",
+  description:
+    "Blog de développement web moderne - Astro, TypeScript, et bonnes pratiques",
+  defaultOgImage: "/assets/og-default.jpg",
+  author: "Sebastien",
   organization: {
-    name: import.meta.env.SITE_ORGANIZATION_NAME || 'sebc.dev',
-    type: (['Organization', 'Person'].includes(import.meta.env.SITE_ORGANIZATION_TYPE)
+    name: import.meta.env.SITE_ORGANIZATION_NAME || "sebc.dev",
+    type: (["Organization", "Person"].includes(
+      import.meta.env.SITE_ORGANIZATION_TYPE,
+    )
       ? import.meta.env.SITE_ORGANIZATION_TYPE
-      : 'Organization') as 'Organization' | 'Person',
+      : "Organization") as "Organization" | "Person",
     url: getBaseUrl(),
   },
   social: {
@@ -95,7 +98,9 @@ export const siteUtils = {
    * Construit le titre complet de la page
    */
   getPageTitle(pageTitle?: string): string {
-    return pageTitle && pageTitle.trim() ? `${pageTitle} | ${siteConfig.title}` : siteConfig.title;
+    return pageTitle && pageTitle.trim()
+      ? `${pageTitle} | ${siteConfig.title}`
+      : siteConfig.title;
   },
 
   /**
@@ -111,19 +116,19 @@ export const siteUtils = {
     return {
       "@context": "https://schema.org",
       "@type": "BlogPosting",
-      "headline": article.title,
-      "description": article.description,
-      "image": article.image && siteUtils.getAssetUrl(article.image),
-      "datePublished": article.datePublished,
-      "author": {
+      headline: article.title,
+      description: article.description,
+      image: article.image && siteUtils.getAssetUrl(article.image),
+      datePublished: article.datePublished,
+      author: {
         "@type": "Person",
-        "name": article.author
+        name: article.author,
       },
-      "publisher": {
+      publisher: {
         "@type": siteConfig.organization.type,
-        "name": siteConfig.organization.name,
-        "url": siteConfig.organization.url
-      }
+        name: siteConfig.organization.name,
+        url: siteConfig.organization.url,
+      },
     };
   },
 };
@@ -134,16 +139,16 @@ export const siteUtils = {
 export const envConfig = {
   isDev: import.meta.env.DEV,
   isProd: import.meta.env.PROD,
-  isPreview: import.meta.env.MODE === 'preview',
-  
+  isPreview: import.meta.env.MODE === "preview",
+
   /**
    * Indique si on est en mode debug (développement ou preview)
-   * 
-   * Retourne `true` si l'environnement est soit en développement (`dev`) 
+   *
+   * Retourne `true` si l'environnement est soit en développement (`dev`)
    * soit en mode preview. Utile pour activer des fonctionnalités de debug,
    * des logs détaillés, ou des outils de développement qui ne doivent pas
    * être présents en production.
-   * 
+   *
    * @returns {boolean} `true` en mode développement ou preview, `false` en production
    * @example
    * ```typescript
@@ -155,4 +160,4 @@ export const envConfig = {
   get isDebug() {
     return this.isDev || this.isPreview;
   },
-}; 
+};

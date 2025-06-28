@@ -1,4 +1,8 @@
-import { useTranslations, useTranslatedPath, getLangFromUrl } from "../../i18n/utils";
+import {
+  useTranslations,
+  useTranslatedPath,
+  getLangFromUrl,
+} from "../../i18n/utils";
 import type { Languages } from "../../i18n/ui";
 import type {
   NavLink,
@@ -6,9 +10,9 @@ import type {
   TranslatePathFunction,
   HeaderData,
 } from "./types";
-import { 
-  generateContextualLanguageUrls, 
-  generateHreflangLinks 
+import {
+  generateContextualLanguageUrls,
+  generateHreflangLinks,
 } from "./article-utils";
 import { analyzeLanguageContext } from "./server-utils";
 
@@ -46,30 +50,40 @@ export function mapNavLinks(
  */
 export async function prepareHeaderData(
   currentUrl: URL,
-  navLinks: NavLink[]
+  navLinks: NavLink[],
 ): Promise<HeaderData> {
   // Analyser le contexte linguistique
   const languageContext = await analyzeLanguageContext(currentUrl);
-  
+
   // Utiliser la langue détectée ou fallback vers getLangFromUrl qui ne peut jamais échouer
   const lang = languageContext.detectedLang || getLangFromUrl(currentUrl);
-  
+
   // Log pour debugging si on utilise le fallback
   if (!languageContext.detectedLang) {
-    console.warn(`Language detection failed for URL: ${currentUrl.pathname}. Using fallback: ${lang}`);
+    console.warn(
+      `Language detection failed for URL: ${currentUrl.pathname}. Using fallback: ${lang}`,
+    );
   }
-  
+
   // Préparer les traductions et navigation
   const t = useTranslations(lang);
   const translatePath = useTranslatedPath(lang);
-  const translatedNavLinks = mapNavLinks(navLinks, lang, translatePath, currentUrl);
-  
+  const translatedNavLinks = mapNavLinks(
+    navLinks,
+    lang,
+    translatePath,
+    currentUrl,
+  );
+
   // Générer les URLs de langue
-  const languageUrls = generateContextualLanguageUrls(languageContext, currentUrl);
-  
+  const languageUrls = generateContextualLanguageUrls(
+    languageContext,
+    currentUrl,
+  );
+
   // Générer les liens hreflang
   const hreflangLinks = generateHreflangLinks(languageUrls);
-  
+
   return {
     lang,
     languageContext,

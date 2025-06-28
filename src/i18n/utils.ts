@@ -241,7 +241,7 @@ export function generateLanguageUrlsForArticle(
   currentPath: string,
   currentLang: Languages,
   translationMapping?: Record<string, string | null>,
-  pathPrefix = '/blog/',
+  pathPrefix = "/blog/",
 ): LanguageUrlsResult {
   const supportedLanguages = getSupportedLanguages();
 
@@ -252,7 +252,7 @@ export function generateLanguageUrlsForArticle(
     );
     if (invalidKeys.length > 0) {
       throw new Error(
-        `Invalid language keys in translationMapping: ${invalidKeys.join(', ')}. Valid languages are: ${supportedLanguages.join(', ')}`,
+        `Invalid language keys in translationMapping: ${invalidKeys.join(", ")}. Valid languages are: ${supportedLanguages.join(", ")}`,
       );
     }
   }
@@ -260,7 +260,9 @@ export function generateLanguageUrlsForArticle(
   const result = {} as LanguageUrlsResult;
 
   // Normaliser le préfixe de chemin
-  const normalizedPrefix = pathPrefix.endsWith('/') ? pathPrefix : `${pathPrefix}/`;
+  const normalizedPrefix = pathPrefix.endsWith("/")
+    ? pathPrefix
+    : `${pathPrefix}/`;
 
   for (const lang of supportedLanguages) {
     let targetUrl: string;

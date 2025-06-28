@@ -690,19 +690,16 @@ describe("generateLanguageUrlsForArticle", () => {
 
   it("should validate translationMapping keys", () => {
     expect(() => {
-      generateLanguageUrlsForArticle(
-        "/blog/en/test-article",
-        "en",
-        { en: "test-article", es: "articulo-test", invalid: "test" },
-      );
+      generateLanguageUrlsForArticle("/blog/en/test-article", "en", {
+        en: "test-article",
+        es: "articulo-test",
+        invalid: "test",
+      });
     }).toThrow("Invalid language keys in translationMapping: es, invalid");
   });
 
   it("should work without translationMapping (fallback to normal path translation)", () => {
-    const result = generateLanguageUrlsForArticle(
-      "/blog/test-article",
-      "en",
-    );
+    const result = generateLanguageUrlsForArticle("/blog/test-article", "en");
 
     expect(result.en.url).toBe("/blog/test-article");
     expect(result.fr.url).toBe("/fr/blog/test-article");
@@ -729,12 +726,12 @@ describe("generateLanguageUrlsForArticle", () => {
     // Verify structure matches expected type
     expect(result).toHaveProperty("en");
     expect(result).toHaveProperty("fr");
-    
+
     expect(result.en).toHaveProperty("url");
     expect(result.en).toHaveProperty("isActive");
     expect(result.en).toHaveProperty("label");
     expect(result.en).toHaveProperty("flag");
-    
+
     expect(typeof result.en.url).toBe("string");
     expect(typeof result.en.isActive).toBe("boolean");
     expect(typeof result.en.label).toBe("string");
