@@ -11,7 +11,7 @@ import type { CollectionEntry } from "astro:content";
 
 describe("Category Page Logic", () => {
   // Mock des données d'articles pour tester
-  const mockPosts: CollectionEntry<"blog">[] = [
+  const mockPosts = [
     {
       slug: "guide-astro",
       collection: "blog",
@@ -25,7 +25,7 @@ describe("Category Page Logic", () => {
       },
       id: "fr/guide-astro.mdx",
       render: async () => ({ 
-        Content: () => null as any, 
+        Content: () => null, 
         headings: [],
         remarkPluginFrontmatter: {}
       })
@@ -43,7 +43,7 @@ describe("Category Page Logic", () => {
       },
       id: "fr/typescript-pour-debutants.mdx",
       render: async () => ({ 
-        Content: () => null as any, 
+        Content: () => null, 
         headings: [],
         remarkPluginFrontmatter: {}
       })
@@ -61,7 +61,7 @@ describe("Category Page Logic", () => {
       },
       id: "fr/css-grid-layout-guide.mdx",
       render: async () => ({ 
-        Content: () => null as any, 
+        Content: () => null, 
         headings: [],
         remarkPluginFrontmatter: {}
       })
@@ -79,12 +79,12 @@ describe("Category Page Logic", () => {
       },
       id: "fr/api-rest-bonnes-pratiques.mdx",
       render: async () => ({ 
-        Content: () => null as any, 
+        Content: () => null, 
         headings: [],
         remarkPluginFrontmatter: {}
       })
     }
-  ];
+  ] as unknown as CollectionEntry<"blog">[];
 
   const translations: CategoryTranslations = {
     framework: "Framework",
@@ -268,7 +268,7 @@ describe("Category Page Logic", () => {
         expect(path.props).toHaveProperty("translations");
         
         // Vérifier que les posts appartiennent bien à la catégorie
-        path.props.posts.forEach((post: any) => {
+        path.props.posts.forEach((post: CollectionEntry<"blog">) => {
           const postCategory = getUniqueCategories([post], translations);
           expect(postCategory).toContain(category);
         });
