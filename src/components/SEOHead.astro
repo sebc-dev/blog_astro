@@ -43,12 +43,12 @@ const getPageTitle = () => {
   if (!title) {
     return siteConfig.title; // Titre par défaut du site
   }
-  
+
   // Si titleTemplate contient %s, on remplace par le titre
   if (titleTemplate.includes("%s")) {
     return titleTemplate.replace("%s", title);
   }
-  
+
   return title;
 };
 
@@ -58,12 +58,12 @@ const finalOgTitle = ogTitle || finalTitle;
 const finalOgDescription = ogDescription || finalDescription;
 
 // URL canonique utilisant la configuration centralisée
-const finalCanonicalUrl = canonicalUrl || siteUtils.getCanonicalUrl(Astro.url.pathname);
+const finalCanonicalUrl =
+  canonicalUrl || siteUtils.getCanonicalUrl(Astro.url.pathname);
 
 // Génération des balises meta pour les tags
 const keywordsContent = tags.length > 0 ? tags.join(", ") : undefined;
 ---
-
 
 <!-- Titre de la page -->
 <title>{finalTitle}</title>
@@ -95,21 +95,29 @@ const keywordsContent = tags.length > 0 ? tags.join(", ") : undefined;
 <meta name="twitter:image" content={siteUtils.getAssetUrl(ogImage)} />
 
 <!-- Métadonnées d'article (si applicable) -->
-{ogType === "article" && publishedTime && (
-  <meta property="article:published_time" content={publishedTime} />
-)}
-{ogType === "article" && modifiedTime && (
-  <meta property="article:modified_time" content={modifiedTime} />
-)}
-{ogType === "article" && author && (
-  <meta property="article:author" content={author} />
-)}
-{ogType === "article" && tags.map((tag: string) => (
-  <meta property="article:tag" content={tag} />
-))}
+{
+  ogType === "article" && publishedTime && (
+    <meta property="article:published_time" content={publishedTime} />
+  )
+}
+{
+  ogType === "article" && modifiedTime && (
+    <meta property="article:modified_time" content={modifiedTime} />
+  )
+}
+{
+  ogType === "article" && author && (
+    <meta property="article:author" content={author} />
+  )
+}
+{
+  ogType === "article" &&
+    tags.map((tag: string) => <meta property="article:tag" content={tag} />)
+}
 
 <!-- Langue de la page -->
 <meta name="language" content={lang} />
 
 <!-- Métadonnées pour les moteurs de recherche -->
-<meta name="generator" content={Astro.generator} /> 
+<meta name="generator" content={Astro.generator} />
+

@@ -30,9 +30,9 @@ export interface ThemeConfig {
  * Union type for country flags used in language switching
  * Includes emoji flags for supported languages and generic fallback
  */
-export type CountryFlag = 
-  | "🇺🇸"  // United States (English)
-  | "🇫🇷"  // France (French)
+export type CountryFlag =
+  | "🇺🇸" // United States (English)
+  | "🇫🇷" // France (French)
   | "🌐"; // Generic/fallback flag
 
 // === TYPES POUR LES ARTICLES ===

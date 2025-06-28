@@ -41,7 +41,9 @@ const mockBlogPosts = [
 describe("Header Article Utils", () => {
   describe("isArticlePage", () => {
     it("should detect article pages correctly", () => {
-      const articleUrl = new URL("http://localhost:4321/blog/en/rest-api-guide");
+      const articleUrl = new URL(
+        "http://localhost:4321/blog/en/rest-api-guide",
+      );
       const homeUrl = new URL("http://localhost:4321/");
       const aboutUrl = new URL("http://localhost:4321/about");
 
@@ -51,7 +53,9 @@ describe("Header Article Utils", () => {
     });
 
     it("should handle French article pages", () => {
-      const frArticleUrl = new URL("http://localhost:4321/fr/blog/fr/guide-typescript");
+      const frArticleUrl = new URL(
+        "http://localhost:4321/fr/blog/fr/guide-typescript",
+      );
       expect(isArticlePage(frArticleUrl)).toBe(true);
     });
   });
@@ -71,7 +75,9 @@ describe("Header Article Utils", () => {
       const germanUrl = new URL("http://localhost:4321/blog/de/some-article");
       const italianUrl = new URL("http://localhost:4321/blog/it/some-article");
       const chineseUrl = new URL("http://localhost:4321/blog/zh/some-article");
-      const invalidCodeUrl = new URL("http://localhost:4321/blog/invalid/some-article");
+      const invalidCodeUrl = new URL(
+        "http://localhost:4321/blog/invalid/some-article",
+      );
 
       expect(detectArticleLanguage(spanishUrl)).toBeNull();
       expect(detectArticleLanguage(germanUrl)).toBeNull();
@@ -88,12 +94,16 @@ describe("Header Article Utils", () => {
 
   describe("extractArticleSlug", () => {
     it("should extract slug from article URLs", () => {
-      const url = new URL("http://localhost:4321/blog/en/rest-api-best-practices-guide");
+      const url = new URL(
+        "http://localhost:4321/blog/en/rest-api-best-practices-guide",
+      );
       expect(extractArticleSlug(url)).toBe("rest-api-best-practices-guide");
     });
 
     it("should handle complex slugs", () => {
-      const url = new URL("http://localhost:4321/blog/fr/guide/typescript/pour-debutants");
+      const url = new URL(
+        "http://localhost:4321/blog/fr/guide/typescript/pour-debutants",
+      );
       expect(extractArticleSlug(url)).toBe("guide/typescript/pour-debutants");
     });
 
@@ -105,28 +115,48 @@ describe("Header Article Utils", () => {
 
   describe("extractSlugWithoutLanguagePrefix", () => {
     it("should extract slug correctly from normal cases", () => {
-      expect(extractSlugWithoutLanguagePrefix("en/rest-api-guide", "en")).toBe("rest-api-guide");
-      expect(extractSlugWithoutLanguagePrefix("fr/guide-typescript", "fr")).toBe("guide-typescript");
+      expect(extractSlugWithoutLanguagePrefix("en/rest-api-guide", "en")).toBe(
+        "rest-api-guide",
+      );
+      expect(
+        extractSlugWithoutLanguagePrefix("fr/guide-typescript", "fr"),
+      ).toBe("guide-typescript");
     });
 
     it("should handle complex slugs with slashes", () => {
-      expect(extractSlugWithoutLanguagePrefix("en/advanced/typescript/guide", "en")).toBe("advanced/typescript/guide");
-      expect(extractSlugWithoutLanguagePrefix("fr/guide/css/grid-layout", "fr")).toBe("guide/css/grid-layout");
+      expect(
+        extractSlugWithoutLanguagePrefix("en/advanced/typescript/guide", "en"),
+      ).toBe("advanced/typescript/guide");
+      expect(
+        extractSlugWithoutLanguagePrefix("fr/guide/css/grid-layout", "fr"),
+      ).toBe("guide/css/grid-layout");
     });
 
     it("should handle special characters in slugs", () => {
-      expect(extractSlugWithoutLanguagePrefix("en/my-article-with-dashes", "en")).toBe("my-article-with-dashes");
-      expect(extractSlugWithoutLanguagePrefix("fr/article.avec.points", "fr")).toBe("article.avec.points");
-      expect(extractSlugWithoutLanguagePrefix("en/article_with_underscores", "en")).toBe("article_with_underscores");
+      expect(
+        extractSlugWithoutLanguagePrefix("en/my-article-with-dashes", "en"),
+      ).toBe("my-article-with-dashes");
+      expect(
+        extractSlugWithoutLanguagePrefix("fr/article.avec.points", "fr"),
+      ).toBe("article.avec.points");
+      expect(
+        extractSlugWithoutLanguagePrefix("en/article_with_underscores", "en"),
+      ).toBe("article_with_underscores");
     });
 
     it("should handle edge cases safely", () => {
       // Cas où la langue apparaît ailleurs dans le slug mais pas au début
-      expect(extractSlugWithoutLanguagePrefix("en/article-about-en-language", "en")).toBe("article-about-en-language");
-      expect(extractSlugWithoutLanguagePrefix("fr/tutorial-fr-basics", "fr")).toBe("tutorial-fr-basics");
-      
+      expect(
+        extractSlugWithoutLanguagePrefix("en/article-about-en-language", "en"),
+      ).toBe("article-about-en-language");
+      expect(
+        extractSlugWithoutLanguagePrefix("fr/tutorial-fr-basics", "fr"),
+      ).toBe("tutorial-fr-basics");
+
       // Cas où la langue est répétée
-      expect(extractSlugWithoutLanguagePrefix("en/en-tutorial", "en")).toBe("en-tutorial");
+      expect(extractSlugWithoutLanguagePrefix("en/en-tutorial", "en")).toBe(
+        "en-tutorial",
+      );
     });
 
     it("should return null for invalid inputs", () => {
@@ -141,19 +171,27 @@ describe("Header Article Utils", () => {
       // Mauvaise langue au début
       expect(extractSlugWithoutLanguagePrefix("fr/article", "en")).toBeNull();
       // Slug qui ne commence pas par la langue
-      expect(extractSlugWithoutLanguagePrefix("blog/en/article", "en")).toBeNull();
+      expect(
+        extractSlugWithoutLanguagePrefix("blog/en/article", "en"),
+      ).toBeNull();
     });
 
     it("should handle languages that need regex escaping", () => {
       // Test avec des caractères qui pourraient poser problème en regex
-      expect(extractSlugWithoutLanguagePrefix("c++/programming-guide", "c++")).toBe("programming-guide");
-      expect(extractSlugWithoutLanguagePrefix("c#/tutorial", "c#")).toBe("tutorial");
+      expect(
+        extractSlugWithoutLanguagePrefix("c++/programming-guide", "c++"),
+      ).toBe("programming-guide");
+      expect(extractSlugWithoutLanguagePrefix("c#/tutorial", "c#")).toBe(
+        "tutorial",
+      );
     });
   });
 
   describe("createArticleTranslationMappingPure", () => {
     it("should create correct translation mapping", () => {
-      const url = new URL("http://localhost:4321/blog/en/rest-api-best-practices-guide");
+      const url = new URL(
+        "http://localhost:4321/blog/en/rest-api-best-practices-guide",
+      );
       const mapping = createArticleTranslationMappingPure(url, mockBlogPosts);
 
       expect(mapping).toEqual({
@@ -170,7 +208,9 @@ describe("Header Article Utils", () => {
     });
 
     it("should handle articles with only one translation", () => {
-      const url = new URL("http://localhost:4321/blog/en/typescript-beginners-guide");
+      const url = new URL(
+        "http://localhost:4321/blog/en/typescript-beginners-guide",
+      );
       const mapping = createArticleTranslationMappingPure(url, mockBlogPosts);
 
       expect(mapping).toEqual({
@@ -182,7 +222,9 @@ describe("Header Article Utils", () => {
 
   describe("analyzeLanguageContextPure", () => {
     it("should analyze article page context correctly", () => {
-      const url = new URL("http://localhost:4321/blog/en/rest-api-best-practices-guide");
+      const url = new URL(
+        "http://localhost:4321/blog/en/rest-api-best-practices-guide",
+      );
       const context = analyzeLanguageContextPure(url, mockBlogPosts);
 
       expect(context).toMatchObject({
@@ -245,4 +287,4 @@ describe("Header Article Utils", () => {
       ]);
     });
   });
-}); 
+});

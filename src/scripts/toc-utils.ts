@@ -20,12 +20,12 @@ export interface AstroHeading {
  * @returns Hiérarchie de table des matières
  */
 export function buildTocHierarchy(
-  headings: AstroHeading[], 
-  minDepth = 2
+  headings: AstroHeading[],
+  minDepth = 2,
 ): TocHeading[] {
   const toc: TocHeading[] = [];
   const parentHeadings = new Map<number, TocHeading>();
-  
+
   if (!headings || headings.length === 0) {
     return toc;
   }
@@ -36,15 +36,15 @@ export function buildTocHierarchy(
       return;
     }
 
-    const tocHeading: TocHeading = { 
+    const tocHeading: TocHeading = {
       depth: heading.depth,
       text: heading.text,
       slug: heading.slug,
-      subheadings: [] 
+      subheadings: [],
     };
-    
+
     parentHeadings.set(tocHeading.depth, tocHeading);
-    
+
     // Élément de niveau racine (par défaut H2)
     if (tocHeading.depth === minDepth) {
       toc.push(tocHeading);
@@ -66,7 +66,7 @@ export function buildTocHierarchy(
       }
     }
   });
-  
+
   return toc;
 }
 
@@ -78,10 +78,10 @@ export function buildTocHierarchy(
  */
 export function filterHeadingsByDepth(
   headings: AstroHeading[],
-  maxDepth = 4
+  maxDepth = 4,
 ): AstroHeading[] {
   if (!headings) return [];
-  return headings.filter(heading => heading.depth <= maxDepth);
+  return headings.filter((heading) => heading.depth <= maxDepth);
 }
 
 /**
@@ -89,12 +89,17 @@ export function filterHeadingsByDepth(
  * @param headings - Array des headings
  * @returns Objet avec le nombre de headings par niveau
  */
-export function countHeadingsByLevel(headings: AstroHeading[]): Record<number, number> {
+export function countHeadingsByLevel(
+  headings: AstroHeading[],
+): Record<number, number> {
   if (!headings) return {};
-  return headings.reduce((acc, heading) => {
-    acc[heading.depth] = (acc[heading.depth] || 0) + 1;
-    return acc;
-  }, {} as Record<number, number>);
+  return headings.reduce(
+    (acc, heading) => {
+      acc[heading.depth] = (acc[heading.depth] || 0) + 1;
+      return acc;
+    },
+    {} as Record<number, number>,
+  );
 }
 
 /**
@@ -103,6 +108,9 @@ export function countHeadingsByLevel(headings: AstroHeading[]): Record<number, n
  * @param minHeadings - Nombre minimum de headings requis (défaut: 3)
  * @returns true si l'article mérite une table des matières
  */
-export function shouldShowToc(headings: AstroHeading[], minHeadings = 3): boolean {
+export function shouldShowToc(
+  headings: AstroHeading[],
+  minHeadings = 3,
+): boolean {
   return Boolean(headings && headings.length >= minHeadings);
-} 
+}

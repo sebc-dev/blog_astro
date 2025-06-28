@@ -217,7 +217,9 @@ describe("Build Static Tests - Phase 2", () => {
       // pour le rendu initial sans layout shift
 
       // 1. Positionnement critique du header (évite le layout shift)
-      expect(combinedCSS).toMatch(/\.header-critical\s*{[^}]*position:\s*fixed/);
+      expect(combinedCSS).toMatch(
+        /\.header-critical\s*{[^}]*position:\s*fixed/,
+      );
       expect(combinedCSS).toMatch(/\.header-critical\s*{[^}]*top:\s*0/);
       expect(combinedCSS).toMatch(/\.header-critical\s*{[^}]*left:\s*0/);
       expect(combinedCSS).toMatch(/\.header-critical\s*{[^}]*right:\s*0/);
@@ -232,7 +234,9 @@ describe("Build Static Tests - Phase 2", () => {
       expect(combinedCSS).toMatch(/transition:\s*all\s+0\.3s\s+ease/);
 
       // 5. Accessibilité - respect des préférences de mouvement réduit
-      expect(combinedCSS).toMatch(/@media\s*\(\s*prefers-reduced-motion:\s*reduce\s*\)/);
+      expect(combinedCSS).toMatch(
+        /@media\s*\(\s*prefers-reduced-motion:\s*reduce\s*\)/,
+      );
       expect(combinedCSS).toMatch(/transition:\s*none\s*!\s*important/);
 
       // 6. Vérifications des animations responsives pour les articles (performance initiale)
@@ -249,7 +253,9 @@ describe("Build Static Tests - Phase 2", () => {
       // 8. Optimisations de performance CSS (contain property)
       expect(combinedCSS).toMatch(/contain:\s*layout\s+paint\s+style/);
 
-      console.log("✅ Critical CSS properties verified for initial render performance");
+      console.log(
+        "✅ Critical CSS properties verified for initial render performance",
+      );
     });
 
     test("bundle JavaScript total < 5KB", async () => {

@@ -106,7 +106,9 @@
   color-scheme: dark; /* color of browser-provided UI */
 
   /* Base colors - palette sombre profonde (surcharge les variables TailwindCSS) */
-  --color-base-50: oklch(16% 0.006 190); /* très sombre - pour éléments de fond profonds */
+  --color-base-50: oklch(
+    16% 0.006 190
+  ); /* très sombre - pour éléments de fond profonds */
   --color-base-100: oklch(19% 0.008 190); /* background principal - sombre */
   --color-base-200: oklch(26% 0.01 190); /* card - sombre mais lisible */
   --color-base-300: oklch(33% 0.012 190); /* muted/border */
@@ -180,7 +182,9 @@
 
   /* Base colors - palette claire mais plus douce (surcharge les variables TailwindCSS) */
   --color-base-50: oklch(94% 0.003 190); /* clair - pour highlights subtils */
-  --color-base-100: oklch(88% 0.005 190); /* background principal - gris clair doux */
+  --color-base-100: oklch(
+    88% 0.005 190
+  ); /* background principal - gris clair doux */
   --color-base-200: oklch(82% 0.008 190); /* card - gris moyen clair */
   --color-base-300: oklch(75% 0.012 190); /* muted/border - bien visible */
   --color-base-400: oklch(68% 0.015 190); /* éléments désactivés/subtils */
@@ -253,7 +257,9 @@ html {
   padding: 64px 0 0 0;
   margin: 0;
   scroll-behavior: smooth;
-  scroll-padding-top: var(--header-height); /* Offset pour les ancres avec header fixe */
+  scroll-padding-top: var(
+    --header-height
+  ); /* Offset pour les ancres avec header fixe */
   overscroll-behavior: none;
   font-family:
     "Inter",

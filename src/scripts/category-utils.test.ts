@@ -1,5 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { normalizeCategoryForUrl, denormalizeCategoryFromUrl } from "./category-utils";
+import {
+  normalizeCategoryForUrl,
+  denormalizeCategoryFromUrl,
+} from "./category-utils";
 
 describe("Category Utils", () => {
   describe("URL normalization", () => {
@@ -11,12 +14,24 @@ describe("Category Utils", () => {
     });
 
     it("should denormalize category names from URLs", () => {
-      const availableCategories = ["Framework", "Best Practices", "CSS & Styling"];
-      
-      expect(denormalizeCategoryFromUrl("framework", availableCategories)).toBe("Framework");
-      expect(denormalizeCategoryFromUrl("best-practices", availableCategories)).toBe("Best Practices");
-      expect(denormalizeCategoryFromUrl("css-styling", availableCategories)).toBe("CSS & Styling");
-      expect(denormalizeCategoryFromUrl("nonexistent", availableCategories)).toBeNull();
+      const availableCategories = [
+        "Framework",
+        "Best Practices",
+        "CSS & Styling",
+      ];
+
+      expect(denormalizeCategoryFromUrl("framework", availableCategories)).toBe(
+        "Framework",
+      );
+      expect(
+        denormalizeCategoryFromUrl("best-practices", availableCategories),
+      ).toBe("Best Practices");
+      expect(
+        denormalizeCategoryFromUrl("css-styling", availableCategories),
+      ).toBe("CSS & Styling");
+      expect(
+        denormalizeCategoryFromUrl("nonexistent", availableCategories),
+      ).toBeNull();
     });
 
     describe("Edge cases - normalizeCategoryForUrl", () => {
@@ -33,13 +48,17 @@ describe("Category Utils", () => {
         expect(normalizeCategoryForUrl("CSS && Styling")).toBe("css-styling");
         expect(normalizeCategoryForUrl("API///Backend")).toBe("api-backend");
         expect(normalizeCategoryForUrl("Data\\\\Science")).toBe("data-science");
-        expect(normalizeCategoryForUrl("Web   Development")).toBe("web-development");
+        expect(normalizeCategoryForUrl("Web   Development")).toBe(
+          "web-development",
+        );
       });
 
       it("should handle strings with leading and trailing hyphens", () => {
         expect(normalizeCategoryForUrl("-Frontend-")).toBe("frontend");
         expect(normalizeCategoryForUrl("--Backend--")).toBe("backend");
-        expect(normalizeCategoryForUrl("---Web Development---")).toBe("web-development");
+        expect(normalizeCategoryForUrl("---Web Development---")).toBe(
+          "web-development",
+        );
       });
 
       it("should handle categories composed only of special characters", () => {
@@ -51,7 +70,9 @@ describe("Category Utils", () => {
       });
 
       it("should handle mixed special characters and valid content", () => {
-        expect(normalizeCategoryForUrl("!@#Web$%^Development&*()")).toBe("webdevelopment");
+        expect(normalizeCategoryForUrl("!@#Web$%^Development&*()")).toBe(
+          "webdevelopment",
+        );
         expect(normalizeCategoryForUrl("###React###")).toBe("react");
         expect(normalizeCategoryForUrl("Vue.js 3.0!!!")).toBe("vuejs-30");
       });
@@ -78,12 +99,12 @@ describe("Category Utils", () => {
 
     describe("Edge cases - denormalizeCategoryFromUrl", () => {
       const availableCategories = [
-        "Framework", 
-        "Best Practices", 
+        "Framework",
+        "Best Practices",
         "CSS & Styling",
         "API/Backend",
         "Web Development",
-        "Data Science"
+        "Data Science",
       ];
 
       it("should handle empty strings", () => {
@@ -91,29 +112,59 @@ describe("Category Utils", () => {
       });
 
       it("should handle strings with only whitespace", () => {
-        expect(denormalizeCategoryFromUrl("   ", availableCategories)).toBeNull();
-        expect(denormalizeCategoryFromUrl("\t\n", availableCategories)).toBeNull();
+        expect(
+          denormalizeCategoryFromUrl("   ", availableCategories),
+        ).toBeNull();
+        expect(
+          denormalizeCategoryFromUrl("\t\n", availableCategories),
+        ).toBeNull();
       });
 
       it("should handle categories with special characters in available list", () => {
-        const specialCategories = ["CSS & Styling", "API/Backend", "C++", ".NET Core"];
-        
-        expect(denormalizeCategoryFromUrl("css-styling", specialCategories)).toBe("CSS & Styling");
-        expect(denormalizeCategoryFromUrl("api-backend", specialCategories)).toBe("API/Backend");
+        const specialCategories = [
+          "CSS & Styling",
+          "API/Backend",
+          "C++",
+          ".NET Core",
+        ];
+
+        expect(
+          denormalizeCategoryFromUrl("css-styling", specialCategories),
+        ).toBe("CSS & Styling");
+        expect(
+          denormalizeCategoryFromUrl("api-backend", specialCategories),
+        ).toBe("API/Backend");
         expect(denormalizeCategoryFromUrl("c", specialCategories)).toBe("C++");
-        expect(denormalizeCategoryFromUrl("net-core", specialCategories)).toBe(".NET Core");
+        expect(denormalizeCategoryFromUrl("net-core", specialCategories)).toBe(
+          ".NET Core",
+        );
       });
 
       it("should handle malformed URL categories", () => {
-        expect(denormalizeCategoryFromUrl("--invalid--", availableCategories)).toBeNull();
-        expect(denormalizeCategoryFromUrl("category-with-many-hyphens", availableCategories)).toBeNull();
-        expect(denormalizeCategoryFromUrl("nonexistent123", availableCategories)).toBeNull();
+        expect(
+          denormalizeCategoryFromUrl("--invalid--", availableCategories),
+        ).toBeNull();
+        expect(
+          denormalizeCategoryFromUrl(
+            "category-with-many-hyphens",
+            availableCategories,
+          ),
+        ).toBeNull();
+        expect(
+          denormalizeCategoryFromUrl("nonexistent123", availableCategories),
+        ).toBeNull();
       });
 
       it("should handle case variations in URL categories", () => {
-        expect(denormalizeCategoryFromUrl("FRAMEWORK", availableCategories)).toBe("Framework");
-        expect(denormalizeCategoryFromUrl("Framework", availableCategories)).toBe("Framework");
-        expect(denormalizeCategoryFromUrl("fRaMeWoRk", availableCategories)).toBe("Framework");
+        expect(
+          denormalizeCategoryFromUrl("FRAMEWORK", availableCategories),
+        ).toBe("Framework");
+        expect(
+          denormalizeCategoryFromUrl("Framework", availableCategories),
+        ).toBe("Framework");
+        expect(
+          denormalizeCategoryFromUrl("fRaMeWoRk", availableCategories),
+        ).toBe("Framework");
       });
 
       it("should handle empty available categories array", () => {
@@ -123,25 +174,34 @@ describe("Category Utils", () => {
 
       it("should handle null and undefined inputs", () => {
         const availableCategories = ["Framework", "Best Practices"];
-        
+
         // @ts-expect-error Testing edge case with invalid input
-        expect(() => denormalizeCategoryFromUrl(null, availableCategories)).toThrow();
-        // @ts-expect-error Testing edge case with invalid input  
-        expect(() => denormalizeCategoryFromUrl(undefined, availableCategories)).toThrow();
-        
+        expect(() =>
+          denormalizeCategoryFromUrl(null, availableCategories),
+        ).toThrow();
+        // @ts-expect-error Testing edge case with invalid input
+        expect(() =>
+          denormalizeCategoryFromUrl(undefined, availableCategories),
+        ).toThrow();
+
         // @ts-expect-error Testing edge case with invalid input - availableCategories null/undefined also throw
         expect(() => denormalizeCategoryFromUrl("framework", null)).toThrow();
         // @ts-expect-error Testing edge case with invalid input
-        expect(() => denormalizeCategoryFromUrl("framework", undefined)).toThrow();
+        expect(() =>
+          denormalizeCategoryFromUrl("framework", undefined),
+        ).toThrow();
       });
 
       it("should be consistent with normalization round-trip", () => {
-        availableCategories.forEach(category => {
+        availableCategories.forEach((category) => {
           const normalized = normalizeCategoryForUrl(category);
-          const denormalized = denormalizeCategoryFromUrl(normalized, availableCategories);
+          const denormalized = denormalizeCategoryFromUrl(
+            normalized,
+            availableCategories,
+          );
           expect(denormalized).toBe(category);
         });
       });
     });
   });
-}); 
+});

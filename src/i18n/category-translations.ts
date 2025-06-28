@@ -7,21 +7,21 @@ import type { CategoryTranslations } from "../scripts/category-utils";
 export const categoryTranslations = {
   en: {
     framework: "Framework",
-    language: "Language", 
+    language: "Language",
     performance: "Performance",
     styling: "Styling",
     backend: "Backend",
-    article: "Article"
+    article: "Article",
   } as CategoryTranslations,
-  
+
   fr: {
     framework: "Framework",
     language: "Langage",
-    performance: "Performance", 
+    performance: "Performance",
     styling: "Style",
     backend: "Backend",
-    article: "Article"
-  } as CategoryTranslations
+    article: "Article",
+  } as CategoryTranslations,
 } as const;
 
 /**
@@ -29,6 +29,8 @@ export const categoryTranslations = {
  * @param lang - The language code (en | fr)
  * @returns The category translations for the specified language
  */
-export function getCategoryTranslations(lang: "en" | "fr"): CategoryTranslations {
+export function getCategoryTranslations(
+  lang: "en" | "fr",
+): CategoryTranslations {
   return categoryTranslations[lang];
-} 
+}

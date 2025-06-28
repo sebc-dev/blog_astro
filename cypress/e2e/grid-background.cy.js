@@ -25,7 +25,7 @@ describe("Content Background Layout", () => {
         .should(($el) => {
           const element = $el[0];
           const computedStyle = window.getComputedStyle(element);
-          
+
           // Vérifier que left existe (peut être 50%, auto, ou une valeur calculée)
           expect(computedStyle.left).to.not.be.undefined;
         });
@@ -62,10 +62,10 @@ describe("Content Background Layout", () => {
 
         // Vérifier la largeur maximale
         expect(computedStyle.maxWidth).to.equal("1280px"); // max-w-7xl
-        
+
         // Vérifier qu'il y a une transformation (peut être matrix ou translateX)
         expect(computedStyle.transform).to.not.equal("none");
-        
+
         // Vérifier le positionnement de centrage (left est calculé en pixels, vérifier qu'il est raisonnable)
         const leftValue = Number.parseFloat(computedStyle.left);
         expect(leftValue).to.be.greaterThan(100); // Doit être un décalage significatif pour le centrage
@@ -87,7 +87,9 @@ describe("Content Background Layout", () => {
   describe("Layering and Content Interaction", () => {
     it("should not interfere with page content", () => {
       // Vérifier que le contenu principal est accessible
-      cy.get('[data-cy="header-desktop"], [data-cy="header-mobile"]').should("exist");
+      cy.get('[data-cy="header-desktop"], [data-cy="header-mobile"]').should(
+        "exist",
+      );
       cy.get('[data-cy="main-content"]').should("be.visible");
       cy.get("footer").should("exist");
 
@@ -97,7 +99,9 @@ describe("Content Background Layout", () => {
 
     it("should allow proper content interaction", () => {
       // Vérifier que les éléments interactifs fonctionnent
-      cy.get('[data-cy="header-desktop"], [data-cy="header-mobile"]').should("exist");
+      cy.get('[data-cy="header-desktop"], [data-cy="header-mobile"]').should(
+        "exist",
+      );
 
       // Tester qu'on peut cliquer sur les éléments de navigation s'ils existent
       cy.get('[data-cy="logo-desktop"], [data-cy="logo-mobile"]')
@@ -107,11 +111,17 @@ describe("Content Background Layout", () => {
 
     it("should maintain proper z-index hierarchy", () => {
       // Le background doit être derrière tout le contenu
-      cy.get('[data-cy="content-background"]').should("have.css", "z-index", "-1");
+      cy.get('[data-cy="content-background"]').should(
+        "have.css",
+        "z-index",
+        "-1",
+      );
 
       // Le contenu principal doit être visible par-dessus
       cy.get('[data-cy="main-content"]').should("be.visible");
-      cy.get('[data-cy="header-desktop"], [data-cy="header-mobile"]').should("exist");
+      cy.get('[data-cy="header-desktop"], [data-cy="header-mobile"]').should(
+        "exist",
+      );
     });
   });
 
@@ -134,7 +144,9 @@ describe("Content Background Layout", () => {
 
         // Le contenu doit rester accessible
         cy.get('[data-cy="main-content"]').should("be.visible");
-        cy.get('[data-cy="header-desktop"], [data-cy="header-mobile"]').should("exist");
+        cy.get('[data-cy="header-desktop"], [data-cy="header-mobile"]').should(
+          "exist",
+        );
       });
     });
   });
@@ -186,7 +198,7 @@ describe("Content Background Layout", () => {
       cy.get('[data-cy="content-background"]').should(
         "have.css",
         "pointer-events",
-        "none"
+        "none",
       );
     });
 
@@ -195,14 +207,17 @@ describe("Content Background Layout", () => {
       cy.get('[data-cy="content-background"]').should(
         "have.css",
         "pointer-events",
-        "none"
+        "none",
       );
 
       // Vérifier qu'il existe des éléments interactifs sur la page
       cy.get("a, button, input, textarea").should("have.length.greaterThan", 0);
 
       // Vérifier que le background n'interfère pas avec les éléments du DOM
-      cy.get('[data-cy="content-background"]').should("not.have.attr", "tabindex");
+      cy.get('[data-cy="content-background"]').should(
+        "not.have.attr",
+        "tabindex",
+      );
     });
 
     it("should not cause accessibility issues", () => {
@@ -227,14 +242,18 @@ describe("Content Background Layout", () => {
       // Vérifier que tous les éléments principaux sont au-dessus du background
       cy.get('[data-cy="main-content"]').should("be.visible");
       cy.get('[data-cy="latest-articles-section"]').should("be.visible");
-      cy.get('[data-cy="content-background"]').should("have.css", "z-index", "-1");
+      cy.get('[data-cy="content-background"]').should(
+        "have.css",
+        "z-index",
+        "-1",
+      );
     });
 
     it("should not affect content rendering", () => {
       // Vérifier que les articles se chargent correctement malgré le background
       cy.get('[data-cy="article-card"], [data-cy="article-hero"]').should(
         "have.length.at.least",
-        1
+        1,
       );
       cy.get('[data-cy="articles-container"]').should("be.visible");
     });
@@ -262,11 +281,11 @@ describe("Content Background Layout", () => {
     it("should not interfere with responsive grid layout", () => {
       // Tester différents viewports et vérifier que le layout reste cohérent
       const viewports = [375, 768, 1024, 1280];
-      
-      viewports.forEach(width => {
+
+      viewports.forEach((width) => {
         cy.viewport(width, 800);
         cy.wait(200);
-        
+
         cy.get('[data-cy="content-background"]').should("exist");
         cy.get('[data-cy="main-content"]').should("be.visible");
       });
@@ -275,18 +294,20 @@ describe("Content Background Layout", () => {
     it("should work with dynamic content", () => {
       // Vérifier que le background fonctionne avec du contenu dynamique
       cy.get('[data-cy="content-background"]').should("exist");
-      
+
       // Tester la navigation pour voir si le background reste cohérent
       // Utiliser un sélecteur plus fiable pour les liens d'articles
       cy.get('[data-cy="article-read-button"], [data-cy="article-title-link"]')
         .first()
         .then(($link) => {
-          if ($link.length > 0 && $link.is(':visible')) {
+          if ($link.length > 0 && $link.is(":visible")) {
             cy.wrap($link).click();
             cy.get('[data-cy="content-background"]').should("exist");
           } else {
             // Si aucun lien visible n'est trouvé, vérifier simplement que le background persiste
-            cy.log("No visible article links found, checking background persistence");
+            cy.log(
+              "No visible article links found, checking background persistence",
+            );
             cy.get('[data-cy="content-background"]').should("exist");
           }
         });

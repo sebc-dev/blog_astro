@@ -1,17 +1,17 @@
 import type { CollectionEntry } from "astro:content";
-import { 
-  getLangFromUrl, 
-  getPathWithoutLang, 
+import {
+  getLangFromUrl,
+  getPathWithoutLang,
   isValidLang,
   getSupportedLanguages,
   generateLanguageUrls,
   generateLanguageUrlsForArticle,
 } from "../../i18n/utils";
 import type { Languages } from "../../i18n/ui";
-import type { 
-  ArticleLanguageContext, 
-  LanguageUrls, 
-  HreflangLink 
+import type {
+  ArticleLanguageContext,
+  LanguageUrls,
+  HreflangLink,
 } from "./types";
 
 // Type pour les articles de blog
@@ -23,16 +23,19 @@ type BlogPost = CollectionEntry<"blog">;
  * @param language - Code de langue à retirer
  * @returns Le slug sans préfixe de langue ou null si le format est invalide
  */
-export function extractSlugWithoutLanguagePrefix(fullSlug: string, language: string): string | null {
+export function extractSlugWithoutLanguagePrefix(
+  fullSlug: string,
+  language: string,
+): string | null {
   if (!fullSlug || !language) {
     return null;
   }
-  
+
   // Utiliser une regex pour matcher précisément le préfixe de langue au début
   // Pattern: ^{language}/ suivi du reste du slug
   const languagePrefixPattern = new RegExp(`^${escapeRegExp(language)}/(.+)$`);
   const match = fullSlug.match(languagePrefixPattern);
-  
+
   return match?.[1] || null;
 }
 
@@ -42,7 +45,7 @@ export function extractSlugWithoutLanguagePrefix(fullSlug: string, language: str
  * @returns Chaîne avec caractères spéciaux échappés
  */
 function escapeRegExp(string: string): string {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 /**
@@ -66,16 +69,18 @@ export function detectArticleLanguage(url: URL): Languages | null {
   if (!isArticlePage(url)) {
     return null;
   }
-  
-  const pathSegments = url.pathname.split('/').filter(segment => segment !== '');
-  
-  if (pathSegments.length >= 2 && pathSegments[0] === 'blog') {
+
+  const pathSegments = url.pathname
+    .split("/")
+    .filter((segment) => segment !== "");
+
+  if (pathSegments.length >= 2 && pathSegments[0] === "blog") {
     const articleLang = pathSegments[1];
     if (isValidLang(articleLang)) {
       return articleLang as Languages;
     }
   }
-  
+
   return null;
 }
 
@@ -89,14 +94,16 @@ export function extractArticleSlug(url: URL): string | null {
   if (!isArticlePage(url)) {
     return null;
   }
-  
+
   const currentPath = getPathWithoutLang(url);
-  const pathSegments = currentPath.split('/').filter(segment => segment !== '');
-  
-  if (pathSegments.length >= 3 && pathSegments[0] === 'blog') {
-    return pathSegments.slice(2).join('/');
+  const pathSegments = currentPath
+    .split("/")
+    .filter((segment) => segment !== "");
+
+  if (pathSegments.length >= 3 && pathSegments[0] === "blog") {
+    return pathSegments.slice(2).join("/");
   }
-  
+
   return null;
 }
 
@@ -109,64 +116,70 @@ export function extractArticleSlug(url: URL): string | null {
  */
 export function createArticleTranslationMappingPure(
   currentUrl: URL,
-  allPosts: BlogPost[]
+  allPosts: BlogPost[],
 ): Record<Languages, string | null> | undefined {
   // Validation des paramètres d'entrée
   if (!currentUrl || !(currentUrl instanceof URL)) {
-    console.warn("createArticleTranslationMappingPure: currentUrl doit être un objet URL valide");
+    console.warn(
+      "createArticleTranslationMappingPure: currentUrl doit être un objet URL valide",
+    );
     return undefined;
   }
-  
+
   if (!Array.isArray(allPosts) || allPosts.length === 0) {
-    console.warn("createArticleTranslationMappingPure: allPosts doit être un tableau non vide");
+    console.warn(
+      "createArticleTranslationMappingPure: allPosts doit être un tableau non vide",
+    );
     return undefined;
   }
-  
+
   try {
     const currentPath = getPathWithoutLang(currentUrl);
-    const pathSegments = currentPath.split('/').filter(segment => segment !== '');
-    
-    if (pathSegments.length >= 3 && pathSegments[0] === 'blog') {
+    const pathSegments = currentPath
+      .split("/")
+      .filter((segment) => segment !== "");
+
+    if (pathSegments.length >= 3 && pathSegments[0] === "blog") {
       const articleLang = pathSegments[1];
-      const articleSlug = pathSegments.slice(2).join('/');
-      
+      const articleSlug = pathSegments.slice(2).join("/");
+
       // Le slug dans Astro inclut le préfixe de langue (ex: "en/rest-api-best-practices-guide")
       const fullSlug = `${articleLang}/${articleSlug}`;
-      
+
       // Récupérer l'article correspondant
-      const currentPost = allPosts.find(post => post.slug === fullSlug);
-      
+      const currentPost = allPosts.find((post) => post.slug === fullSlug);
+
       if (currentPost) {
         const currentTranslationId = currentPost.data.translationId;
-        
+
         // Créer un mapping des traductions disponibles
         const translationMapping = {} as Record<Languages, string | null>;
-        
+
         // Trouver tous les articles avec le même translationId
-        const relatedPosts = allPosts.filter(post => 
-          post.data.translationId === currentTranslationId
+        const relatedPosts = allPosts.filter(
+          (post) => post.data.translationId === currentTranslationId,
         );
-        
+
         // Initialiser et remplir en une seule passe
         const supportedLanguages = getSupportedLanguages();
-        supportedLanguages.forEach(lang => {
+        supportedLanguages.forEach((lang) => {
           translationMapping[lang] = null;
         });
-        
-        relatedPosts.forEach(post => {
+
+        relatedPosts.forEach((post) => {
           const postLang = post.data.lang as Languages;
           // Extraire juste le nom du fichier sans le préfixe de langue de manière robuste
           const slug = extractSlugWithoutLanguagePrefix(post.slug, postLang);
           translationMapping[postLang] = slug;
         });
-        
+
         return translationMapping;
       }
     }
   } catch (error) {
     console.error("Error fetching the article:", error);
   }
-  
+
   return undefined;
 }
 
@@ -177,19 +190,22 @@ export function createArticleTranslationMappingPure(
  * @param allPosts - Tous les articles de blog (optionnel)
  * @returns Contexte linguistique avec toutes les informations nécessaires
  */
-export function analyzeLanguageContextPure(url: URL, allPosts?: BlogPost[]): ArticleLanguageContext {
+export function analyzeLanguageContextPure(
+  url: URL,
+  allPosts?: BlogPost[],
+): ArticleLanguageContext {
   const isArticle = isArticlePage(url);
-  
+
   if (!isArticle) {
     return {
       isArticlePage: false,
       detectedLang: getLangFromUrl(url),
     };
   }
-  
+
   const detectedLang = detectArticleLanguage(url);
   const articleSlug = extractArticleSlug(url);
-  
+
   if (!detectedLang) {
     return {
       isArticlePage: true,
@@ -197,13 +213,13 @@ export function analyzeLanguageContextPure(url: URL, allPosts?: BlogPost[]): Art
       articleSlug: articleSlug ?? undefined,
     };
   }
-  
+
   let translationMapping: Record<Languages, string | null> | undefined;
-  
+
   if (allPosts) {
     translationMapping = createArticleTranslationMappingPure(url, allPosts);
   }
-  
+
   return {
     isArticlePage: true,
     detectedLang,
@@ -220,15 +236,23 @@ export function analyzeLanguageContextPure(url: URL, allPosts?: BlogPost[]): Art
  */
 export function generateContextualLanguageUrls(
   context: ArticleLanguageContext,
-  currentUrl: URL
+  currentUrl: URL,
 ): LanguageUrls {
   const currentPath = getPathWithoutLang(currentUrl);
   const lang = context.detectedLang || getLangFromUrl(currentUrl);
-  
-  if (context.isArticlePage && context.translationMapping && context.articleSlug) {
+
+  if (
+    context.isArticlePage &&
+    context.translationMapping &&
+    context.articleSlug
+  ) {
     // Pour les articles, utiliser le format /blog/{slug} sans langue
     const articlePath = `/blog/${context.articleSlug}`;
-    return generateLanguageUrlsForArticle(articlePath, lang, context.translationMapping);
+    return generateLanguageUrlsForArticle(
+      articlePath,
+      lang,
+      context.translationMapping,
+    );
   } else {
     // Pour les pages normales
     return generateLanguageUrls(currentPath, lang);
@@ -240,9 +264,11 @@ export function generateContextualLanguageUrls(
  * @param languageUrls - URLs de langue générées
  * @returns Tableau de liens hreflang
  */
-export function generateHreflangLinks(languageUrls: LanguageUrls): HreflangLink[] {
+export function generateHreflangLinks(
+  languageUrls: LanguageUrls,
+): HreflangLink[] {
   return Object.entries(languageUrls).map(([langCode, data]) => ({
     hreflang: langCode,
     href: data.url,
   }));
-} 
+}

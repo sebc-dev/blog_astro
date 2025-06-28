@@ -13,40 +13,48 @@ interface Props {
   className?: string;
 }
 
-const { 
-  headings, 
-  title = "Table des matières",
-  className = "" 
-} = Astro.props;
+const { headings, title = "Table des matières", className = "" } = Astro.props;
 ---
 
-{headings && headings.length > 0 && (
-  <aside class={`table-of-contents ${className}`} aria-label={title} data-cy="table-of-contents">
-    <h2 class="toc-title" data-cy="toc-title">{title}</h2>
-    <nav class="toc-nav" data-cy="toc-nav">
-      <ul class="toc-list" data-cy="toc-list">
-        {headings.map((heading) => (
-          <li class="toc-item" data-cy="toc-item">
-            <a href={`#${heading.slug}`} class="toc-link" data-cy="toc-link">
-              {heading.text}
-            </a>
-            {heading.subheadings && heading.subheadings.length > 0 && (
-              <ul class="toc-sublist" data-cy="toc-sublist">
-                {heading.subheadings.map((subheading) => (
-                  <li class="toc-subitem" data-cy="toc-subitem">
-                    <a href={`#${subheading.slug}`} class="toc-sublink" data-cy="toc-sublink">
-                      {subheading.text}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </li>
-        ))}
-      </ul>
-    </nav>
-  </aside>
-)}
+{
+  headings && headings.length > 0 && (
+    <aside
+      class={`table-of-contents ${className}`}
+      aria-label={title}
+      data-cy="table-of-contents"
+    >
+      <h2 class="toc-title" data-cy="toc-title">
+        {title}
+      </h2>
+      <nav class="toc-nav" data-cy="toc-nav">
+        <ul class="toc-list" data-cy="toc-list">
+          {headings.map((heading) => (
+            <li class="toc-item" data-cy="toc-item">
+              <a href={`#${heading.slug}`} class="toc-link" data-cy="toc-link">
+                {heading.text}
+              </a>
+              {heading.subheadings && heading.subheadings.length > 0 && (
+                <ul class="toc-sublist" data-cy="toc-sublist">
+                  {heading.subheadings.map((subheading) => (
+                    <li class="toc-subitem" data-cy="toc-subitem">
+                      <a
+                        href={`#${subheading.slug}`}
+                        class="toc-sublink"
+                        data-cy="toc-sublink"
+                      >
+                        {subheading.text}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </aside>
+  )
+}
 
 <style>
   /* Styles pour la table des matières */
@@ -60,7 +68,9 @@ const {
     backdrop-filter: blur(4px);
     border: 1px solid var(--color-base-400);
     border-radius: 0.5rem;
-    box-shadow: 0 10px 15px -3px oklch(var(--color-base-content) / 0.1), 0 4px 6px -2px oklch(var(--color-base-content) / 0.05);
+    box-shadow:
+      0 10px 15px -3px oklch(var(--color-base-content) / 0.1),
+      0 4px 6px -2px oklch(var(--color-base-content) / 0.05);
     padding: 1.5rem;
   }
 
@@ -150,4 +160,5 @@ const {
       display: none;
     }
   }
-</style> 
+</style>
+
