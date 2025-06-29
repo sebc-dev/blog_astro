@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { ui, defaultLang, type Languages, type UIKeys } from "../i18n/ui";
+import { ui, defaultLang, type Languages, type UIKeys } from "@/i18n/ui";
 import {
   getLangFromUrl,
   useTranslations,
@@ -17,7 +17,7 @@ import {
   getLanguageName,
   getLanguageFlag,
   generateLanguageUrlsForArticle,
-} from "../i18n/utils";
+} from "@/i18n/utils";
 
 // Mock console pour tester les warnings et erreurs
 beforeEach(() => {

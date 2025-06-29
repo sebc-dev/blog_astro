@@ -1,5 +1,5 @@
-import type { Languages } from "../../../i18n/ui";
-import { getPathWithoutLang, isValidLang } from "../../../i18n/utils";
+import type { Languages } from "@/i18n/ui";
+import { getPathWithoutLang, isValidLang } from "@/i18n/utils";
 import type { PageDetector, ArticlePageInfo, PageType } from "./types";
 
 /**

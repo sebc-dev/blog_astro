@@ -11,7 +11,7 @@ import {
   extractCategoryFromUrl,
   detectCategoryLanguage,
   createCategoryUrlMapping,
-} from "../../../../components/header/article-utils";
+} from "@/components/layout/header/article-utils";
 
 // Mock data pour les tests (simplified for testing purposes)
 const mockBlogPosts = [

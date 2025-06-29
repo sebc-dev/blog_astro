@@ -5,7 +5,7 @@ import {
   countHeadingsByLevel,
   shouldShowToc,
   type AstroHeading,
-} from "../../toc-utils";
+} from "@/lib/content/toc-utils";
 
 describe("TOC Utils", () => {
   const mockHeadings: AstroHeading[] = [

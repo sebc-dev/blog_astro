@@ -3,24 +3,24 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { generateCriticalCSS } from "../../../../components/header/header-styles";
-import { prepareHeaderData } from "../../../../components/header/utils";
-import { NormalMapper } from "../../../../components/header/page-mappers/normal-mapper";
-import type { NormalPageInfo } from "../../components/header/page-detectors/types";
+import { generateCriticalCSS } from "@/components/layout/header/header-styles";
+import { prepareHeaderData } from "@/components/layout/header/utils";
+import { NormalMapper } from "@/components/layout/header/page-mappers/normal-mapper";
+import type { NormalPageInfo } from "@/components/layout/header/page-detectors/types";
 
 // Mock server-utils
-vi.mock("../../../../components/header/server-utils", () => ({
+vi.mock("@/components/layout/header/server-utils", () => ({
   analyzeLanguageContext: vi.fn(),
 }));
 
 // Mock article-utils
-vi.mock("../../../../components/header/article-utils", () => ({
+vi.mock("@/components/layout/header/article-utils", () => ({
   generateContextualLanguageUrls: vi.fn(),
   generateHreflangLinks: vi.fn(),
 }));
 
 // Mock i18n utils
-vi.mock("../../../../i18n/utils", () => ({
+vi.mock("@/i18n/utils", () => ({
   getLangFromUrl: vi.fn(),
   useTranslations: vi.fn(),
   useTranslatedPath: vi.fn(),
@@ -34,12 +34,12 @@ import {
   useTranslatedPath,
   getPathWithoutLang,
   generateLanguageUrls,
-} from "../../../../i18n/utils";
-import { analyzeLanguageContext } from "../../../../components/header/server-utils";
+} from "@/i18n/utils";
+import { analyzeLanguageContext } from "@/components/layout/header/server-utils";
 import {
   generateContextualLanguageUrls,
   generateHreflangLinks,
-} from "../../../../components/header/article-utils";
+} from "@/components/layout/header/article-utils";
 
 // Mock des fonctions
 const mockGetLangFromUrl = vi.mocked(getLangFromUrl);
@@ -185,7 +185,7 @@ describe("NormalMapper - Dynamic Path Extraction", () => {
     vi.clearAllMocks();
   });
 
-  test("devrait utiliser le chemin dynamique au lieu du chemin hardcodé", () => {
+  it("devrait utiliser le chemin dynamique au lieu du chemin hardcodé", () => {
     const normalMapper = new NormalMapper();
     
     // Créer un pageInfo pour une page normale
@@ -252,7 +252,7 @@ describe("NormalMapper - Dynamic Path Extraction", () => {
     });
   });
 
-  test("devrait utiliser '/' comme fallback quand aucune URL n'est fournie", () => {
+  it("devrait utiliser '/' comme fallback quand aucune URL n'est fournie", () => {
     const normalMapper = new NormalMapper();
     
     const pageInfo: NormalPageInfo = {
@@ -282,7 +282,7 @@ describe("NormalMapper - Dynamic Path Extraction", () => {
     }
   });
 
-  test("devrait gérer les URLs invalides dans additionalData", () => {
+  it("devrait gérer les URLs invalides dans additionalData", () => {
     const normalMapper = new NormalMapper();
     
     const pageInfo: NormalPageInfo = {

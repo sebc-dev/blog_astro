@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   estimateReadingTime,
   getPostCategory,
-} from "../../lib/article-utils";
+} from "@/lib/article/article-utils";
 
 describe("Articles Réels - Tests d'Intégration", () => {
   // Mock des vrais articles basés sur les fichiers MDX existants

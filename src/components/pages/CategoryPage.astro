@@ -1,17 +1,17 @@
 ---
 import MainLayout from "../../layouts/MainLayout.astro";
-import ArticleCard from "../ui/ArticleCard.astro";
-import { useTranslations } from "../../i18n/utils";
-import { siteUtils } from "../../config/site";
+import ArticleCard from "@/components/ui/ArticleCard.astro";
+import { useTranslations } from "@/i18n/utils";
+import { siteUtils } from "@/config/site";
 import {
   estimateReadingTime,
   getPostCategory,
   getPostTag,
-} from "../../lib/article/article-utils";
+} from "@/lib/article/article-utils";
 import {
   normalizeCategoryForUrl,
   type CategoryTranslations,
-} from "../../lib/article/category-utils";
+} from "@/lib/article/category-utils";
 
 interface Props {
   category: string;
@@ -210,7 +210,7 @@ const initialSortedPosts = [...postsData].sort(
 
   <!-- Script de tri optimisé -->
   <script>
-    import("../../lib/sorting/category-sort.ts");
+    import("@/lib/sorting/category-sort");
   </script>
 </MainLayout>
 

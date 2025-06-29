@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   normalizeCategoryForUrl,
   denormalizeCategoryFromUrl,
-} from "./category-utils";
+} from "@/lib/article/category-utils";
 
 describe("Category Utils", () => {
   describe("URL normalization", () => {

@@ -6,7 +6,7 @@ import {
   detectArticleLanguage,
   extractArticleSlug,
 } from "./article-utils";
-import { getLangFromUrl } from "../../i18n/utils";
+import { getLangFromUrl } from "@/i18n/utils";
 
 /**
  * Types d'erreur pour une gestion granulaire

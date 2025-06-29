@@ -6,7 +6,7 @@ import {
   denormalizeCategoryFromUrl,
   sortPosts,
   type CategoryTranslations,
-} from "../../lib/category-utils";
+} from "@/lib/article/category-utils";
 import type { CollectionEntry } from "astro:content";
 
 describe("Category Page Logic", () => {

@@ -2,8 +2,8 @@
  * Types TypeScript pour le composant Header
  */
 
-import type { UIKeys } from "../../i18n/ui";
-import type { Languages } from "../../i18n/ui";
+import type { UIKeys } from "@/i18n/ui";
+import type { Languages } from "@/i18n/ui";
 
 // === TYPES POUR LA NAVIGATION ===
 export interface NavLink {

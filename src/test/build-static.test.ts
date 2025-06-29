@@ -3,7 +3,7 @@
  * Teste la génération HTML multilingue et l'optimisation des assets
  */
 
-import { describe, test, expect, beforeAll, afterAll, vi } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 import { readFile, access } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { spawn } from "node:child_process";
@@ -80,7 +80,7 @@ describe("Build Static Tests - Phase 2", () => {
   });
 
   describe("1. Génération HTML Statique", () => {
-    test("génère les pages pour chaque langue", async () => {
+    it("génère les pages pour chaque langue", async () => {
       // Vérifier que le dossier dist existe
       const distExists = await fileExists(BUILD_CONFIG.buildDir);
       expect(distExists).toBe(true);
@@ -98,7 +98,7 @@ describe("Build Static Tests - Phase 2", () => {
       expect(frPageExists).toBe(true);
     });
 
-    test("contient la structure HTML correcte", async () => {
+    it("contient la structure HTML correcte", async () => {
       const enHTML = await readHTMLFile("index.html");
       const frHTML = await readHTMLFile("fr/index.html");
 
@@ -114,7 +114,7 @@ describe("Build Static Tests - Phase 2", () => {
       expect(frHTML).toContain("<body");
     });
 
-    test("inclut la navigation dans le HTML statique", async () => {
+    it("inclut la navigation dans le HTML statique", async () => {
       const enHTML = await readHTMLFile("index.html");
       const frHTML = await readHTMLFile("fr/index.html");
 
@@ -129,7 +129,7 @@ describe("Build Static Tests - Phase 2", () => {
   });
 
   describe("2. Traitement i18n au Build-time", () => {
-    test("contient le contenu spécifique à chaque langue", async () => {
+    it("contient le contenu spécifique à chaque langue", async () => {
       const enHTML = await readHTMLFile("index.html");
       const frHTML = await readHTMLFile("fr/index.html");
 
@@ -141,7 +141,7 @@ describe("Build Static Tests - Phase 2", () => {
       expect(frHTML).toMatch(/<html[^>]*lang="fr"/);
     });
 
-    test("génère les URLs multilingues correctement", async () => {
+    it("génère les URLs multilingues correctement", async () => {
       const enHTML = await readHTMLFile("index.html");
       const frHTML = await readHTMLFile("fr/index.html");
 
@@ -152,7 +152,7 @@ describe("Build Static Tests - Phase 2", () => {
       expect(frHTML).toContain('href="/fr/');
     });
 
-    test("génère les liens hreflang pour le SEO", async () => {
+    it("génère les liens hreflang pour le SEO", async () => {
       const enHTML = await readHTMLFile("index.html");
       const frHTML = await readHTMLFile("fr/index.html");
 
@@ -166,7 +166,7 @@ describe("Build Static Tests - Phase 2", () => {
   });
 
   describe("3. Optimisation Assets - Phase 2 Étape 2", () => {
-    test("CSS critique intégré inline < 1KB", async () => {
+    it("CSS critique intégré inline < 1KB", async () => {
       const enHTML = await readHTMLFile("index.html");
       const frHTML = await readHTMLFile("fr/index.html");
 
@@ -199,7 +199,7 @@ describe("Build Static Tests - Phase 2", () => {
       }
     });
 
-    test("contient les styles Header critiques", async () => {
+    it("contient les styles Header critiques", async () => {
       const enHTML = await readHTMLFile("index.html");
 
       // Vérifier que le CSS critique contient les classes Header essentielles
@@ -258,7 +258,7 @@ describe("Build Static Tests - Phase 2", () => {
       );
     });
 
-    test("bundle JavaScript total < 5KB", async () => {
+    it("bundle JavaScript total < 5KB", async () => {
       const { readdirSync, statSync } = await import("node:fs");
       // `join` est déjà disponible dans la portée – supprimer cette ligne superflue
 
@@ -308,7 +308,7 @@ describe("Build Static Tests - Phase 2", () => {
       expect(totalSize).toBeLessThan(BUILD_CONFIG.maxBundleSize);
     });
 
-    test("génère les preload/prefetch links pour optimisation", async () => {
+    it("génère les preload/prefetch links pour optimisation", async () => {
       const enHTML = await readHTMLFile("index.html");
       const frHTML = await readHTMLFile("fr/index.html");
 
@@ -338,7 +338,7 @@ describe("Build Static Tests - Phase 2", () => {
       );
     });
 
-    test("optimise les meta tags de performance", async () => {
+    it("optimise les meta tags de performance", async () => {
       const enHTML = await readHTMLFile("index.html");
 
       // Vérifier les meta tags essentiels (réellement présents)
@@ -357,7 +357,7 @@ describe("Build Static Tests - Phase 2", () => {
   });
 
   describe("4. Métriques de Performance Sites Statiques", () => {
-    test("structure HTML minimale et optimisée", async () => {
+    it("structure HTML minimale et optimisée", async () => {
       const enHTML = await readHTMLFile("index.html");
 
       // Vérifier que le HTML n'est pas excessivement volumineux
@@ -378,7 +378,7 @@ describe("Build Static Tests - Phase 2", () => {
       console.log(`📊 Inline Scripts: ${inlineScriptCount} (Max: 5)`);
     });
 
-    test("absence de ressources bloquantes critiques", async () => {
+    it("absence de ressources bloquantes critiques", async () => {
       const enHTML = await readHTMLFile("index.html");
 
       // Vérifier l'absence de CSS externe bloquant
@@ -398,7 +398,7 @@ describe("Build Static Tests - Phase 2", () => {
       expect(blockingScripts.length).toBe(0);
     });
 
-    test("conformité aux seuils de performance globaux", async () => {
+    it("conformité aux seuils de performance globaux", async () => {
       const enHTML = await readHTMLFile("index.html");
       const frHTML = await readHTMLFile("fr/index.html");
 
