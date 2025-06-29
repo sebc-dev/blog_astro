@@ -2,10 +2,8 @@ import { getCollection } from "astro:content";
 import type { ArticleLanguageContext } from "./types";
 import {
   analyzeLanguageContextPure,
-  isArticlePage,
-  detectArticleLanguage,
-  extractArticleSlug,
 } from "./article-utils";
+import { analyzeLanguageContextUnified, pageDetectionManager } from "./page-utils";
 import { getLangFromUrl } from "@/i18n/utils";
 
 /**
@@ -65,14 +63,23 @@ function categorizeError(error: unknown): CollectionErrorType {
  * Préserve la détection de langue et les informations de base même sans données d'articles
  */
 function createArticleFallbackContext(url: URL): ArticleLanguageContext {
-  const detectedLang = detectArticleLanguage(url);
-  const articleSlug = extractArticleSlug(url);
+  const detection = pageDetectionManager.detectPage(url);
+  
+  if (detection?.pageInfo.pageType === "article") {
+    return {
+      isArticlePage: true,
+      detectedLang: detection.pageInfo.detectedLang || getLangFromUrl(url),
+      articleSlug: detection.pageInfo.slug || undefined,
+      isCategoryPage: false,
+      // translationMapping est omis délibérément car non fiable sans données
+    };
+  }
 
+  // Fallback si la détection échoue
   return {
-    isArticlePage: true,
-    detectedLang: detectedLang || getLangFromUrl(url),
-    articleSlug: articleSlug || undefined,
-    // translationMapping est omis délibérément car non fiable sans données
+    isArticlePage: false,
+    detectedLang: getLangFromUrl(url),
+    isCategoryPage: false,
   };
 }
 
@@ -89,11 +96,23 @@ export async function analyzeLanguageContext(
     // Récupérer tous les articles
     const allPosts = await getCollection("blog");
 
-    // Utiliser la logique pure avec les données complètes
-    return analyzeLanguageContextPure(url, allPosts);
+    // Utiliser le nouveau système unifié
+    const unifiedContext = await analyzeLanguageContextUnified(url, allPosts);
+    
+    // Convertir vers l'ancien format pour la compatibilité
+    return {
+      isArticlePage: unifiedContext.isArticlePage,
+      detectedLang: unifiedContext.detectedLang,
+      articleSlug: unifiedContext.articleSlug,
+      translationMapping: unifiedContext.translationMapping,
+      isCategoryPage: unifiedContext.isCategoryPage,
+      categorySlug: unifiedContext.categorySlug,
+      categoryUrlMapping: unifiedContext.categoryUrlMapping,
+    };
   } catch (error) {
     const errorType = categorizeError(error);
-    const isArticle = isArticlePage(url);
+    const detection = pageDetectionManager.detectPage(url);
+    const isArticle = detection?.pageInfo.pageType === "article";
 
     console.error(
       `Erreur lors de la récupération des articles [${errorType}]:`,
