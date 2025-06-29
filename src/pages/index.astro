@@ -1,7 +1,7 @@
 ---
-import MainLayout from "../layouts/MainLayout.astro";
-import LatestArticlesSection from "../components/LatestArticlesSection.astro";
-import { getLangFromUrl, useTranslations } from "../i18n/utils";
+import MainLayout from "@/layouts/MainLayout.astro";
+import LatestArticlesSection from "@/components/sections/LatestArticlesSection.astro";
+import { getLangFromUrl, useTranslations } from "@/i18n/utils";
 
 // Système d'internationalisation
 const lang = getLangFromUrl(Astro.url);

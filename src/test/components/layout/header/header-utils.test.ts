@@ -3,42 +3,50 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { generateCriticalCSS } from "../../components/header/header-styles";
-import { prepareHeaderData } from "../../components/header/utils";
+import { generateCriticalCSS } from "@/components/layout/header/header-styles";
+import { prepareHeaderData } from "@/components/layout/header/utils";
+import { NormalMapper } from "@/components/layout/header/page-mappers/normal-mapper";
+import type { NormalPageInfo } from "@/components/layout/header/page-detectors/types";
 
 // Mock server-utils
-vi.mock("../../components/header/server-utils", () => ({
+vi.mock("@/components/layout/header/server-utils", () => ({
   analyzeLanguageContext: vi.fn(),
 }));
 
 // Mock article-utils
-vi.mock("../../components/header/article-utils", () => ({
+vi.mock("@/components/layout/header/article-utils", () => ({
   generateContextualLanguageUrls: vi.fn(),
   generateHreflangLinks: vi.fn(),
 }));
 
 // Mock i18n utils
-vi.mock("../../i18n/utils", () => ({
+vi.mock("@/i18n/utils", () => ({
   getLangFromUrl: vi.fn(),
   useTranslations: vi.fn(),
   useTranslatedPath: vi.fn(),
+  getPathWithoutLang: vi.fn(),
+  generateLanguageUrls: vi.fn(),
 }));
 
 import {
   getLangFromUrl,
   useTranslations,
   useTranslatedPath,
-} from "../../i18n/utils";
-import { analyzeLanguageContext } from "../../components/header/server-utils";
+  getPathWithoutLang,
+  generateLanguageUrls,
+} from "@/i18n/utils";
+import { analyzeLanguageContext } from "@/components/layout/header/server-utils";
 import {
   generateContextualLanguageUrls,
   generateHreflangLinks,
-} from "../../components/header/article-utils";
+} from "@/components/layout/header/article-utils";
 
 // Mock des fonctions
 const mockGetLangFromUrl = vi.mocked(getLangFromUrl);
 const mockUseTranslations = vi.mocked(useTranslations);
 const mockUseTranslatedPath = vi.mocked(useTranslatedPath);
+const mockGetPathWithoutLang = vi.mocked(getPathWithoutLang);
+const mockGenerateLanguageUrls = vi.mocked(generateLanguageUrls);
 const mockAnalyzeLanguageContext = vi.mocked(analyzeLanguageContext);
 const mockGenerateContextualLanguageUrls = vi.mocked(
   generateContextualLanguageUrls,
@@ -169,5 +177,135 @@ describe("prepareHeaderData - Gestion d'erreur gracieuse", () => {
 
     // Vérifier que le flag de fallback est false
     expect(result.usingLanguageFallback).toBe(false);
+  });
+});
+
+describe("NormalMapper - Dynamic Path Extraction", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("devrait utiliser le chemin dynamique au lieu du chemin hardcodé", () => {
+    const normalMapper = new NormalMapper();
+    
+    // Créer un pageInfo pour une page normale
+    const pageInfo: NormalPageInfo = {
+      pageType: "normal",
+      detectedLang: "en",
+    };
+
+    // Test avec différents chemins
+    const testCases = [
+      {
+        url: new URL("http://localhost:4321/about"),
+        expectedPath: "/about",
+        description: "page about"
+      },
+      {
+        url: new URL("http://localhost:4321/contact"),
+        expectedPath: "/contact", 
+        description: "page contact"
+      },
+      {
+        url: new URL("http://localhost:4321/fr/about"),
+        expectedPath: "/about",
+        description: "page française (chemin sans préfixe de langue)"
+      },
+      {
+        url: new URL("http://localhost:4321/services/consulting"),
+        expectedPath: "/services/consulting",
+        description: "page avec sous-chemin"
+      }
+    ];
+
+    testCases.forEach(({ url, expectedPath, description }) => {
+      // Configurer les mocks pour chaque test
+      mockGetPathWithoutLang.mockReturnValue(expectedPath);
+      mockGenerateLanguageUrls.mockReturnValue({
+        en: { url: expectedPath, label: "English", flag: "🇺🇸", isActive: true },
+        fr: { url: `/fr${expectedPath}`, label: "Français", flag: "🇫🇷", isActive: false },
+      });
+
+      const additionalData = { currentUrl: url };
+      const result = normalMapper.createUrlMapping(pageInfo, additionalData);
+      
+      expect(result, `Devrait générer un mapping pour ${description}`).not.toBeNull();
+      
+             if (result) {
+         // Vérifier que les URLs générées utilisent le bon chemin de base
+         Object.values(result).forEach((mappedUrl: string) => {
+           if (expectedPath === "/") {
+             // Pour la racine, les URLs peuvent être "/" ou avec préfixe de langue
+             expect(
+               mappedUrl === "/" || mappedUrl.startsWith("/fr"),
+               `URL mappée "${mappedUrl}" devrait correspondre au chemin racine pour ${description}`
+             ).toBe(true);
+           } else {
+             // Pour les autres chemins, vérifier que l'URL contient le chemin attendu
+             expect(
+               mappedUrl.includes(expectedPath),
+               `URL mappée "${mappedUrl}" devrait contenir "${expectedPath}" pour ${description}`
+             ).toBe(true);
+           }
+         });
+       }
+    });
+  });
+
+  it("devrait utiliser '/' comme fallback quand aucune URL n'est fournie", () => {
+    const normalMapper = new NormalMapper();
+    
+    const pageInfo: NormalPageInfo = {
+      pageType: "normal",
+      detectedLang: "en",
+    };
+
+    // Configurer le mock pour le fallback
+    mockGenerateLanguageUrls.mockReturnValue({
+      en: { url: "/", label: "English", flag: "🇺🇸", isActive: true },
+      fr: { url: "/fr", label: "Français", flag: "🇫🇷", isActive: false },
+    });
+
+    // Test sans additionalData (fallback vers "/")
+    const result = normalMapper.createUrlMapping(pageInfo);
+    
+    expect(result).not.toBeNull();
+    
+    if (result) {
+      // Vérifier que le mapping contient les langues supportées
+      expect(result).toHaveProperty("en");
+      expect(result).toHaveProperty("fr");
+      
+      // Pour le fallback, on s'attend à des URLs racines
+      expect(result.en === "/" || result.en === "").toBe(true);
+      expect(result.fr === "/fr" || result.fr === "/fr/").toBe(true);
+    }
+  });
+
+  it("devrait gérer les URLs invalides dans additionalData", () => {
+    const normalMapper = new NormalMapper();
+    
+    const pageInfo: NormalPageInfo = {
+      pageType: "normal",
+      detectedLang: "en",
+    };
+
+    // Configurer le mock pour le fallback quand URL invalide
+    mockGenerateLanguageUrls.mockReturnValue({
+      en: { url: "/", label: "English", flag: "🇺🇸", isActive: true },
+      fr: { url: "/fr", label: "Français", flag: "🇫🇷", isActive: false },
+    });
+
+    // Test avec currentUrl invalide (fallback vers "/")
+    const additionalData = { currentUrl: "not-a-url" };
+    const result = normalMapper.createUrlMapping(pageInfo, additionalData);
+    
+    expect(result).not.toBeNull();
+    
+    if (result) {
+      // Devrait utiliser le fallback
+      expect(result.en === "/" || result.en === "").toBe(true);
+      expect(result.fr === "/fr" || result.fr === "/fr/").toBe(true);
+    }
   });
 });

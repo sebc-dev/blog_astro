@@ -4,7 +4,7 @@ describe("SEOHead Component", () => {
   describe("Configuration centralisée", () => {
     it("devrait utiliser la configuration du site pour les valeurs par défaut", async () => {
       // Test conceptuel - vérifie que les imports sont corrects
-      const siteConfigImport = await import("../../config/site");
+      const siteConfigImport = await import("../../../config/site");
 
       expect(siteConfigImport.siteConfig).toBeDefined();
       expect(siteConfigImport.siteUtils).toBeDefined();
@@ -15,7 +15,7 @@ describe("SEOHead Component", () => {
     });
 
     it("devrait avoir les utilitaires nécessaires pour les URLs", async () => {
-      const { siteUtils } = await import("../../config/site");
+      const { siteUtils } = await import("@/config/site");
 
       // Test des utilitaires utilisés dans SEOHead
       expect(typeof siteUtils.getCanonicalUrl).toBe("function");
@@ -32,7 +32,7 @@ describe("SEOHead Component", () => {
 
   describe("Génération des métadonnées", () => {
     it("devrait construire des URLs correctes pour les images", async () => {
-      const { siteUtils } = await import("../../config/site");
+      const { siteUtils } = await import("@/config/site");
 
       // Test avec différents formats d'images
       const testCases = [
@@ -50,7 +50,7 @@ describe("SEOHead Component", () => {
     });
 
     it("devrait générer des URLs canoniques cohérentes", async () => {
-      const { siteUtils } = await import("../../config/site");
+      const { siteUtils } = await import("@/config/site");
 
       const testPaths = ["/", "/blog", "/blog/article", "about", "/fr/contact"];
 
@@ -69,7 +69,7 @@ describe("SEOHead Component", () => {
 
   describe("Intégration avec la configuration", () => {
     it("devrait utiliser le titre du site depuis la configuration", async () => {
-      const { siteConfig } = await import("../../config/site");
+      const { siteConfig } = await import("@/config/site");
 
       expect(siteConfig.title).toBeDefined();
       expect(typeof siteConfig.title).toBe("string");
@@ -77,7 +77,7 @@ describe("SEOHead Component", () => {
     });
 
     it("devrait utiliser l'image OG par défaut depuis la configuration", async () => {
-      const { siteConfig } = await import("../../config/site");
+      const { siteConfig } = await import("@/config/site");
 
       expect(siteConfig.defaultOgImage).toBeDefined();
       expect(siteConfig.defaultOgImage).toMatch(
@@ -86,7 +86,7 @@ describe("SEOHead Component", () => {
     });
 
     it("devrait avoir une configuration d'organisation pour les métadonnées", async () => {
-      const { siteConfig } = await import("../../config/site");
+      const { siteConfig } = await import("@/config/site");
 
       expect(siteConfig.organization).toBeDefined();
       expect(siteConfig.organization.name).toBeDefined();
@@ -97,7 +97,7 @@ describe("SEOHead Component", () => {
 
   describe("Cohérence avec MainLayout", () => {
     it("devrait utiliser les mêmes utilitaires que MainLayout", async () => {
-      const { siteUtils, siteConfig } = await import("../../config/site");
+      const { siteUtils, siteConfig } = await import("@/config/site");
 
       // Vérifier que les mêmes fonctions sont disponibles
       expect(typeof siteUtils.getCanonicalUrl).toBe("function");
@@ -114,7 +114,7 @@ describe("SEOHead Component", () => {
     });
 
     it("devrait maintenir la cohérence des URLs entre composants", async () => {
-      const { siteUtils } = await import("../../config/site");
+      const { siteUtils } = await import("@/config/site");
 
       const testImage = "/assets/test-image.jpg";
       const testPath = "/test-page";
@@ -133,7 +133,7 @@ describe("SEOHead Component", () => {
 
   describe("Validation des templates", () => {
     it("devrait construire des templates de titre corrects", async () => {
-      const { siteConfig } = await import("../../config/site");
+      const { siteConfig } = await import("@/config/site");
 
       // Template par défaut attendu
       const expectedTemplate = `%s | ${siteConfig.title}`;
@@ -146,7 +146,7 @@ describe("SEOHead Component", () => {
     });
 
     it("devrait gérer les cas sans titre", async () => {
-      const { siteConfig } = await import("../../config/site");
+      const { siteConfig } = await import("@/config/site");
 
       // Quand pas de titre, devrait retourner le titre du site
       expect(siteConfig.title).toBeDefined();
@@ -157,7 +157,7 @@ describe("SEOHead Component", () => {
   describe("Gestion des erreurs et cas limites", () => {
     describe("URLs malformées et invalides", () => {
       it("devrait gérer les chemins avec caractères spéciaux", async () => {
-        const { siteUtils } = await import("../../config/site");
+        const { siteUtils } = await import("@/config/site");
 
         const specialPaths = [
           "/blog/article-with-émojis-🚀",
@@ -177,7 +177,7 @@ describe("SEOHead Component", () => {
       });
 
       it("devrait gérer les chemins vides ou invalides", async () => {
-        const { siteUtils } = await import("../../config/site");
+        const { siteUtils } = await import("@/config/site");
 
         const invalidPaths = ["", "   ", null, undefined];
 
@@ -190,7 +190,7 @@ describe("SEOHead Component", () => {
       });
 
       it("devrait gérer les URLs d'assets malformées", async () => {
-        const { siteUtils } = await import("../../config/site");
+        const { siteUtils } = await import("@/config/site");
 
         const malformedAssets = [
           "",
@@ -213,7 +213,7 @@ describe("SEOHead Component", () => {
 
     describe("Valeurs de configuration manquantes", () => {
       it("devrait gérer l'absence de configuration d'organisation", async () => {
-        const { siteConfig } = await import("../../config/site");
+        const { siteConfig } = await import("@/config/site");
 
         // Même si certaines valeurs sont undefined, la structure doit exister
         expect(siteConfig.organization).toBeDefined();
@@ -226,7 +226,7 @@ describe("SEOHead Component", () => {
       });
 
       it("devrait gérer les variables d'environnement manquantes", async () => {
-        const { siteConfig } = await import("../../config/site");
+        const { siteConfig } = await import("@/config/site");
 
         // Les valeurs sociales peuvent être undefined
         expect(siteConfig.social).toBeDefined();
@@ -243,7 +243,7 @@ describe("SEOHead Component", () => {
       });
 
       it("devrait avoir des valeurs par défaut robustes", async () => {
-        const { siteConfig } = await import("../../config/site");
+        const { siteConfig } = await import("@/config/site");
 
         // Valeurs critiques qui ne doivent jamais être undefined
         expect(siteConfig.baseUrl).toBeDefined();
@@ -259,7 +259,7 @@ describe("SEOHead Component", () => {
 
     describe("Gestion des titres avec cas limites", () => {
       it("devrait gérer les titres très longs", async () => {
-        const { siteUtils } = await import("../../config/site");
+        const { siteUtils } = await import("@/config/site");
 
         const longTitle = "A".repeat(300); // Titre très long
         const pageTitle = siteUtils.getPageTitle(longTitle);
@@ -270,7 +270,7 @@ describe("SEOHead Component", () => {
       });
 
       it("devrait gérer les titres avec caractères spéciaux", async () => {
-        const { siteUtils } = await import("../../config/site");
+        const { siteUtils } = await import("@/config/site");
 
         const specialTitles = [
           "Titre avec émojis 🚀🎉",
@@ -290,7 +290,7 @@ describe("SEOHead Component", () => {
       });
 
       it("devrait gérer les titres vides ou invalides", async () => {
-        const { siteUtils, siteConfig } = await import("../../config/site");
+        const { siteUtils, siteConfig } = await import("@/config/site");
 
         // Test avec titres vraiment vides
         const emptyTitles = ["", null, undefined];
@@ -309,7 +309,7 @@ describe("SEOHead Component", () => {
 
     describe("Génération de schémas JSON-LD avec erreurs", () => {
       it("devrait gérer les articles avec données manquantes", async () => {
-        const { siteUtils } = await import("../../config/site");
+        const { siteUtils } = await import("@/config/site");
 
         const incompleteArticles = [
           {
@@ -348,7 +348,7 @@ describe("SEOHead Component", () => {
       });
 
       it("devrait gérer les dates invalides", async () => {
-        const { siteUtils } = await import("../../config/site");
+        const { siteUtils } = await import("@/config/site");
 
         const invalidDates = [
           "not-a-date",
@@ -371,7 +371,7 @@ describe("SEOHead Component", () => {
       });
 
       it("devrait gérer les images d'article invalides", async () => {
-        const { siteUtils } = await import("../../config/site");
+        const { siteUtils } = await import("@/config/site");
 
         const invalidImages = [
           "",
@@ -398,7 +398,7 @@ describe("SEOHead Component", () => {
 
     describe("Robustesse des utilitaires URL", () => {
       it("devrait gérer les doubles slashes et normalisation", async () => {
-        const { siteUtils } = await import("../../config/site");
+        const { siteUtils } = await import("@/config/site");
 
         const pathsWithSlashes = [
           "//double-slash",
@@ -417,7 +417,7 @@ describe("SEOHead Component", () => {
       });
 
       it("devrait maintenir la cohérence malgré les erreurs d'entrée", async () => {
-        const { siteUtils } = await import("../../config/site");
+        const { siteUtils } = await import("@/config/site");
 
         // Même avec des entrées bizarres, les URLs doivent rester cohérentes
         const weirdInputs = [
@@ -448,7 +448,7 @@ describe("SEOHead Component", () => {
       it("devrait fonctionner même avec une baseUrl malformée", async () => {
         // Ce test vérifie que même si la configuration est corrompue,
         // les fonctions ne plantent pas
-        const { siteUtils } = await import("../../config/site");
+        const { siteUtils } = await import("@/config/site");
 
         expect(() => {
           const url = siteUtils.getCanonicalUrl("/test");
@@ -457,7 +457,7 @@ describe("SEOHead Component", () => {
       });
 
       it("devrait gérer les types d'organisation invalides", async () => {
-        const { siteConfig } = await import("../../config/site");
+        const { siteConfig } = await import("@/config/site");
 
         // Le type doit être l'un des deux valides
         expect(["Organization", "Person"]).toContain(

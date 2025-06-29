@@ -2,8 +2,8 @@ import {
   useTranslations,
   useTranslatedPath,
   getLangFromUrl,
-} from "../../i18n/utils";
-import type { Languages } from "../../i18n/ui";
+} from "@/i18n/utils";
+import type { Languages } from "@/i18n/ui";
 import type {
   NavLink,
   TranslatedNavLink,

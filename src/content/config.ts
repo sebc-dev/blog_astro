@@ -1,5 +1,5 @@
 import { defineCollection, z } from "astro:content";
-import { SLUG_REGEX } from "../scripts/validate-content-utils";
+import { SLUG_REGEX } from "../lib/content/validate-content-utils";
 
 const blogCollection = defineCollection({
   type: "content",

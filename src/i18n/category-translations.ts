@@ -1,4 +1,4 @@
-import type { CategoryTranslations } from "../scripts/category-utils";
+import type { CategoryTranslations } from "@/lib/article/category-utils";
 
 /**
  * Centralized category translations for all supported languages
@@ -21,8 +21,8 @@ export const categoryTranslations = {
     styling: "Style",
     backend: "Backend",
     article: "Article",
-  } as CategoryTranslations,
-} as const;
+  }
+} satisfies Record<"en" | "fr", CategoryTranslations>;
 
 /**
  * Get category translations for a specific language

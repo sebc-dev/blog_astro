@@ -2,8 +2,7 @@
  * Types TypeScript pour le composant Header
  */
 
-import type { UIKeys } from "../../i18n/ui";
-import type { Languages } from "../../i18n/ui";
+import type { UIKeys, Languages, CountryFlag } from "@/i18n/ui";
 
 // === TYPES POUR LA NAVIGATION ===
 export interface NavLink {
@@ -26,23 +25,22 @@ export interface ThemeConfig {
 }
 
 // === TYPES POUR LES DRAPEAUX ===
-/**
- * Union type for country flags used in language switching
- * Includes emoji flags for supported languages and generic fallback
- */
-export type CountryFlag =
-  | "🇺🇸" // United States (English)
-  | "🇫🇷" // France (French)
-  | "🌐"; // Generic/fallback flag
+// CountryFlag type is now imported from @/i18n/ui
+export type { CountryFlag };
 
 // === TYPES POUR LES ARTICLES ===
 export type ArticleTranslationMapping = Record<Languages, string | null>;
 
 export interface ArticleLanguageContext {
-  isArticlePage: boolean;
-  detectedLang: Languages | null;
-  translationMapping?: ArticleTranslationMapping;
-  articleSlug?: string;
+  readonly isArticlePage: boolean;
+  readonly detectedLang: Languages | null;
+  readonly articleSlug?: string;
+  readonly translationMapping?: Record<Languages, string | null>;
+  
+  // Nouveaux champs pour les pages de catégories
+  readonly isCategoryPage?: boolean;
+  readonly categorySlug?: string;
+  readonly categoryUrlMapping?: Record<string, string>;
 }
 
 export interface LanguageUrlData {

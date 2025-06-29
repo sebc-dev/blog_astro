@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { siteConfig, siteUtils, envConfig } from "../../config/site";
+import { siteConfig, siteUtils, envConfig } from "@/config/site";
 
 describe("Configuration du Site", () => {
   describe("siteConfig", () => {

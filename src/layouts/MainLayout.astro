@@ -1,9 +1,9 @@
 ---
-import Header from "../components/header/Header.astro";
-import Footer from "../components/Footer.astro";
-import { getLangFromUrl, useTranslations } from "../i18n/utils";
-import { siteConfig, siteUtils } from "../config/site";
-import "../assets/app.css";
+import Header from "@/components/layout/header/Header.astro";
+import Footer from "@/components/layout/Footer.astro";
+import { getLangFromUrl, useTranslations } from "@/i18n/utils";
+import { siteConfig, siteUtils } from "@/config/site";
+import "@/styles/global/app.css";
 
 // Props pour le layout
 interface Props {

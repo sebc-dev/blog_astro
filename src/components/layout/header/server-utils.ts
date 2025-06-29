@@ -2,11 +2,9 @@ import { getCollection } from "astro:content";
 import type { ArticleLanguageContext } from "./types";
 import {
   analyzeLanguageContextPure,
-  isArticlePage,
-  detectArticleLanguage,
-  extractArticleSlug,
 } from "./article-utils";
-import { getLangFromUrl } from "../../i18n/utils";
+import { analyzeLanguageContextUnified, pageDetectionManager } from "./page-utils";
+import { getLangFromUrl } from "@/i18n/utils";
 
 /**
  * Types d'erreur pour une gestion granulaire
@@ -63,17 +61,65 @@ function categorizeError(error: unknown): CollectionErrorType {
 /**
  * Crée un contexte de fallback sécurisé pour les pages d'articles
  * Préserve la détection de langue et les informations de base même sans données d'articles
+ * GARANTIT toujours isArticlePage: true puisque appelée uniquement pour les pages d'articles détectées
  */
 function createArticleFallbackContext(url: URL): ArticleLanguageContext {
-  const detectedLang = detectArticleLanguage(url);
-  const articleSlug = extractArticleSlug(url);
+  const detection = pageDetectionManager.detectPage(url);
+  
+  // Si la détection fonctionne et confirme une page d'article
+  if (detection?.pageInfo.pageType === "article") {
+    return {
+      isArticlePage: true,
+      detectedLang: detection.pageInfo.detectedLang || getLangFromUrl(url),
+      articleSlug: detection.pageInfo.slug || undefined,
+      isCategoryPage: false,
+      // translationMapping est omis délibérément car non fiable sans données
+    };
+  }
+
+  // Fallback : extraction manuelle depuis l'URL pour garantir un contexte d'article valide
+  // Cette fonction est appelée seulement pour les pages d'articles déjà détectées au niveau supérieur
+  const fallbackSlug = extractArticleSlugFromUrl(url);
+  const fallbackLang = getLangFromUrl(url);
+  
+  console.warn(
+    `Détection détaillée d'article échouée, fallback manuel pour ${url.pathname}`,
+    { extractedSlug: fallbackSlug, extractedLang: fallbackLang }
+  );
 
   return {
-    isArticlePage: true,
-    detectedLang: detectedLang || getLangFromUrl(url),
-    articleSlug: articleSlug || undefined,
-    // translationMapping est omis délibérément car non fiable sans données
+    isArticlePage: true, // TOUJOURS true car fonction appelée seulement pour articles détectés
+    detectedLang: fallbackLang,
+    articleSlug: fallbackSlug || undefined,
+    isCategoryPage: false,
+    // translationMapping omis car non fiable sans données d'articles
   };
+}
+
+/**
+ * Extrait le slug d'article directement depuis l'URL (fallback manuel)
+ * Réplique la logique de l'ArticleDetector en cas d'échec de détection
+ * @param url - URL courante
+ * @returns Le slug de l'article ou null si extraction impossible
+ */
+function extractArticleSlugFromUrl(url: URL): string | null {
+  try {
+    // Reproduire la logique de l'ArticleDetector
+    const pathSegments = url.pathname.split("/").filter(segment => segment !== "");
+    
+    // Chercher le pattern /blog/{lang}/{slug} ou /{lang}/blog/{slug}
+    const blogIndex = pathSegments.indexOf("blog");
+    
+    if (blogIndex !== -1 && pathSegments.length > blogIndex + 2) {
+      // Extraire le slug après /blog/{lang}/
+      return pathSegments.slice(blogIndex + 2).join("/");
+    }
+    
+    return null;
+  } catch (error) {
+    console.warn("Échec d'extraction manuelle du slug d'article:", error);
+    return null;
+  }
 }
 
 /**
@@ -89,11 +135,23 @@ export async function analyzeLanguageContext(
     // Récupérer tous les articles
     const allPosts = await getCollection("blog");
 
-    // Utiliser la logique pure avec les données complètes
-    return analyzeLanguageContextPure(url, allPosts);
+    // Utiliser le nouveau système unifié
+    const unifiedContext = analyzeLanguageContextUnified(url, allPosts);
+    
+    // Convertir vers l'ancien format pour la compatibilité
+    return {
+      isArticlePage: unifiedContext.isArticlePage,
+      detectedLang: unifiedContext.detectedLang,
+      articleSlug: unifiedContext.articleSlug,
+      translationMapping: unifiedContext.translationMapping,
+      isCategoryPage: unifiedContext.isCategoryPage,
+      categorySlug: unifiedContext.categorySlug,
+      categoryUrlMapping: unifiedContext.categoryUrlMapping,
+    };
   } catch (error) {
     const errorType = categorizeError(error);
-    const isArticle = isArticlePage(url);
+    const detection = pageDetectionManager.detectPage(url);
+    const isArticle = detection?.pageInfo.pageType === "article";
 
     console.error(
       `Erreur lors de la récupération des articles [${errorType}]:`,

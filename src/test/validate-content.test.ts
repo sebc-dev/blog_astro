@@ -5,7 +5,7 @@ import {
   validateAllContent,
   SLUG_REGEX,
   type BlogPost,
-} from "../scripts/validate-content-utils";
+} from "@/lib/content/validate-content-utils";
 
 describe("Content Validation Utils", () => {
   describe("validateTranslationIdUniqueness", () => {

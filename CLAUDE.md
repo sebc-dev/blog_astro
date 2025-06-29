@@ -184,3 +184,39 @@ From `.cursor/rules/`:
 - **MDX**: Blog posts use MDX format with frontmatter metadata
 - **SEO**: Proper meta descriptions and structured data
 - **Accessibility**: ARIA labels, alt text, keyboard navigation support
+
+## Header Component Architecture
+
+### Modular Detection System
+
+The header uses a **modular, extensible architecture** with Strategy pattern for page detection:
+
+- **Page Detectors**: `src/components/header/page-detectors/` - Detect page types (article, category, normal)
+- **URL Mappers**: `src/components/header/page-mappers/` - Generate language-specific URLs
+- **Main Orchestrator**: `PageDetectionManager` in `page-utils.ts`
+
+### Adding New Page Types
+
+1. Create detector implementing `PageDetector` interface
+2. Create mapper implementing `UrlMapper` interface  
+3. Register in `PageDetectionManager` constructor
+4. Update `PageType` union in `types.ts`
+
+## Cursor Rules Integration
+
+### Focus System
+- **IMPLEMENTATION**: For coding and feature development
+- **DEBUGGING**: For diagnostics and error correction
+
+### SOLID + Object Calisthenics
+- No `else` statements (use guard clauses)
+- One level of indentation max
+- Classes < 50-150 lines
+- Max 2 instance variables per class
+- Single Responsibility Principle
+
+### Testing Patterns
+- Use `includes()` over exact matches for cross-platform compatibility
+- Avoid fragile regex patterns
+- Test granularly with flexible assertions
+- Use `happy-dom` environment (2x faster than jsdom)

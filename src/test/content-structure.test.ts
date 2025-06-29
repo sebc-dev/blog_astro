@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { join } from "path";
-import { SLUG_REGEX } from "../scripts/validate-content-utils.js";
+import { SLUG_REGEX } from "../lib/content/validate-content-utils";
 
 const CONTENT_DIR = join(process.cwd(), "src", "content");
 

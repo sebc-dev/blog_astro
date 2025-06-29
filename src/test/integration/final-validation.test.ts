@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { estimateReadingTime } from "../../scripts/article-utils";
+import { estimateReadingTime } from "@/lib/article/article-utils";
 
 describe("Validation Finale - Section avec Vrais Articles", () => {
   it("devrait pouvoir récupérer les vraies collections d'articles", async () => {

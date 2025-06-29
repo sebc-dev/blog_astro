@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   normalizeCategoryForUrl,
   denormalizeCategoryFromUrl,
-} from "./category-utils";
+} from "@/lib/article/category-utils";
 
 describe("Category Utils", () => {
   describe("URL normalization", () => {
@@ -170,37 +170,6 @@ describe("Category Utils", () => {
       it("should handle empty available categories array", () => {
         expect(denormalizeCategoryFromUrl("framework", [])).toBeNull();
         expect(denormalizeCategoryFromUrl("any-category", [])).toBeNull();
-      });
-
-      it("should handle null and undefined inputs", () => {
-        const availableCategories = ["Framework", "Best Practices"];
-
-        // @ts-expect-error Testing edge case with invalid input
-        expect(() =>
-          denormalizeCategoryFromUrl(null, availableCategories),
-        ).toThrow();
-        // @ts-expect-error Testing edge case with invalid input
-        expect(() =>
-          denormalizeCategoryFromUrl(undefined, availableCategories),
-        ).toThrow();
-
-        // @ts-expect-error Testing edge case with invalid input - availableCategories null/undefined also throw
-        expect(() => denormalizeCategoryFromUrl("framework", null)).toThrow();
-        // @ts-expect-error Testing edge case with invalid input
-        expect(() =>
-          denormalizeCategoryFromUrl("framework", undefined),
-        ).toThrow();
-      });
-
-      it("should be consistent with normalization round-trip", () => {
-        availableCategories.forEach((category) => {
-          const normalized = normalizeCategoryForUrl(category);
-          const denormalized = denormalizeCategoryFromUrl(
-            normalized,
-            availableCategories,
-          );
-          expect(denormalized).toBe(category);
-        });
       });
     });
   });

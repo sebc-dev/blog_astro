@@ -4,6 +4,16 @@
  * Langues supportées : Anglais (en), Français (fr)
  */
 
+// === TYPES POUR LES DRAPEAUX ===
+/**
+ * Union type for country flags used in language switching
+ * Includes emoji flags for supported languages and generic fallback
+ */
+export type CountryFlag =
+  | "🇺🇸" // United States (English)
+  | "🇫🇷" // France (French)
+  | "🌐"; // Generic/fallback flag
+
 export const ui = {
   en: {
     // LANGUE PAR DÉFAUT

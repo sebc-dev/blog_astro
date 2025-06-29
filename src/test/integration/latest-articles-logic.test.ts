@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { getPostCategory, getPostTag } from "../../scripts/article-utils";
+  import { describe, it, expect } from "vitest";
+import { getPostCategory, getPostTag } from "@/lib/article/article-utils";
 
 describe("LatestArticlesSection - Logique Métier", () => {
   // Mock des données d'articles pour tester la logique

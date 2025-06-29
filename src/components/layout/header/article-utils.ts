@@ -2,17 +2,21 @@ import type { CollectionEntry } from "astro:content";
 import {
   getLangFromUrl,
   getPathWithoutLang,
-  isValidLang,
   getSupportedLanguages,
   generateLanguageUrls,
   generateLanguageUrlsForArticle,
-} from "../../i18n/utils";
-import type { Languages } from "../../i18n/ui";
+  getLanguageName,
+  getLanguageFlag,
+} from "@/i18n/utils";
+import type { Languages } from "@/i18n/ui";
 import type {
   ArticleLanguageContext,
   LanguageUrls,
   HreflangLink,
 } from "./types";
+
+// Import du nouveau système générique
+import { pageDetectionManager } from "./page-utils";
 
 // Type pour les articles de blog
 type BlogPost = CollectionEntry<"blog">;
@@ -34,9 +38,9 @@ export function extractSlugWithoutLanguagePrefix(
   // Utiliser une regex pour matcher précisément le préfixe de langue au début
   // Pattern: ^{language}/ suivi du reste du slug
   const languagePrefixPattern = new RegExp(`^${escapeRegExp(language)}/(.+)$`);
-  const match = fullSlug.match(languagePrefixPattern);
+  const match = languagePrefixPattern.exec(fullSlug);
 
-  return match?.[1] || null;
+  return match?.[1] ?? null;
 }
 
 /**
@@ -46,65 +50,6 @@ export function extractSlugWithoutLanguagePrefix(
  */
 function escapeRegExp(string: string): string {
   return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-/**
- * Détecte si l'URL courante correspond à une page d'article
- * @param url - URL courante
- * @returns true si c'est une page d'article, false sinon
- */
-export function isArticlePage(url: URL): boolean {
-  const currentPath = getPathWithoutLang(url);
-  return currentPath.startsWith("/blog/");
-}
-
-/**
- * Détecte la langue à partir d'une URL d'article
- * Format attendu: /blog/{lang}/{slug}
- * @param url - URL courante
- * @returns La langue détectée ou null si non trouvée
- */
-export function detectArticleLanguage(url: URL): Languages | null {
-  // Vérifier d'abord si c'est une page d'article pour éviter les faux positifs
-  if (!isArticlePage(url)) {
-    return null;
-  }
-
-  const pathSegments = url.pathname
-    .split("/")
-    .filter((segment) => segment !== "");
-
-  if (pathSegments.length >= 2 && pathSegments[0] === "blog") {
-    const articleLang = pathSegments[1];
-    if (isValidLang(articleLang)) {
-      return articleLang as Languages;
-    }
-  }
-
-  return null;
-}
-
-/**
- * Extrait le slug d'un article depuis l'URL
- * @param url - URL courante
- * @returns Le slug de l'article ou null si non trouvé
- */
-export function extractArticleSlug(url: URL): string | null {
-  // Vérifier d'abord si c'est une page d'article
-  if (!isArticlePage(url)) {
-    return null;
-  }
-
-  const currentPath = getPathWithoutLang(url);
-  const pathSegments = currentPath
-    .split("/")
-    .filter((segment) => segment !== "");
-
-  if (pathSegments.length >= 3 && pathSegments[0] === "blog") {
-    return pathSegments.slice(2).join("/");
-  }
-
-  return null;
 }
 
 /**
@@ -185,7 +130,7 @@ export function createArticleTranslationMappingPure(
 
 /**
  * Analyse le contexte linguistique d'une page (article ou page normale)
- * Version pure qui accepte les données en paramètre pour faciliter les tests
+ * Version synchrone pour la compatibilité avec les tests existants
  * @param url - URL courante
  * @param allPosts - Tous les articles de blog (optionnel)
  * @returns Contexte linguistique avec toutes les informations nécessaires
@@ -194,38 +139,52 @@ export function analyzeLanguageContextPure(
   url: URL,
   allPosts?: BlogPost[],
 ): ArticleLanguageContext {
-  const isArticle = isArticlePage(url);
-
-  if (!isArticle) {
+  // Utiliser le nouveau système de détection
+  const detection = pageDetectionManager.detectPage(url);
+  
+  if (!detection) {
+    // Fallback pour les pages non détectées
     return {
       isArticlePage: false,
       detectedLang: getLangFromUrl(url),
+      isCategoryPage: false,
     };
   }
 
-  const detectedLang = detectArticleLanguage(url);
-  const articleSlug = extractArticleSlug(url);
+  const { pageInfo } = detection;
 
-  if (!detectedLang) {
+  if (pageInfo.pageType === "article") {
+    // Logique pour les articles
+    const translationMapping = allPosts
+      ? createArticleTranslationMappingPure(url, allPosts)
+      : undefined;
+
     return {
       isArticlePage: true,
-      detectedLang: getLangFromUrl(url),
-      articleSlug: articleSlug ?? undefined,
+      detectedLang: pageInfo.detectedLang,
+      articleSlug: pageInfo.slug,
+      translationMapping,
+      isCategoryPage: false,
+    };
+  } else if (pageInfo.pageType === "category") {
+    // Logique pour les catégories
+    const categoryUrlMapping = pageDetectionManager.createUrlMapping(pageInfo, url);
+
+    return {
+      isArticlePage: false,
+      detectedLang: pageInfo.detectedLang,
+      isCategoryPage: true,
+      categorySlug: pageInfo.category,
+      categoryUrlMapping: categoryUrlMapping || undefined,
+    };
+  } else {
+    // Pages normales
+    return {
+      isArticlePage: false,
+      detectedLang: pageInfo.detectedLang,
+      isCategoryPage: false,
     };
   }
-
-  let translationMapping: Record<Languages, string | null> | undefined;
-
-  if (allPosts) {
-    translationMapping = createArticleTranslationMappingPure(url, allPosts);
-  }
-
-  return {
-    isArticlePage: true,
-    detectedLang,
-    translationMapping,
-    articleSlug: articleSlug || undefined,
-  };
 }
 
 /**
@@ -239,7 +198,7 @@ export function generateContextualLanguageUrls(
   currentUrl: URL,
 ): LanguageUrls {
   const currentPath = getPathWithoutLang(currentUrl);
-  const lang = context.detectedLang || getLangFromUrl(currentUrl);
+  const lang = context.detectedLang ?? getLangFromUrl(currentUrl);
 
   if (
     context.isArticlePage &&
@@ -253,6 +212,26 @@ export function generateContextualLanguageUrls(
       lang,
       context.translationMapping,
     );
+  } else if (
+    context.isCategoryPage &&
+    context.categoryUrlMapping
+  ) {
+    // Pour les pages de catégories, utiliser le mapping prédéfini
+    const supportedLanguages = getSupportedLanguages();
+    const result = {} as LanguageUrls;
+    
+    for (const targetLang of supportedLanguages) {
+      const url = context.categoryUrlMapping[targetLang] || "/";
+      
+      result[targetLang] = {
+        url,
+        isActive: lang === targetLang,
+        label: getLanguageName(targetLang),
+        flag: getLanguageFlag(targetLang),
+      };
+    }
+    
+    return result;
   } else {
     // Pour les pages normales
     return generateLanguageUrls(currentPath, lang);
