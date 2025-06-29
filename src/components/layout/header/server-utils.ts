@@ -4,7 +4,7 @@ import {
   analyzeLanguageContextPure,
 } from "./article-utils";
 import { analyzeLanguageContextUnified, pageDetectionManager } from "./page-utils";
-import { getLangFromUrl } from "@/i18n/utils";
+import { getLangFromUrl, getPathWithoutLang } from "@/i18n/utils";
 
 /**
  * Types d'erreur pour une gestion granulaire
@@ -66,12 +66,12 @@ function categorizeError(error: unknown): CollectionErrorType {
 function createArticleFallbackContext(url: URL): ArticleLanguageContext {
   const detection = pageDetectionManager.detectPage(url);
   
-  // Si la détection fonctionne et confirme une page d'article
-  if (detection?.pageInfo.pageType === "article") {
+  // Si la détection fonctionne et confirme une page d'article avec toutes les propriétés
+  if (detection?.pageInfo.pageType === "article" && detection.pageInfo.slug) {
     return {
       isArticlePage: true,
       detectedLang: detection.pageInfo.detectedLang || getLangFromUrl(url),
-      articleSlug: detection.pageInfo.slug || undefined,
+      articleSlug: detection.pageInfo.slug,
       isCategoryPage: false,
       // translationMapping est omis délibérément car non fiable sans données
     };
@@ -98,21 +98,27 @@ function createArticleFallbackContext(url: URL): ArticleLanguageContext {
 
 /**
  * Extrait le slug d'article directement depuis l'URL (fallback manuel)
- * Réplique la logique de l'ArticleDetector en cas d'échec de détection
+ * Réplique exactement la logique de l'ArticleDetector en cas d'échec de détection
  * @param url - URL courante
  * @returns Le slug de l'article ou null si extraction impossible
  */
 function extractArticleSlugFromUrl(url: URL): string | null {
   try {
-    // Reproduire la logique de l'ArticleDetector
-    const pathSegments = url.pathname.split("/").filter(segment => segment !== "");
+    // Reproduire exactement la logique de l'ArticleDetector
+    // 1. Utiliser getPathWithoutLang comme fait l'ArticleDetector
+    const currentPath = getPathWithoutLang(url);
     
-    // Chercher le pattern /blog/{lang}/{slug} ou /{lang}/blog/{slug}
-    const blogIndex = pathSegments.indexOf("blog");
+    // 2. Vérifier que c'est bien une page blog
+    if (!currentPath.startsWith("/blog/")) {
+      return null;
+    }
     
-    if (blogIndex !== -1 && pathSegments.length > blogIndex + 2) {
-      // Extraire le slug après /blog/{lang}/
-      return pathSegments.slice(blogIndex + 2).join("/");
+    // 3. Extraire et filtrer les segments (même logique que l'ArticleDetector)
+    const pathSegments = currentPath.split("/").filter((segment: string) => segment !== "");
+    
+    // 4. Vérifier la structure et extraire le slug (même logique que l'ArticleDetector)
+    if (pathSegments.length >= 3 && pathSegments[0] === "blog") {
+      return pathSegments.slice(2).join("/");
     }
     
     return null;
