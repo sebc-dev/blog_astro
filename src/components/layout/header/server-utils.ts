@@ -61,10 +61,12 @@ function categorizeError(error: unknown): CollectionErrorType {
 /**
  * Crée un contexte de fallback sécurisé pour les pages d'articles
  * Préserve la détection de langue et les informations de base même sans données d'articles
+ * GARANTIT toujours isArticlePage: true puisque appelée uniquement pour les pages d'articles détectées
  */
 function createArticleFallbackContext(url: URL): ArticleLanguageContext {
   const detection = pageDetectionManager.detectPage(url);
   
+  // Si la détection fonctionne et confirme une page d'article
   if (detection?.pageInfo.pageType === "article") {
     return {
       isArticlePage: true,
@@ -75,12 +77,49 @@ function createArticleFallbackContext(url: URL): ArticleLanguageContext {
     };
   }
 
-  // Fallback si la détection échoue
+  // Fallback : extraction manuelle depuis l'URL pour garantir un contexte d'article valide
+  // Cette fonction est appelée seulement pour les pages d'articles déjà détectées au niveau supérieur
+  const fallbackSlug = extractArticleSlugFromUrl(url);
+  const fallbackLang = getLangFromUrl(url);
+  
+  console.warn(
+    `Détection détaillée d'article échouée, fallback manuel pour ${url.pathname}`,
+    { extractedSlug: fallbackSlug, extractedLang: fallbackLang }
+  );
+
   return {
-    isArticlePage: false,
-    detectedLang: getLangFromUrl(url),
+    isArticlePage: true, // TOUJOURS true car fonction appelée seulement pour articles détectés
+    detectedLang: fallbackLang,
+    articleSlug: fallbackSlug || undefined,
     isCategoryPage: false,
+    // translationMapping omis car non fiable sans données d'articles
   };
+}
+
+/**
+ * Extrait le slug d'article directement depuis l'URL (fallback manuel)
+ * Réplique la logique de l'ArticleDetector en cas d'échec de détection
+ * @param url - URL courante
+ * @returns Le slug de l'article ou null si extraction impossible
+ */
+function extractArticleSlugFromUrl(url: URL): string | null {
+  try {
+    // Reproduire la logique de l'ArticleDetector
+    const pathSegments = url.pathname.split("/").filter(segment => segment !== "");
+    
+    // Chercher le pattern /blog/{lang}/{slug} ou /{lang}/blog/{slug}
+    const blogIndex = pathSegments.indexOf("blog");
+    
+    if (blogIndex !== -1 && pathSegments.length > blogIndex + 2) {
+      // Extraire le slug après /blog/{lang}/
+      return pathSegments.slice(blogIndex + 2).join("/");
+    }
+    
+    return null;
+  } catch (error) {
+    console.warn("Échec d'extraction manuelle du slug d'article:", error);
+    return null;
+  }
 }
 
 /**
