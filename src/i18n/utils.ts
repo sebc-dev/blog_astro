@@ -2,8 +2,7 @@
  * Utilitaires i18n pour la gestion des traductions et du routage multilingue
  */
 
-import { ui, defaultLang, type UIKeys, type Languages } from "@/i18n/ui";
-import type { CountryFlag } from "@/components/layout/header/types";
+import { ui, defaultLang, type UIKeys, type Languages, type CountryFlag } from "@/i18n/ui";
 
 /**
  * Détecte la langue à partir de l'URL

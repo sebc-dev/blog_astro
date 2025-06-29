@@ -4,6 +4,11 @@ import { getSupportedLanguages } from "@/i18n/utils";
 import { normalizeCategoryForUrl, denormalizeCategoryFromUrl } from "@/lib/article/category-utils";
 import type { UrlMapper, PageInfo, PageType } from "../page-detectors/types";
 
+const CATEGORY_PATHS = {
+  en: '/category/',
+  fr: '/fr/categorie/'
+} as const;
+
 /**
  * Mapper d'URLs pour les pages de catégories
  */
@@ -69,11 +74,7 @@ export class CategoryMapper implements UrlMapper {
         const normalizedName = normalizeCategoryForUrl(categoryName);
         
         // Générer l'URL complète selon la langue
-        if (lang === 'en') {
-          mapping[lang] = `/category/${normalizedName}`;
-        } else {
-          mapping[lang] = `/fr/categorie/${normalizedName}`;
-        }
+        mapping[lang] = `${CATEGORY_PATHS[lang] || CATEGORY_PATHS.en}${normalizedName}`;
       }
     }
 

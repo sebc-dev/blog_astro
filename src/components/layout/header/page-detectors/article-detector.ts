@@ -53,9 +53,7 @@ export class ArticleDetector implements PageDetector {
       return null;
     }
 
-    const pathSegments = url.pathname
-      .split("/")
-      .filter((segment) => segment !== "");
+    const pathSegments = this.extractFilteredPathSegments(url.pathname);
 
     if (pathSegments.length >= 2 && pathSegments[0] === "blog") {
       const articleLang = pathSegments[1];
@@ -78,14 +76,21 @@ export class ArticleDetector implements PageDetector {
     }
 
     const currentPath = getPathWithoutLang(url);
-    const pathSegments = currentPath
-      .split("/")
-      .filter((segment) => segment !== "");
+    const pathSegments = this.extractFilteredPathSegments(currentPath);
 
     if (pathSegments.length >= 3 && pathSegments[0] === "blog") {
       return pathSegments.slice(2).join("/");
     }
 
     return null;
+  }
+
+  /**
+   * Utilitaire privé pour extraire et filtrer les segments de chemin
+   * @param path - Chemin à analyser
+   * @returns Segments de chemin filtrés (sans segments vides)
+   */
+  private extractFilteredPathSegments(path: string): string[] {
+    return path.split("/").filter((segment) => segment !== "");
   }
 } 

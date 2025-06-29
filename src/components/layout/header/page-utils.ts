@@ -13,7 +13,8 @@ import type {
   PageType,
   ArticlePageInfo,
   CategoryPageInfo,
-  NormalPageInfo
+  NormalPageInfo,
+  UrlMapper
 } from "./page-detectors/types";
 import { isArticlePageInfo } from "./page-detectors/types";
 
@@ -21,7 +22,6 @@ import { isArticlePageInfo } from "./page-detectors/types";
 import { ArticleMapper } from "./page-mappers/article-mapper";
 import { CategoryMapper } from "./page-mappers/category-mapper";
 import { NormalMapper } from "./page-mappers/normal-mapper";
-import type { UrlMapper } from "./page-detectors/types";
 
 // Import des fonctions existantes pour la compatibilité
 import { createArticleTranslationMappingPure } from "./article-utils";
@@ -30,8 +30,8 @@ import { createArticleTranslationMappingPure } from "./article-utils";
  * Gestionnaire principal du système de détection de pages générique
  */
 export class PageDetectionManager {
-  private detectors: PageDetector[];
-  private mappers: Map<PageType, UrlMapper>;
+  private readonly detectors: PageDetector[];
+  private readonly mappers: Map<PageType, UrlMapper>;
 
   constructor() {
     // Initialiser les détecteurs dans l'ordre de priorité
@@ -86,7 +86,6 @@ export class PageDetectionManager {
   ): Record<string, string> | null {
     const mapper = this.mappers.get(pageInfo.pageType);
     if (!mapper) {
-      console.warn(`No mapper found for page type: ${pageInfo.pageType}`);
       return null;
     }
 
@@ -105,10 +104,10 @@ export class PageDetectionManager {
    * @param allPosts - Articles de blog (optionnel pour les articles)
    * @returns Informations complètes de la page
    */
-  async analyzePage(
+  analyzePage(
     url: URL,
     allPosts?: CollectionEntry<"blog">[]
-  ): Promise<ExtendedPageInfo | null> {
+  ): ExtendedPageInfo | null {
     const detection = this.detectPage(url);
     if (!detection) {
       return null;
@@ -123,48 +122,46 @@ export class PageDetectionManager {
       if (translationMapping) {
         additionalData = { translationMapping };
         urlMapping = this.createUrlMapping(detection.pageInfo, url, additionalData);
-        
-        // Enrichir les informations de l'article avec le mapping de traduction
-        const enrichedPageInfo: ArticlePageInfoExtended = {
-          ...detection.pageInfo,
-          translationMapping,
-          urlMapping,
-          usingFallback: false,
-        };
-        
-        return enrichedPageInfo;
       }
     }
 
     // Pour les autres types de pages
-    urlMapping = this.createUrlMapping(detection.pageInfo, url);
+    urlMapping ??= this.createUrlMapping(detection.pageInfo, url);
 
     // Créer l'objet étendu basé sur le type de page
+    let enrichedPageInfo: ExtendedPageInfo;
+
     switch (detection.pageInfo.pageType) {
       case "category":
-        return {
+        enrichedPageInfo = {
           ...detection.pageInfo,
           urlMapping,
           usingFallback: false,
         } as CategoryPageInfoExtended;
+        break;
       
       case "normal":
-        return {
+        enrichedPageInfo = {
           ...detection.pageInfo,
           urlMapping,
           usingFallback: true,
         } as NormalPageInfoExtended;
+        break;
       
       case "article":
-        return {
+        enrichedPageInfo = {
           ...detection.pageInfo,
+          translationMapping: additionalData?.translationMapping as Record<Languages, string | null> | undefined,
           urlMapping,
           usingFallback: false,
         } as ArticlePageInfoExtended;
+        break;
       
       default:
         return null;
     }
+
+    return enrichedPageInfo;
   }
 }
 
@@ -217,11 +214,11 @@ export const pageDetectionManager = new PageDetectionManager();
  * @param allPosts - Articles de blog (optionnel)
  * @returns Contexte linguistique unifié
  */
-export async function analyzeLanguageContextUnified(
+export function analyzeLanguageContextUnified(
   url: URL,
   allPosts?: CollectionEntry<"blog">[]
-): Promise<UnifiedLanguageContext> {
-  const pageInfo = await pageDetectionManager.analyzePage(url, allPosts);
+): UnifiedLanguageContext {
+  const pageInfo = pageDetectionManager.analyzePage(url, allPosts);
   
   if (!pageInfo) {
     // Fallback vers la détection basique
@@ -276,39 +273,3 @@ export async function analyzeLanguageContextUnified(
       };
   }
 }
-
-/**
- * TYPE SAFETY IMPROVEMENT DEMONSTRATION
- * 
- * BEFORE (Unsafe - could cause runtime errors):
- * ```typescript
- * translationMapping: pageInfo.pageType === "article" 
- *   ? (pageInfo as Record<string, unknown>).translationMapping as Record<Languages, string | null> | undefined
- *   : undefined,
- * ```
- * 
- * AFTER (Type-safe with discriminated unions):
- * ```typescript
- * switch (pageInfo.pageType) {
- *   case "article":
- *     // TypeScript knows this is ArticlePageInfo
- *     return {
- *       translationMapping: pageInfo.translationMapping, // ✅ Type-safe access
- *       // ...
- *     };
- *   case "category":
- *     // TypeScript knows this is CategoryPageInfo  
- *     return {
- *       categorySlug: pageInfo.category, // ✅ Type-safe access
- *       // ...
- *     };
- * }
- * ```
- * 
- * BENEFITS:
- * - ✅ Compile-time type checking
- * - ✅ IntelliSense support
- * - ✅ Prevents runtime errors from accessing undefined properties
- * - ✅ Self-documenting code through types
- * - ✅ Exhaustiveness checking in switch statements
- */ 

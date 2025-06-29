@@ -97,7 +97,7 @@ export async function analyzeLanguageContext(
     const allPosts = await getCollection("blog");
 
     // Utiliser le nouveau système unifié
-    const unifiedContext = await analyzeLanguageContextUnified(url, allPosts);
+    const unifiedContext = analyzeLanguageContextUnified(url, allPosts);
     
     // Convertir vers l'ancien format pour la compatibilité
     return {

@@ -21,8 +21,8 @@ export const categoryTranslations = {
     styling: "Style",
     backend: "Backend",
     article: "Article",
-  } as CategoryTranslations,
-} as const;
+  }
+} satisfies Record<"en" | "fr", CategoryTranslations>;
 
 /**
  * Get category translations for a specific language

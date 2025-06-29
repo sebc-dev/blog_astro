@@ -1,5 +1,5 @@
 ---
-import MainLayout from "../../layouts/MainLayout.astro";
+import MainLayout from "@/layouts/MainLayout.astro";
 import ArticleCard from "@/components/ui/ArticleCard.astro";
 import { useTranslations } from "@/i18n/utils";
 import { siteUtils } from "@/config/site";
@@ -209,8 +209,8 @@ const initialSortedPosts = [...postsData].sort(
   />
 
   <!-- Script de tri optimisé -->
-  <script>
-    import("@/lib/sorting/category-sort");
+  <script type="module">
+    import("../../lib/sorting/category-sort");
   </script>
 </MainLayout>
 
