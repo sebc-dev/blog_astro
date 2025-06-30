@@ -1,4 +1,5 @@
 ---
+import type { CollectionEntry } from "astro:content";
 import MainLayout from "@/layouts/MainLayout.astro";
 import ArticleCard from "@/components/ui/ArticleCard.astro";
 import { useTranslations } from "@/i18n/utils";
@@ -15,7 +16,7 @@ import {
 
 interface Props {
   tag: string;
-  posts: any[];
+  posts: CollectionEntry<"blog">[];
   lang: "en" | "fr";
   translations: TagTranslations;
   homeUrl: string;
@@ -52,7 +53,7 @@ const localeConfig = {
 };
 
 // Préparer les données pour le tri côté client
-const postsData = posts.map((post: any) => ({
+const postsData = posts.map((post) => ({
   ...post,
   category: getPostCategory(post, {
     translations: {

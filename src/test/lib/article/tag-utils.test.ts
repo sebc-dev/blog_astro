@@ -155,6 +155,47 @@ describe("normalizeTagForUrl", () => {
     expect(normalizeTagForUrl("Développement")).toBe("dveloppement");
   });
 
+  it("should normalize French special characters with accents", () => {
+    // Note: Current implementation removes accented characters entirely
+    // This documents the current behavior for French special characters
+    
+    // Test various acute accents (é) - accents are removed
+    expect(normalizeTagForUrl("Développé")).toBe("dvelopp");
+    expect(normalizeTagForUrl("Créé")).toBe("cr");
+    expect(normalizeTagForUrl("Généré")).toBe("gnr");
+    
+    // Test grave accents (è, à) - accents are removed
+    expect(normalizeTagForUrl("Système")).toBe("systme");
+    expect(normalizeTagForUrl("Modèle")).toBe("modle");
+    expect(normalizeTagForUrl("À propos")).toBe("propos");
+    
+    // Test circumflex accents (ê, ô, â, î, û) - accents are removed
+    expect(normalizeTagForUrl("Être")).toBe("tre");
+    expect(normalizeTagForUrl("Contrôle")).toBe("contrle");
+    expect(normalizeTagForUrl("Prêt")).toBe("prt");
+    expect(normalizeTagForUrl("Maître")).toBe("matre");
+    expect(normalizeTagForUrl("Sûr")).toBe("sr");
+    
+    // Test cedilla (ç) - cedilla is removed
+    expect(normalizeTagForUrl("Français")).toBe("franais");
+    expect(normalizeTagForUrl("Leçon")).toBe("leon");
+    expect(normalizeTagForUrl("Façon")).toBe("faon");
+    
+    // Test dieresis/umlaut (ë, ï, ü) - diacritics are removed
+    expect(normalizeTagForUrl("Noël")).toBe("nol");
+    expect(normalizeTagForUrl("Naïf")).toBe("naf");
+    expect(normalizeTagForUrl("Müller")).toBe("mller");
+    
+    // Test combinations of accents in same word - all accents removed
+    expect(normalizeTagForUrl("Créée")).toBe("cre");
+    expect(normalizeTagForUrl("Événement")).toBe("vnement");
+    expect(normalizeTagForUrl("Spécialité")).toBe("spcialit");
+    
+    // Test mixed case with accents - lowercase with accents removed
+    expect(normalizeTagForUrl("DéveloppeMENT Avancé")).toBe("dveloppement-avanc");
+    expect(normalizeTagForUrl("Méthode TRÈS Efficace")).toBe("mthode-trs-efficace");
+  });
+
   it("should handle multiple consecutive spaces and special chars", () => {
     expect(normalizeTagForUrl("  Multiple   Spaces  ")).toBe("multiple-spaces");
     expect(normalizeTagForUrl("Test---Tag")).toBe("test-tag");

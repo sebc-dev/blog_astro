@@ -127,7 +127,7 @@ const tagUrl = buildLocalizedUrl("tag", lang, tag ? normalizeTagForUrl(tag) : nu
         class="text-base-content/70 flex items-center gap-2 text-sm"
         data-cy="hero-reading-time-info"
       >
-        <span data-cy="hero-reading-time">{readingTime} min {lang === "fr" ? "de lecture" : "read"}</span>
+        <span data-cy="hero-reading-time">{readingTime} min {t("blog.readingTime")}</span>
       </div>
 
       <a

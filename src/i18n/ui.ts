@@ -35,6 +35,7 @@ export const ui = {
     "blog.relatedPosts": "Related Posts",
     "blog.noPostsFound": "No posts found",
     "blog.searchPlaceholder": "Search articles...",
+    "blog.readingTime": "read",
 
     // Latest Articles Section
     "latestArticles.title": "Latest Articles",
@@ -146,6 +147,7 @@ export const ui = {
     "blog.relatedPosts": "Articles similaires",
     "blog.noPostsFound": "Aucun article trouvé",
     "blog.searchPlaceholder": "Rechercher des articles...",
+    "blog.readingTime": "de lecture",
 
     // Latest Articles Section
     "latestArticles.title": "Derniers Articles",
