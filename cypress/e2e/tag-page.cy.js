@@ -195,11 +195,23 @@ describe("Tag Pages", () => {
       
       testTagUrls.forEach(url => {
         cy.request({ url, failOnStatusCode: false }).then((response) => {
+          // Vérifier explicitement que le statut est l'un des attendus
+          expect(response.status).to.be.oneOf([200, 404], 
+            `Expected status 200 or 404 for ${url}, but got ${response.status}`);
+          
           if (response.status === 200) {
+            // Le tag existe - vérifier que la page se charge correctement
             cy.visit(url);
             cy.get('.tag-page').should('exist');
+            cy.get('.tag-header').should('exist');
+            cy.get('.tag-header h1').should('contain', 'Articles with tag:');
+          } else if (response.status === 404) {
+            // Le tag n'existe pas - vérifier la page 404
+            cy.visit(url, { failOnStatusCode: false });
+            // La page 404 peut être gérée par Astro ou afficher un message approprié
+            cy.get('body').should('exist');
+            cy.log(`Tag page ${url} correctly returns 404 (tag does not exist)`);
           }
-          // Si 404, c'est normal - le tag n'existe peut-être pas
         });
       });
     });

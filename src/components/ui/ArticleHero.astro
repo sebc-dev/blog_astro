@@ -2,6 +2,7 @@
 import { getLangFromUrl, useTranslations } from "@/i18n/utils";
 import { normalizeCategoryForUrl } from "@/lib/article/category-utils";
 import { normalizeTagForUrl } from "@/lib/article/tag-utils";
+import { buildLocalizedUrl } from "@/utils/urlHelpers";
 
 export interface Props {
   title: string;
@@ -37,17 +38,7 @@ const formattedDate = pubDate.toLocaleDateString(locale, {
   day: "numeric",
 });
 
-// Helper function pour construire les URLs localisées
-function buildLocalizedUrl(basePath: string, lang: string, normalizedValue: string | null): string {
-  if (!normalizedValue) return "#";
-  
-  if (lang === "fr") {
-    const frBasePath = basePath === "category" ? "categorie" : basePath;
-    return `/fr/${frBasePath}/${normalizedValue}`;
-  }
-  
-  return `/${basePath}/${normalizedValue}`;
-}
+
 
 // URLs pour les catégories et tags
 const categoryUrl = buildLocalizedUrl("category", lang, category ? normalizeCategoryForUrl(category) : null);

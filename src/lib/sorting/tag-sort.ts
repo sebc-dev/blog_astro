@@ -36,6 +36,87 @@ interface TagTranslations {
 }
 
 /**
+ * Valide que les données des posts sont valides
+ */
+export function validatePostsData(data: unknown): data is PostData[] {
+  if (!Array.isArray(data)) {
+    console.error("Tag sort: Posts data is not an array", typeof data);
+    return false;
+  }
+
+  // Vérifier que chaque élément a la structure attendue
+  for (let i = 0; i < data.length; i++) {
+    const post = data[i];
+    if (!post || typeof post !== 'object') {
+      console.error(`Tag sort: Post at index ${i} is not an object`, post);
+      return false;
+    }
+
+    const typedPost = post as Record<string, unknown>;
+    
+    // Vérifications des propriétés essentielles
+    if (typeof typedPost.slug !== 'string') {
+      console.error(`Tag sort: Post at index ${i} missing valid slug`, typedPost);
+      return false;
+    }
+
+    if (!typedPost.data || typeof typedPost.data !== 'object') {
+      console.error(`Tag sort: Post at index ${i} missing valid data object`, typedPost);
+      return false;
+    }
+
+    const postData = typedPost.data as Record<string, unknown>;
+    if (typeof postData.title !== 'string' || 
+        typeof postData.description !== 'string' ||
+        (!postData.pubDate || (typeof postData.pubDate !== 'string' && !(postData.pubDate instanceof Date)))) {
+      console.error(`Tag sort: Post at index ${i} missing required data properties`, postData);
+      return false;
+    }
+
+    if (typeof typedPost.category !== 'string' ||
+        typeof typedPost.readingTime !== 'number' ||
+        typeof typedPost.formattedDate !== 'string') {
+      console.error(`Tag sort: Post at index ${i} missing required properties`, typedPost);
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/**
+ * Valide que les données de traduction sont valides
+ */
+export function validateTranslationsData(data: unknown): data is TagTranslations {
+  if (!data || typeof data !== 'object') {
+    console.error("Tag sort: Translations data is not an object", typeof data);
+    return false;
+  }
+
+  const translations = data as Record<string, unknown>;
+  const requiredProperties = [
+    'sortLabel',
+    'sortDateDesc', 
+    'sortDateAsc',
+    'sortTitleAsc',
+    'sortTitleDesc',
+    'sortReadingTimeAsc',
+    'sortReadingTimeDesc',
+    'readText',
+    'tagText'
+  ];
+
+  for (const prop of requiredProperties) {
+    if (typeof translations[prop] !== 'string') {
+      console.error(`Tag sort: Missing or invalid translation property: ${prop}`, translations[prop]);
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/**
  * Trie les articles selon l'option spécifiée (version côté client)
  */
 function sortPosts(posts: PostData[], sortOption: SortOption): PostData[] {
@@ -78,6 +159,26 @@ function sortPosts(posts: PostData[], sortOption: SortOption): PostData[] {
 }
 
 /**
+ * Échappe les caractères HTML pour prévenir les attaques XSS
+ */
+export function escapeHtml(unsafe: string | number | undefined | null): string {
+  if (unsafe === undefined || unsafe === null) {
+    return '';
+  }
+  
+  const text = String(unsafe);
+  const map: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  
+  return text.replace(/[&<>"']/g, (match) => map[match] || match);
+}
+
+/**
  * Applique le tri aux articles et met à jour l'affichage
  */
 function applySorting(posts: PostData[], sortOption: SortOption): PostData[] {
@@ -98,25 +199,25 @@ function updateArticlesGrid(
   const articlesHTML = sortedPosts
     .map((post) => {
       const tagBadge = post.tag
-        ? `<span class="badge badge-secondary badge-sm">${post.tag}</span>`
+        ? `<span class="badge badge-secondary badge-sm">${escapeHtml(post.tag)}</span>`
         : "";
 
       return `
         <article class="card bg-base-200 shadow-xl">
           <div class="card-body">
-            <h2 class="card-title text-base-content">${post.data.title}</h2>
-            <p class="text-base-content/70">${post.data.description}</p>
+            <h2 class="card-title text-base-content">${escapeHtml(post.data.title)}</h2>
+            <p class="text-base-content/70">${escapeHtml(post.data.description)}</p>
             <div class="flex flex-wrap gap-2 mt-2">
-              <span class="badge badge-primary badge-sm">${post.category}</span>
+              <span class="badge badge-primary badge-sm">${escapeHtml(post.category)}</span>
               ${tagBadge}
             </div>
             <div class="flex items-center justify-between mt-4">
-              <span class="text-sm text-muted-accessible">${post.formattedDate}</span>
-              <span class="text-sm text-muted-accessible">${post.readingTime} min</span>
+              <span class="text-sm text-muted-accessible">${escapeHtml(post.formattedDate)}</span>
+              <span class="text-sm text-muted-accessible">${escapeHtml(post.readingTime)} min</span>
             </div>
             <div class="card-actions justify-end">
-              <a href="/blog/${post.slug}" class="btn btn-primary btn-sm">
-                ${translations.readText}
+              <a href="/blog/${escapeHtml(post.slug)}" class="btn btn-primary btn-sm">
+                ${escapeHtml(translations.readText)}
               </a>
             </div>
           </div>
@@ -156,26 +257,91 @@ function handleSortChange(
  * Initialisation du module de tri
  */
 function initTagSort(): void {
-  // Récupérer les données des scripts JSON
+  // Vérification de l'existence des éléments avec validation du contenu
   const postsDataScript = document.getElementById("posts-data");
   const translationsDataScript = document.getElementById("translations-data");
 
-  if (!postsDataScript || !translationsDataScript) {
-    console.warn("Tag sort: Required data scripts not found");
+  // Validation de l'existence des éléments
+  if (!postsDataScript) {
+    console.error("Tag sort: Element with id 'posts-data' not found, aborting initialization");
+    return;
+  }
+
+  if (!translationsDataScript) {
+    console.error("Tag sort: Element with id 'translations-data' not found, aborting initialization");
+    return;
+  }
+
+  // Validation du contenu textuel des éléments
+  const postsTextContent = postsDataScript.textContent;
+  const translationsTextContent = translationsDataScript.textContent;
+
+  if (!postsTextContent || postsTextContent.trim() === "") {
+    console.error("Tag sort: Element 'posts-data' exists but contains no text content, aborting initialization");
+    return;
+  }
+
+  if (!translationsTextContent || translationsTextContent.trim() === "") {
+    console.error("Tag sort: Element 'translations-data' exists but contains no text content, aborting initialization");
+    return;
+  }
+
+  // Parsing JSON sécurisé avec gestion d'erreurs spécifique
+  let postsRaw: unknown;
+  let translationsRaw: unknown;
+
+  try {
+    postsRaw = JSON.parse(postsTextContent);
+  } catch (error) {
+    console.error("Tag sort: Failed to parse posts JSON data", {
+      error: error instanceof Error ? error.message : String(error),
+      textContent: postsTextContent.substring(0, 100) + "..." // Log excerpt for debugging
+    });
     return;
   }
 
   try {
-    const posts: PostData[] = JSON.parse(postsDataScript.textContent || "[]");
-    const translations: TagTranslations = JSON.parse(
-      translationsDataScript.textContent || "{}",
-    );
-
-    // Configurer la gestion des événements de tri
-    handleSortChange(posts, translations);
+    translationsRaw = JSON.parse(translationsTextContent);
   } catch (error) {
-    console.error("Tag sort: Error parsing data", error);
+    console.error("Tag sort: Failed to parse translations JSON data", {
+      error: error instanceof Error ? error.message : String(error),
+      textContent: translationsTextContent.substring(0, 100) + "..." // Log excerpt for debugging
+    });
+    return;
   }
+
+  // Vérification que les données posts sont un array avant validation avancée
+  if (!Array.isArray(postsRaw)) {
+    console.error("Tag sort: Parsed posts data is not an array", {
+      type: typeof postsRaw,
+      isArray: Array.isArray(postsRaw),
+      value: postsRaw
+    });
+    return;
+  }
+
+  // Validation stricte des données parsées avec les fonctions existantes
+  if (!validatePostsData(postsRaw)) {
+    console.error("Tag sort: Posts data validation failed, aborting initialization");
+    return;
+  }
+
+  if (!validateTranslationsData(translationsRaw)) {
+    console.error("Tag sort: Translations data validation failed, aborting initialization");
+    return;
+  }
+
+  // Les données sont maintenant typées et validées - safe to proceed
+  const posts: PostData[] = postsRaw;
+  const translations: TagTranslations = translationsRaw;
+
+  console.log("Tag sort: Successfully initialized with validated data", {
+    postsCount: posts.length,
+    translationsKeys: Object.keys(translations)
+  });
+
+  // Configurer la gestion des événements de tri
+  handleSortChange(posts, translations);
 }
 
 // Initialiser quand le DOM est prêt
