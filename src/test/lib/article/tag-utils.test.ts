@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import type { CollectionEntry } from "astro:content";
 import {
   getUniqueTags,
   filterPostsByTag,
@@ -14,6 +15,11 @@ interface TestPost {
     title: string;
     description: string;
   };
+}
+
+// Type assertion helper pour contourner la vérification TypeScript stricte
+function asTestPosts(posts: TestPost[]): CollectionEntry<"blog">[] {
+  return posts as unknown as CollectionEntry<"blog">[];
 }
 
 // Mock translations pour les tests
@@ -54,7 +60,7 @@ const mockPosts: TestPost[] = [
 
 describe("getUniqueTags", () => {
   it("should extract unique tags from posts", () => {
-    const tags = getUniqueTags(mockPosts as any, mockTagTranslations);
+    const tags = getUniqueTags(asTestPosts(mockPosts), mockTagTranslations);
     
     expect(tags).toContain("Guide");
     expect(tags).toContain("Comparison");
@@ -64,13 +70,13 @@ describe("getUniqueTags", () => {
   });
 
   it("should return sorted tags", () => {
-    const tags = getUniqueTags(mockPosts as any, mockTagTranslations);
+    const tags = getUniqueTags(asTestPosts(mockPosts), mockTagTranslations);
     
     expect(tags).toEqual(["Best Practices", "Comparison", "Guide", "Optimization"]);
   });
 
   it("should work with French translations", () => {
-    const tags = getUniqueTags(mockPosts as any, mockTagTranslationsFr);
+    const tags = getUniqueTags(asTestPosts(mockPosts), mockTagTranslationsFr);
     
     expect(tags).toContain("Guide");
     expect(tags).toContain("Comparaison");
@@ -79,7 +85,7 @@ describe("getUniqueTags", () => {
   });
 
   it("should handle empty posts array", () => {
-    const tags = getUniqueTags([], mockTagTranslations);
+    const tags = getUniqueTags(asTestPosts([]), mockTagTranslations);
     
     expect(tags).toEqual([]);
   });
@@ -87,41 +93,41 @@ describe("getUniqueTags", () => {
 
 describe("filterPostsByTag", () => {
   it("should filter posts by Guide tag", () => {
-    const filteredPosts = filterPostsByTag(mockPosts as any, "Guide", mockTagTranslations);
+    const filteredPosts = filterPostsByTag(asTestPosts(mockPosts), "Guide", mockTagTranslations);
     
     expect(filteredPosts).toHaveLength(1);
     expect(filteredPosts[0].data.title).toBe("Getting Started Guide");
   });
 
   it("should filter posts by Comparison tag", () => {
-    const filteredPosts = filterPostsByTag(mockPosts as any, "Comparison", mockTagTranslations);
+    const filteredPosts = filterPostsByTag(asTestPosts(mockPosts), "Comparison", mockTagTranslations);
     
     expect(filteredPosts).toHaveLength(1);
     expect(filteredPosts[0].data.title).toBe("Performance vs Speed");
   });
 
   it("should filter posts by Best Practices tag", () => {
-    const filteredPosts = filterPostsByTag(mockPosts as any, "Best Practices", mockTagTranslations);
+    const filteredPosts = filterPostsByTag(asTestPosts(mockPosts), "Best Practices", mockTagTranslations);
     
     expect(filteredPosts).toHaveLength(1);
     expect(filteredPosts[0].data.title).toBe("Best Practices for React");
   });
 
   it("should filter posts by Optimization tag", () => {
-    const filteredPosts = filterPostsByTag(mockPosts as any, "Optimization", mockTagTranslations);
+    const filteredPosts = filterPostsByTag(asTestPosts(mockPosts), "Optimization", mockTagTranslations);
     
     expect(filteredPosts).toHaveLength(1);
     expect(filteredPosts[0].data.title).toBe("API Optimization Tips");
   });
 
   it("should return empty array for non-existent tag", () => {
-    const filteredPosts = filterPostsByTag(mockPosts as any, "Non-existent", mockTagTranslations);
+    const filteredPosts = filterPostsByTag(asTestPosts(mockPosts), "Non-existent", mockTagTranslations);
     
     expect(filteredPosts).toEqual([]);
   });
 
   it("should work with French translations", () => {
-    const filteredPosts = filterPostsByTag(mockPosts as any, "Optimisation", mockTagTranslationsFr);
+    const filteredPosts = filterPostsByTag(asTestPosts(mockPosts), "Optimisation", mockTagTranslationsFr);
     
     expect(filteredPosts).toHaveLength(1);
     expect(filteredPosts[0].data.title).toBe("API Optimization Tips");

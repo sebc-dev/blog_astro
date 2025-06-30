@@ -37,14 +37,21 @@ const formattedDate = pubDate.toLocaleDateString(locale, {
   day: "numeric",
 });
 
-// URLs pour les catégories et tags
-const categoryUrl = category ? 
-  (lang === "fr" ? `/fr/categorie/${normalizeCategoryForUrl(category)}` : `/category/${normalizeCategoryForUrl(category)}`) : 
-  "#";
+// Helper function pour construire les URLs localisées
+function buildLocalizedUrl(basePath: string, lang: string, normalizedValue: string | null): string {
+  if (!normalizedValue) return "#";
+  
+  if (lang === "fr") {
+    const frBasePath = basePath === "category" ? "categorie" : basePath;
+    return `/fr/${frBasePath}/${normalizedValue}`;
+  }
+  
+  return `/${basePath}/${normalizedValue}`;
+}
 
-const tagUrl = tag ? 
-  (lang === "fr" ? `/fr/tag/${normalizeTagForUrl(tag)}` : `/tag/${normalizeTagForUrl(tag)}`) : 
-  "#";
+// URLs pour les catégories et tags
+const categoryUrl = buildLocalizedUrl("category", lang, category ? normalizeCategoryForUrl(category) : null);
+const tagUrl = buildLocalizedUrl("tag", lang, tag ? normalizeTagForUrl(tag) : null);
 ---
 
 <article
