@@ -1,5 +1,7 @@
 ---
 import { getLangFromUrl, useTranslations } from "@/i18n/utils";
+import { normalizeCategoryForUrl } from "@/lib/article/category-utils";
+import { normalizeTagForUrl } from "@/lib/article/tag-utils";
 
 export interface Props {
   title: string;
@@ -28,11 +30,21 @@ const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 
 // Formatage de la date
-const formattedDate = pubDate.toLocaleDateString("fr-FR", {
+const locale = lang === "fr" ? "fr-FR" : "en-US";
+const formattedDate = pubDate.toLocaleDateString(locale, {
   year: "numeric",
   month: "long",
   day: "numeric",
 });
+
+// URLs pour les catégories et tags
+const categoryUrl = category ? 
+  (lang === "fr" ? `/fr/categorie/${normalizeCategoryForUrl(category)}` : `/category/${normalizeCategoryForUrl(category)}`) : 
+  "#";
+
+const tagUrl = tag ? 
+  (lang === "fr" ? `/fr/tag/${normalizeTagForUrl(tag)}` : `/tag/${normalizeTagForUrl(tag)}`) : 
+  "#";
 ---
 
 <article
@@ -59,19 +71,24 @@ const formattedDate = pubDate.toLocaleDateString("fr-FR", {
     <div class="mb-4 flex flex-wrap gap-2" data-cy="hero-metadata">
       {
         category && (
-          <span class="badge badge-primary badge-lg" data-cy="hero-category">
+          <a 
+            href={categoryUrl} 
+            class="badge badge-primary badge-lg hover:badge-primary-focus transition-colors" 
+            data-cy="hero-category"
+          >
             {category}
-          </span>
+          </a>
         )
       }
       {
         tag && (
-          <span
-            class="badge badge-secondary badge-outline badge-lg"
+          <a
+            href={tagUrl}
+            class="badge badge-secondary badge-outline badge-lg hover:badge-secondary-focus transition-colors"
             data-cy="hero-tag"
           >
             {tag}
-          </span>
+          </a>
         )
       }
       <span class="text-base-content/70 ml-auto text-sm" data-cy="hero-date">
@@ -103,7 +120,7 @@ const formattedDate = pubDate.toLocaleDateString("fr-FR", {
         class="text-base-content/70 flex items-center gap-2 text-sm"
         data-cy="hero-reading-time-info"
       >
-        <span data-cy="hero-reading-time">{readingTime} min de lecture</span>
+        <span data-cy="hero-reading-time">{readingTime} min {lang === "fr" ? "de lecture" : "read"}</span>
       </div>
 
       <a

@@ -1,5 +1,7 @@
 ---
 import { getLangFromUrl, useTranslations } from "@/i18n/utils";
+import { normalizeCategoryForUrl } from "@/lib/article/category-utils";
+import { normalizeTagForUrl } from "@/lib/article/tag-utils";
 
 export interface Props {
   title: string;
@@ -40,6 +42,15 @@ const shortDescription =
   description.length > 120
     ? description.substring(0, 120) + "..."
     : description;
+
+// URLs pour les catégories et tags
+const categoryUrl = category ? 
+  (lang === "fr" ? `/fr/categorie/${normalizeCategoryForUrl(category)}` : `/category/${normalizeCategoryForUrl(category)}`) : 
+  "#";
+
+const tagUrl = tag ? 
+  (lang === "fr" ? `/fr/tag/${normalizeTagForUrl(tag)}` : `/tag/${normalizeTagForUrl(tag)}`) : 
+  "#";
 ---
 
 <article
@@ -69,16 +80,24 @@ const shortDescription =
     <div class="mb-3 flex flex-wrap gap-1" data-cy="article-metadata">
       {
         category && (
-          <span class="badge badge-primary badge-sm" data-cy="article-category">
+          <a 
+            href={categoryUrl} 
+            class="badge badge-primary badge-sm hover:badge-primary-focus transition-colors" 
+            data-cy="article-category"
+          >
             {category}
-          </span>
+          </a>
         )
       }
       {
         tag && (
-          <span class="badge badge-outline badge-sm" data-cy="article-tag">
+          <a 
+            href={tagUrl} 
+            class="badge badge-outline badge-sm hover:badge-secondary-focus transition-colors" 
+            data-cy="article-tag"
+          >
             {tag}
-          </span>
+          </a>
         )
       }
       <span

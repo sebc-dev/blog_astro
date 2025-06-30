@@ -1,0 +1,217 @@
+---
+import MainLayout from "@/layouts/MainLayout.astro";
+import ArticleCard from "@/components/ui/ArticleCard.astro";
+import { useTranslations } from "@/i18n/utils";
+import { siteUtils } from "@/config/site";
+import {
+  estimateReadingTime,
+  getPostCategory,
+  getPostTag,
+} from "@/lib/article/article-utils";
+import {
+  normalizeTagForUrl,
+  type TagTranslations,
+} from "@/lib/article/tag-utils";
+
+interface Props {
+  tag: string;
+  posts: any[];
+  lang: "en" | "fr";
+  translations: TagTranslations;
+  homeUrl: string;
+  tagBaseUrl: string;
+}
+
+const { tag, posts, lang, translations, homeUrl, tagBaseUrl } =
+  Astro.props;
+
+// Système d'internationalisation
+const t = useTranslations(lang);
+
+// Métadonnées SEO
+const title = t("tag.page.title").replace("{tag}", tag);
+const description = t("tag.page.subtitle").replace("{tag}", tag);
+const canonicalUrl = siteUtils.getCanonicalUrl(
+  `${tagBaseUrl}${normalizeTagForUrl(tag)}`,
+);
+
+// URLs alternatives pour hreflang
+const alternateUrls = {
+  en: siteUtils.getCanonicalUrl(
+    `/tag/${normalizeTagForUrl(tag)}`,
+  ),
+  fr: siteUtils.getCanonicalUrl(
+    `/fr/tag/${normalizeTagForUrl(tag)}`,
+  ),
+};
+
+// Paramètres de localisation
+const localeConfig = {
+  en: { locale: "en_US", dateLocale: "en-US" },
+  fr: { locale: "fr_FR", dateLocale: "fr-FR" },
+};
+
+// Préparer les données pour le tri côté client
+const postsData = posts.map((post: any) => ({
+  ...post,
+  category: getPostCategory(post, {
+    translations: {
+      framework: t("category.framework"),
+      language: t("category.language"),
+      performance: t("category.performance"),
+      styling: t("category.styling"),
+      backend: t("category.backend"),
+      article: t("category.article"),
+    },
+  }),
+  tag: getPostTag(post, { translations }),
+  readingTime: estimateReadingTime(post, lang),
+  formattedDate: post.data.pubDate.toLocaleDateString(
+    localeConfig[lang].dateLocale,
+    {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    },
+  ),
+}));
+
+// Tri initial par date (plus récent en premier)
+const initialSortedPosts = [...postsData].sort(
+  (a, b) =>
+    new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime(),
+);
+---
+
+<MainLayout title={title} description={description}>
+  <!-- Métadonnées SEO spécifiques -->
+  <meta slot="head" property="og:type" content="website" />
+  <meta slot="head" name="robots" content="index, follow" />
+  <link slot="head" rel="canonical" href={canonicalUrl} />
+  <meta slot="head" property="og:locale" content={localeConfig[lang].locale} />
+  <link slot="head" rel="alternate" hreflang="en" href={alternateUrls.en} />
+  <link slot="head" rel="alternate" hreflang="fr" href={alternateUrls.fr} />
+
+  <div class="tag-page mx-auto max-w-7xl px-4 py-8">
+    <!-- En-tête de la page -->
+    <header
+      class="tag-header bg-base-300 border-base-content/10 mb-12 rounded-lg border p-8 text-center shadow-lg"
+    >
+      <!-- Breadcrumb -->
+      <nav class="breadcrumb mb-6" aria-label="Breadcrumb">
+        <ol
+          class="text-muted-accessible flex items-center justify-center gap-2 text-sm"
+        >
+          <li>
+            <a href={homeUrl} class="link link-hover">
+              {t("tag.page.backToHome")}
+            </a>
+          </li>
+          <li class="opacity-60">/</li>
+          <li>
+            <span class="text-primary font-medium">{tag}</span>
+          </li>
+        </ol>
+      </nav>
+
+      <!-- Titre et description -->
+      <h1 class="text-base-content mb-4 text-4xl font-bold">
+        {title}
+      </h1>
+      <p class="text-muted-accessible mx-auto max-w-2xl text-lg">
+        {description}
+      </p>
+    </header>
+
+    <!-- Contrôles de tri -->
+    <div
+      class="tag-controls mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center"
+    >
+      <div class="sort-controls">
+        <label
+          for="sort-select"
+          class="text-base-content mb-2 block text-sm font-medium"
+        >
+          {t("sort.label")}
+        </label>
+        <select
+          id="sort-select"
+          class="select select-bordered w-full max-w-xs"
+          data-cy="tag-sort-select"
+        >
+          <option value="date-desc" selected>{t("sort.dateDesc")}</option>
+          <option value="date-asc">{t("sort.dateAsc")}</option>
+          <option value="title-asc">{t("sort.titleAsc")}</option>
+          <option value="title-desc">{t("sort.titleDesc")}</option>
+          <option value="reading-time-asc">{t("sort.readingTimeAsc")}</option>
+          <option value="reading-time-desc">{t("sort.readingTimeDesc")}</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Grille d'articles -->
+    {
+      initialSortedPosts.length > 0 ? (
+        <div
+          id="articles-grid"
+          class="articles-grid grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+          data-cy="tag-articles-grid"
+        >
+          {initialSortedPosts.map((post) => (
+            <ArticleCard
+              title={post.data.title}
+              description={post.data.description}
+              heroImage={post.data.heroImage}
+              pubDate={post.data.pubDate}
+              category={post.category}
+              tag={post.tag}
+              slug={post.slug}
+              readingTime={post.readingTime}
+            />
+          ))}
+        </div>
+      ) : (
+        <div class="no-articles py-16 text-center" data-cy="no-articles">
+          <div class="bg-base-200 mx-auto max-w-md rounded-lg p-8">
+            <h3 class="mb-2 text-xl font-semibold">
+              {t("tag.page.noArticles")}
+            </h3>
+            <p class="text-muted-accessible mb-4">
+              {t("tag.page.noArticlesDesc")}
+            </p>
+            <a href={homeUrl} class="btn btn-primary">
+              {t("tag.page.backToHome")}
+            </a>
+          </div>
+        </div>
+      )
+    }
+  </div>
+
+  <!-- Données cachées pour le script de tri -->
+  <script
+    type="application/json"
+    id="posts-data"
+    set:text={JSON.stringify(postsData)}
+  />
+  <script
+    type="application/json"
+    id="translations-data"
+    set:text={JSON.stringify({
+      sortLabel: t("sort.label"),
+      sortDateDesc: t("sort.dateDesc"),
+      sortDateAsc: t("sort.dateAsc"),
+      sortTitleAsc: t("sort.titleAsc"),
+      sortTitleDesc: t("sort.titleDesc"),
+      sortReadingTimeAsc: t("sort.readingTimeAsc"),
+      sortReadingTimeDesc: t("sort.readingTimeDesc"),
+      readText: t("blog.read"),
+      tagText: tag,
+    })}
+  />
+
+  <!-- Script de tri optimisé -->
+  <script type="module">
+    import("../../lib/sorting/tag-sort");
+  </script>
+</MainLayout>

@@ -5,6 +5,7 @@ import { getLangFromUrl } from "@/i18n/utils";
 // Import des détecteurs
 import { ArticleDetector } from "./page-detectors/article-detector";
 import { CategoryDetector } from "./page-detectors/category-detector";
+import { TagDetector } from "./page-detectors/tag-detector";
 import { NormalDetector } from "./page-detectors/normal-detector";
 import type { 
   PageDetector, 
@@ -13,6 +14,7 @@ import type {
   PageType,
   ArticlePageInfo,
   CategoryPageInfo,
+  TagPageInfo,
   NormalPageInfo,
   UrlMapper
 } from "./page-detectors/types";
@@ -21,6 +23,7 @@ import { isArticlePageInfo } from "./page-detectors/types";
 // Import des mappers
 import { ArticleMapper } from "./page-mappers/article-mapper";
 import { CategoryMapper } from "./page-mappers/category-mapper";
+import { TagMapper } from "./page-mappers/tag-mapper";
 import { NormalMapper } from "./page-mappers/normal-mapper";
 
 // Import des fonctions existantes pour la compatibilité
@@ -39,6 +42,7 @@ export class PageDetectionManager {
     this.detectors = [
       new ArticleDetector(),
       new CategoryDetector(),
+      new TagDetector(),
       new NormalDetector(), // Fallback en dernier
     ];
 
@@ -46,6 +50,7 @@ export class PageDetectionManager {
     this.mappers = new Map([
       ["article", new ArticleMapper()],
       ["category", new CategoryMapper()],
+      ["tag", new TagMapper()],
       ["normal", new NormalMapper()],
     ]);
   }
@@ -140,6 +145,14 @@ export class PageDetectionManager {
         } as CategoryPageInfoExtended;
         break;
       
+      case "tag":
+        enrichedPageInfo = {
+          ...detection.pageInfo,
+          urlMapping,
+          usingFallback: false,
+        } as TagPageInfoExtended;
+        break;
+      
       case "normal":
         enrichedPageInfo = {
           ...detection.pageInfo,
@@ -178,6 +191,11 @@ export interface CategoryPageInfoExtended extends CategoryPageInfo {
   readonly usingFallback: false;
 }
 
+export interface TagPageInfoExtended extends TagPageInfo {
+  readonly urlMapping: Record<string, string> | null;
+  readonly usingFallback: false;
+}
+
 export interface NormalPageInfoExtended extends NormalPageInfo {
   readonly urlMapping: Record<string, string> | null;
   readonly usingFallback: true;
@@ -186,7 +204,7 @@ export interface NormalPageInfoExtended extends NormalPageInfo {
 /**
  * Union discriminée des informations étendues de page
  */
-export type ExtendedPageInfo = ArticlePageInfoExtended | CategoryPageInfoExtended | NormalPageInfoExtended;
+export type ExtendedPageInfo = ArticlePageInfoExtended | CategoryPageInfoExtended | TagPageInfoExtended | NormalPageInfoExtended;
 
 /**
  * Contexte linguistique unifié (compatible avec l'ancien système)
@@ -199,6 +217,9 @@ export interface UnifiedLanguageContext {
   readonly isCategoryPage?: boolean;
   readonly categorySlug?: string;
   readonly categoryUrlMapping?: Record<string, string>;
+  readonly isTagPage?: boolean;
+  readonly tagSlug?: string;
+  readonly tagUrlMapping?: Record<string, string>;
   readonly pageType: PageType;
   readonly urlMapping?: Record<string, string> | null;
 }
@@ -227,6 +248,7 @@ export function analyzeLanguageContextUnified(
       detectedLang: getLangFromUrl(url),
       pageType: "normal",
       isCategoryPage: false,
+      isTagPage: false,
     };
   }
 
@@ -239,6 +261,7 @@ export function analyzeLanguageContextUnified(
         articleSlug: pageInfo.slug,
         translationMapping: pageInfo.translationMapping,
         isCategoryPage: false,
+        isTagPage: false,
         pageType: pageInfo.pageType,
         urlMapping: pageInfo.urlMapping,
       };
@@ -250,6 +273,19 @@ export function analyzeLanguageContextUnified(
         isCategoryPage: true,
         categorySlug: pageInfo.category,
         categoryUrlMapping: pageInfo.urlMapping || undefined,
+        isTagPage: false,
+        pageType: pageInfo.pageType,
+        urlMapping: pageInfo.urlMapping,
+      };
+    
+    case "tag":
+      return {
+        isArticlePage: false,
+        detectedLang: pageInfo.detectedLang,
+        isCategoryPage: false,
+        isTagPage: true,
+        tagSlug: pageInfo.tag,
+        tagUrlMapping: pageInfo.urlMapping || undefined,
         pageType: pageInfo.pageType,
         urlMapping: pageInfo.urlMapping,
       };
@@ -259,6 +295,7 @@ export function analyzeLanguageContextUnified(
         isArticlePage: false,
         detectedLang: pageInfo.detectedLang,
         isCategoryPage: false,
+        isTagPage: false,
         pageType: pageInfo.pageType,
         urlMapping: pageInfo.urlMapping,
       };
@@ -270,6 +307,7 @@ export function analyzeLanguageContextUnified(
         detectedLang: getLangFromUrl(url),
         pageType: "normal" as const,
         isCategoryPage: false,
+        isTagPage: false,
       };
   }
 }
