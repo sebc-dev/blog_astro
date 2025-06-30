@@ -3,7 +3,7 @@ import type { Languages } from "@/i18n/ui";
 /**
  * Types de pages supportées par le système de détection
  */
-export type PageType = "article" | "category" | "normal";
+export type PageType = "article" | "category" | "tag" | "normal";
 
 /**
  * Interface générique pour les détecteurs de pages
@@ -55,6 +55,14 @@ export interface CategoryPageInfo extends BasePageInfo {
 }
 
 /**
+ * Informations spécifiques aux pages de tags
+ */
+export interface TagPageInfo extends BasePageInfo {
+  readonly pageType: "tag";
+  readonly tag: string;
+}
+
+/**
  * Informations spécifiques aux pages normales
  */
 export interface NormalPageInfo extends BasePageInfo {
@@ -64,7 +72,7 @@ export interface NormalPageInfo extends BasePageInfo {
 /**
  * Union discriminée des informations de page
  */
-export type PageInfo = ArticlePageInfo | CategoryPageInfo | NormalPageInfo;
+export type PageInfo = ArticlePageInfo | CategoryPageInfo | TagPageInfo | NormalPageInfo;
 
 /**
  * Type guards pour les types de pages
@@ -75,6 +83,10 @@ export function isArticlePageInfo(pageInfo: PageInfo): pageInfo is ArticlePageIn
 
 export function isCategoryPageInfo(pageInfo: PageInfo): pageInfo is CategoryPageInfo {
   return pageInfo.pageType === "category";
+}
+
+export function isTagPageInfo(pageInfo: PageInfo): pageInfo is TagPageInfo {
+  return pageInfo.pageType === "tag";
 }
 
 export function isNormalPageInfo(pageInfo: PageInfo): pageInfo is NormalPageInfo {

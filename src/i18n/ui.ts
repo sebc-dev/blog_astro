@@ -35,6 +35,7 @@ export const ui = {
     "blog.relatedPosts": "Related Posts",
     "blog.noPostsFound": "No posts found",
     "blog.searchPlaceholder": "Search articles...",
+    "blog.readingTime": "read",
 
     // Latest Articles Section
     "latestArticles.title": "Latest Articles",
@@ -68,6 +69,16 @@ export const ui = {
       "No articles have been published in this category yet.",
     "category.page.backToHome": "Back to home",
     "category.page.allCategories": "All categories",
+
+    // Tag pages
+    "tag.page.title": "Articles with tag: {tag}",
+    "tag.page.subtitle":
+      "Discover all our articles with the {tag} tag",
+    "tag.page.noArticles": "No articles found",
+    "tag.page.noArticlesDesc":
+      "No articles have been published with this tag yet.",
+    "tag.page.backToHome": "Back to home",
+    "tag.page.allTags": "All tags",
 
     // Sorting
     "sort.label": "Sort by",
@@ -136,6 +147,7 @@ export const ui = {
     "blog.relatedPosts": "Articles similaires",
     "blog.noPostsFound": "Aucun article trouvé",
     "blog.searchPlaceholder": "Rechercher des articles...",
+    "blog.readingTime": "de lecture",
 
     // Latest Articles Section
     "latestArticles.title": "Derniers Articles",
@@ -169,6 +181,16 @@ export const ui = {
       "Aucun article n'a encore été publié dans cette catégorie.",
     "category.page.backToHome": "Retour à l'accueil",
     "category.page.allCategories": "Toutes les catégories",
+
+    // Tag pages
+    "tag.page.title": "Articles avec le tag : {tag}",
+    "tag.page.subtitle":
+      "Découvrez tous nos articles avec le tag {tag}",
+    "tag.page.noArticles": "Aucun article trouvé",
+    "tag.page.noArticlesDesc":
+      "Aucun article n'a encore été publié avec ce tag.",
+    "tag.page.backToHome": "Retour à l'accueil",
+    "tag.page.allTags": "Tous les tags",
 
     // Sorting
     "sort.label": "Trier par",

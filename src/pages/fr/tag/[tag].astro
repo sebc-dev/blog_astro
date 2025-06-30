@@ -1,0 +1,58 @@
+---
+import TagPage from "@/components/pages/TagPage.astro";
+import { getCollection } from "astro:content";
+import {
+  getUniqueTags,
+  filterPostsByTag,
+  normalizeTagForUrl,
+} from "@/lib/article/tag-utils";
+import { getTagTranslations } from "@/i18n/tag-translations";
+
+export async function getStaticPaths() {
+  // Récupérer tous les articles
+  const allPosts = await getCollection("blog");
+
+  // Filtrer uniquement les articles français
+  const frenchPosts = allPosts.filter((post) => post.data.lang === "fr");
+
+  // Récupérer les traductions françaises des tags depuis le fichier centralisé
+  const frenchTranslations = getTagTranslations("fr");
+
+  // Extraire les tags uniques des articles français
+  const tags = getUniqueTags(frenchPosts, frenchTranslations);
+
+  const paths = [];
+
+  for (const tag of tags) {
+    const urlTag = normalizeTagForUrl(tag);
+    const tagPosts = filterPostsByTag(
+      frenchPosts,
+      tag,
+      frenchTranslations,
+    );
+
+    paths.push({
+      params: { tag: urlTag },
+      props: {
+        tag,
+        posts: tagPosts,
+        lang: "fr",
+        translations: frenchTranslations,
+      },
+    });
+  }
+
+  return paths;
+}
+
+const { tag, posts, lang, translations } = Astro.props;
+---
+
+<TagPage
+  tag={tag}
+  posts={posts}
+  lang={lang as "fr"}
+  translations={translations}
+  homeUrl="/fr"
+  tagBaseUrl="/fr/tag/"
+/>
