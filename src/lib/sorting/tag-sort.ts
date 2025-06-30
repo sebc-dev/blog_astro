@@ -1,18 +1,8 @@
+import type { SortOption } from "@/lib/article/category-utils";
 /**
  * Module de tri pour les pages de tags
  * Fonctionnalité identique au tri des catégories mais adapté aux tags
  */
-
-/**
- * Type pour les options de tri des articles
- */
-type SortOption =
-  | "date-desc"
-  | "date-asc"
-  | "title-asc"
-  | "title-desc"
-  | "reading-time-asc"
-  | "reading-time-desc";
 
 /**
  * Interface pour les données des posts côté client (version simplifiée)

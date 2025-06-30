@@ -8,7 +8,7 @@ describe("Tag Pages", () => {
       cy.get('[data-cy="article-tag"]').first().then(($tagLink) => {
         const tagHref = $tagLink.attr('href');
         
-        if (tagHref && tagHref.startsWith('/tag/')) {
+        if (tagHref?.startsWith('/tag/')) {
           // Visiter la page de tag
           cy.visit(tagHref);
           
@@ -59,7 +59,7 @@ describe("Tag Pages", () => {
             if ($tagLinks.length > 0) {
               const tagHref = $tagLinks.first().attr('href');
               
-              if (tagHref && tagHref.startsWith('/tag/')) {
+              if (tagHref?.startsWith('/tag/')) {
                 // Cliquer sur le lien de tag
                 cy.wrap($tagLinks.first()).click();
                 
@@ -87,7 +87,7 @@ describe("Tag Pages", () => {
       cy.get('[data-cy="article-tag"]').first().then(($tagLink) => {
         const tagHref = $tagLink.attr('href');
         
-        if (tagHref && tagHref.startsWith('/fr/tag/')) {
+        if (tagHref?.startsWith('/fr/tag/')) {
           // Visiter la page de tag française
           cy.visit(tagHref);
           
@@ -130,7 +130,7 @@ describe("Tag Pages", () => {
       cy.get('[data-cy="article-tag"]').first().then(($tagLink) => {
         const tagHref = $tagLink.attr('href');
         
-        if (tagHref && tagHref.startsWith('/tag/')) {
+        if (tagHref?.startsWith('/tag/')) {
           cy.visit(tagHref);
           
           // Vérifier que la grille existe
@@ -166,7 +166,7 @@ describe("Tag Pages", () => {
         const tagText = $tagLink.text().trim();
         const tagHref = $tagLink.attr('href');
         
-        if (tagHref && tagHref.startsWith('/tag/')) {
+        if (tagHref?.startsWith('/tag/')) {
           cy.visit(tagHref);
           
           cy.get('body').then(($body) => {
@@ -212,7 +212,7 @@ describe("Tag Pages", () => {
       cy.get('[data-cy="article-tag"]').first().then(($tagLink) => {
         const tagHref = $tagLink.attr('href');
         
-        if (tagHref && tagHref.startsWith('/tag/')) {
+        if (tagHref?.startsWith('/tag/')) {
           cy.visit(tagHref);
           
           // Vérifier les métadonnées SEO

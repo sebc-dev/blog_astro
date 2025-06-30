@@ -1,4 +1,4 @@
-import type { UrlMapper, PageInfo, TagPageInfo } from "../page-detectors/types";
+import type { UrlMapper, PageInfo } from "../page-detectors/types";
 import { isTagPageInfo } from "../page-detectors/types";
 import { normalizeTagForUrl } from "@/lib/article/tag-utils";
 
@@ -14,7 +14,7 @@ export class TagMapper implements UrlMapper {
       return null;
     }
 
-    const tagPageInfo = pageInfo as TagPageInfo;
+    const tagPageInfo = pageInfo;
     const normalizedTag = normalizeTagForUrl(tagPageInfo.tag);
 
     return {
