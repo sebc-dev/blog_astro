@@ -25,29 +25,27 @@ export class TagMapper implements UrlMapper {
     let englishTag: string | null = null;
     let frenchTag: string | null = null;
     
-    // Chercher dans les traductions anglaises
-    for (const [key, value] of Object.entries(englishTranslations)) {
-      if (value === currentTag) {
-        englishTag = value;
-        frenchTag = frenchTranslations[key as keyof typeof frenchTranslations];
+    // Chercher le tag en une seule itération sur les clés de traduction
+    for (const key of Object.keys(englishTranslations)) {
+      const englishValue = englishTranslations[key as keyof typeof englishTranslations];
+      const frenchValue = frenchTranslations[key as keyof typeof frenchTranslations];
+      
+      if (englishValue === currentTag) {
+        englishTag = englishValue;
+        frenchTag = frenchValue;
         break;
-      }
-    }
-    
-    // Si pas trouvé, chercher dans les traductions françaises
-    if (!englishTag) {
-      for (const [key, value] of Object.entries(frenchTranslations)) {
-        if (value === currentTag) {
-          frenchTag = value;
-          englishTag = englishTranslations[key as keyof typeof englishTranslations];
-          break;
-        }
+      } else if (frenchValue === currentTag) {
+        englishTag = englishValue;
+        frenchTag = frenchValue;
+        break;
       }
     }
     
     // Fallback si le tag n'est pas trouvé dans les traductions
     if (!englishTag || !frenchTag) {
-      console.warn(`Tag "${currentTag}" not found in translations, using normalized version`);
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn(`Tag "${currentTag}" not found in translations, using normalized version`);
+      }
       const normalizedTag = normalizeTagForUrl(currentTag);
       return {
         en: `/tag/${normalizedTag}`,
