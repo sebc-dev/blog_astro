@@ -112,7 +112,7 @@ export function createArticleTranslationMappingPure(
         });
 
         relatedPosts.forEach((post) => {
-          const postLang = post.data.lang as Languages;
+          const postLang = post.data.lang;
           // Extraire juste le nom du fichier sans le préfixe de langue de manière robuste
           const slug = extractSlugWithoutLanguagePrefix(post.slug, postLang);
           translationMapping[postLang] = slug;
@@ -141,13 +141,14 @@ export function analyzeLanguageContextPure(
 ): ArticleLanguageContext {
   // Utiliser le nouveau système de détection
   const detection = pageDetectionManager.detectPage(url);
-  
+
   if (!detection) {
     // Fallback pour les pages non détectées
     return {
       isArticlePage: false,
       detectedLang: getLangFromUrl(url),
       isCategoryPage: false,
+      isTagPage: false,
     };
   }
 
@@ -165,10 +166,14 @@ export function analyzeLanguageContextPure(
       articleSlug: pageInfo.slug,
       translationMapping,
       isCategoryPage: false,
+      isTagPage: false,
     };
   } else if (pageInfo.pageType === "category") {
     // Logique pour les catégories
-    const categoryUrlMapping = pageDetectionManager.createUrlMapping(pageInfo, url);
+    const categoryUrlMapping = pageDetectionManager.createUrlMapping(
+      pageInfo,
+      url,
+    );
 
     return {
       isArticlePage: false,
@@ -176,6 +181,19 @@ export function analyzeLanguageContextPure(
       isCategoryPage: true,
       categorySlug: pageInfo.category,
       categoryUrlMapping: categoryUrlMapping || undefined,
+      isTagPage: false,
+    };
+  } else if (pageInfo.pageType === "tag") {
+    // Logique pour les tags
+    const tagUrlMapping = pageDetectionManager.createUrlMapping(pageInfo, url);
+
+    return {
+      isArticlePage: false,
+      detectedLang: pageInfo.detectedLang,
+      isCategoryPage: false,
+      isTagPage: true,
+      tagSlug: pageInfo.tag,
+      tagUrlMapping: tagUrlMapping || undefined,
     };
   } else {
     // Pages normales
@@ -183,6 +201,7 @@ export function analyzeLanguageContextPure(
       isArticlePage: false,
       detectedLang: pageInfo.detectedLang,
       isCategoryPage: false,
+      isTagPage: false,
     };
   }
 }
@@ -212,17 +231,14 @@ export function generateContextualLanguageUrls(
       lang,
       context.translationMapping,
     );
-  } else if (
-    context.isCategoryPage &&
-    context.categoryUrlMapping
-  ) {
+  } else if (context.isCategoryPage && context.categoryUrlMapping) {
     // Pour les pages de catégories, utiliser le mapping prédéfini
     const supportedLanguages = getSupportedLanguages();
     const result = {} as LanguageUrls;
-    
+
     for (const targetLang of supportedLanguages) {
       const url = context.categoryUrlMapping[targetLang] || "/";
-      
+
       result[targetLang] = {
         url,
         isActive: lang === targetLang,
@@ -230,7 +246,24 @@ export function generateContextualLanguageUrls(
         flag: getLanguageFlag(targetLang),
       };
     }
-    
+
+    return result;
+  } else if (context.isTagPage && context.tagUrlMapping) {
+    // Pour les pages de tags, utiliser le mapping prédéfini
+    const supportedLanguages = getSupportedLanguages();
+    const result = {} as LanguageUrls;
+
+    for (const targetLang of supportedLanguages) {
+      const url = context.tagUrlMapping[targetLang] ?? "/";
+
+      result[targetLang] = {
+        url,
+        isActive: lang === targetLang,
+        label: getLanguageName(targetLang),
+        flag: getLanguageFlag(targetLang),
+      };
+    }
+
     return result;
   } else {
     // Pour les pages normales

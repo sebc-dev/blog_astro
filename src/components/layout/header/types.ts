@@ -41,6 +41,11 @@ export interface ArticleLanguageContext {
   readonly isCategoryPage?: boolean;
   readonly categorySlug?: string;
   readonly categoryUrlMapping?: Record<string, string>;
+  
+  // Nouveaux champs pour les pages de tags
+  readonly isTagPage?: boolean;
+  readonly tagSlug?: string;
+  readonly tagUrlMapping?: Record<string, string>;
 }
 
 export interface LanguageUrlData {

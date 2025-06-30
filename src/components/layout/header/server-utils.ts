@@ -1,9 +1,10 @@
 import { getCollection } from "astro:content";
 import type { ArticleLanguageContext } from "./types";
+import { analyzeLanguageContextPure } from "./article-utils";
 import {
-  analyzeLanguageContextPure,
-} from "./article-utils";
-import { analyzeLanguageContextUnified, pageDetectionManager } from "./page-utils";
+  analyzeLanguageContextUnified,
+  pageDetectionManager,
+} from "./page-utils";
 import { getLangFromUrl, getPathWithoutLang } from "@/i18n/utils";
 
 /**
@@ -22,7 +23,7 @@ enum CollectionErrorType {
 function categorizeError(error: unknown): CollectionErrorType {
   if (error instanceof Error) {
     const message = error.message.toLowerCase();
-    const stack = error.stack?.toLowerCase() || "";
+    const stack = error.stack?.toLowerCase() ?? "";
 
     // Erreurs réseau/connexion
     if (
@@ -65,14 +66,15 @@ function categorizeError(error: unknown): CollectionErrorType {
  */
 function createArticleFallbackContext(url: URL): ArticleLanguageContext {
   const detection = pageDetectionManager.detectPage(url);
-  
+
   // Si la détection fonctionne et confirme une page d'article avec toutes les propriétés
   if (detection?.pageInfo.pageType === "article" && detection.pageInfo.slug) {
     return {
       isArticlePage: true,
-      detectedLang: detection.pageInfo.detectedLang || getLangFromUrl(url),
+      detectedLang: detection.pageInfo.detectedLang ?? getLangFromUrl(url),
       articleSlug: detection.pageInfo.slug,
       isCategoryPage: false,
+      isTagPage: false,
       // translationMapping est omis délibérément car non fiable sans données
     };
   }
@@ -81,17 +83,18 @@ function createArticleFallbackContext(url: URL): ArticleLanguageContext {
   // Cette fonction est appelée seulement pour les pages d'articles déjà détectées au niveau supérieur
   const fallbackSlug = extractArticleSlugFromUrl(url);
   const fallbackLang = getLangFromUrl(url);
-  
+
   console.warn(
     `Détection détaillée d'article échouée, fallback manuel pour ${url.pathname}`,
-    { extractedSlug: fallbackSlug, extractedLang: fallbackLang }
+    { extractedSlug: fallbackSlug, extractedLang: fallbackLang },
   );
 
   return {
     isArticlePage: true, // TOUJOURS true car fonction appelée seulement pour articles détectés
     detectedLang: fallbackLang,
-    articleSlug: fallbackSlug || undefined,
+    articleSlug: fallbackSlug ?? undefined,
     isCategoryPage: false,
+    isTagPage: false,
     // translationMapping omis car non fiable sans données d'articles
   };
 }
@@ -107,20 +110,22 @@ function extractArticleSlugFromUrl(url: URL): string | null {
     // Reproduire exactement la logique de l'ArticleDetector
     // 1. Utiliser getPathWithoutLang comme fait l'ArticleDetector
     const currentPath = getPathWithoutLang(url);
-    
+
     // 2. Vérifier que c'est bien une page blog
     if (!currentPath.startsWith("/blog/")) {
       return null;
     }
-    
+
     // 3. Extraire et filtrer les segments (même logique que l'ArticleDetector)
-    const pathSegments = currentPath.split("/").filter((segment: string) => segment !== "");
-    
+    const pathSegments = currentPath
+      .split("/")
+      .filter((segment: string) => segment !== "");
+
     // 4. Vérifier la structure et extraire le slug (même logique que l'ArticleDetector)
     if (pathSegments.length >= 3 && pathSegments[0] === "blog") {
       return pathSegments.slice(2).join("/");
     }
-    
+
     return null;
   } catch (error) {
     console.warn("Échec d'extraction manuelle du slug d'article:", error);
@@ -143,7 +148,7 @@ export async function analyzeLanguageContext(
 
     // Utiliser le nouveau système unifié
     const unifiedContext = analyzeLanguageContextUnified(url, allPosts);
-    
+
     // Convertir vers l'ancien format pour la compatibilité
     return {
       isArticlePage: unifiedContext.isArticlePage,
@@ -153,6 +158,9 @@ export async function analyzeLanguageContext(
       isCategoryPage: unifiedContext.isCategoryPage,
       categorySlug: unifiedContext.categorySlug,
       categoryUrlMapping: unifiedContext.categoryUrlMapping,
+      isTagPage: unifiedContext.isTagPage,
+      tagSlug: unifiedContext.tagSlug,
+      tagUrlMapping: unifiedContext.tagUrlMapping,
     };
   } catch (error) {
     const errorType = categorizeError(error);
