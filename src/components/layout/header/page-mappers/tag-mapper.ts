@@ -25,16 +25,25 @@ export class TagMapper implements UrlMapper {
     let englishTag: string | null = null;
     let frenchTag: string | null = null;
     
-    // Chercher le tag en une seule itération sur les clés de traduction
-    for (const key of Object.keys(englishTranslations)) {
+    // Créer un ensemble de toutes les clés possibles des deux langues
+    const allKeys = new Set([
+      ...Object.keys(englishTranslations),
+      ...Object.keys(frenchTranslations)
+    ]);
+    
+    // Chercher le tag en itérant sur toutes les clés possibles
+    for (const key of allKeys) {
       const englishValue = englishTranslations[key as keyof typeof englishTranslations];
       const frenchValue = frenchTranslations[key as keyof typeof frenchTranslations];
       
-      if (englishValue === currentTag) {
+      // Vérifier si la valeur anglaise correspond et si la traduction française existe
+      if (englishValue === currentTag && frenchValue !== undefined) {
         englishTag = englishValue;
         frenchTag = frenchValue;
         break;
-      } else if (frenchValue === currentTag) {
+      } 
+      // Vérifier si la valeur française correspond et si la traduction anglaise existe
+      else if (frenchValue === currentTag && englishValue !== undefined) {
         englishTag = englishValue;
         frenchTag = frenchValue;
         break;
