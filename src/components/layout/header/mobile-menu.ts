@@ -11,15 +11,20 @@ export class MobileMenuManager implements Destroyable {
   private overlay: HTMLElement | null = null;
   private isOpen = false;
   private eventCleanups: EventCleanup[] = [];
+  
+  // DOM cache for improved performance
+  private domCache = new Map<string, HTMLElement | null>();
+  private cacheInitialized = false;
 
   constructor() {
     this.init();
   }
 
   private init(): void {
-    this.menu = document.querySelector("#mobile-menu");
-    this.toggleButton = document.querySelector("#mobile-menu-toggle");
-    this.overlay = document.querySelector("[data-menu-overlay]");
+    // Use cached queries for better performance
+    this.menu = this.getCachedElement("#mobile-menu");
+    this.toggleButton = this.getCachedElement("#mobile-menu-toggle");
+    this.overlay = this.getCachedElement("[data-menu-overlay]");
 
     if (!this.menu || !this.toggleButton) {
       console.warn("Mobile menu elements not found");
@@ -27,6 +32,26 @@ export class MobileMenuManager implements Destroyable {
     }
 
     this.bindEventListeners();
+  }
+
+  /**
+   * Get a cached element or query the DOM
+   * Since mobile menu elements are typically static, we can cache them permanently
+   */
+  private getCachedElement(selector: string): HTMLElement | null {
+    // Check cache first
+    if (this.domCache.has(selector)) {
+      const cached = this.domCache.get(selector);
+      // Verify element is still in DOM
+      if (cached && document.contains(cached)) {
+        return cached;
+      }
+    }
+    
+    // Query DOM and cache result
+    const element = document.querySelector<HTMLElement>(selector);
+    this.domCache.set(selector, element);
+    return element;
   }
 
   private bindEventListeners(): void {
@@ -140,11 +165,12 @@ export class MobileMenuManager implements Destroyable {
     // Reset body scroll
     document.body.style.overflow = "";
     
-    // Clear references
+    // Clear references and cache
     this.menu = null;
     this.toggleButton = null;
     this.overlay = null;
     this.isOpen = false;
+    this.domCache.clear();
   }
 }
 

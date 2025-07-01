@@ -8,13 +8,25 @@ import type { Destroyable, EventCleanup } from "./types";
 export class DropdownManager implements Destroyable {
   private dropdownButtons: HTMLElement[] = [];
   private eventCleanups: EventCleanup[] = [];
+  
+  // DOM cache for improved performance
+  private domCache = new Map<string, HTMLElement>();
+  private lastCacheTime = 0;
+  private readonly CACHE_TTL = 5000; // 5 seconds cache TTL
+  
+  // WeakMap for element metadata to avoid memory leaks
+  private elementMetadata = new WeakMap<HTMLElement, { 
+    lastAccessed: number;
+    selector: string;
+  }>();
 
   constructor() {
     this.init();
   }
 
   private init(): void {
-    const buttons = document.querySelectorAll<HTMLElement>("[data-dropdown]");
+    // Use cached query if available and fresh
+    const buttons = this.getCachedElements("[data-dropdown]");
     this.dropdownButtons = Array.from(buttons);
 
     if (!this.dropdownButtons.length) {
@@ -22,7 +34,65 @@ export class DropdownManager implements Destroyable {
       return;
     }
 
+    // Cache all buttons for quick access
+    this.dropdownButtons.forEach((btn, index) => {
+      const selector = `[data-dropdown]:nth-of-type(${index + 1})`;
+      this.cacheElement(selector, btn);
+    });
+
     this.bindEventListeners();
+  }
+
+  /**
+   * Get elements with caching for improved performance
+   */
+  private getCachedElements(selector: string): NodeListOf<HTMLElement> {
+    const now = Date.now();
+    
+    // Check if we need to invalidate the entire cache
+    if (now - this.lastCacheTime > this.CACHE_TTL) {
+      this.domCache.clear();
+      this.lastCacheTime = now;
+    }
+    
+    // For querySelectorAll, we need to get fresh data but we can cache individual elements
+    const elements = document.querySelectorAll<HTMLElement>(selector);
+    return elements;
+  }
+
+  /**
+   * Cache a single element for quick retrieval
+   */
+  private cacheElement(selector: string, element: HTMLElement): void {
+    this.domCache.set(selector, element);
+    this.elementMetadata.set(element, {
+      lastAccessed: Date.now(),
+      selector
+    });
+  }
+
+  /**
+   * Get a single cached element or query the DOM
+   */
+  private getCachedElement(selector: string): HTMLElement | null {
+    const cached = this.domCache.get(selector);
+    
+    if (cached && document.contains(cached)) {
+      // Update last accessed time
+      const metadata = this.elementMetadata.get(cached);
+      if (metadata) {
+        metadata.lastAccessed = Date.now();
+      }
+      return cached;
+    }
+    
+    // Cache miss or stale - query DOM
+    const element = document.querySelector<HTMLElement>(selector);
+    if (element) {
+      this.cacheElement(selector, element);
+    }
+    
+    return element;
   }
 
   private bindEventListeners(): void {
@@ -85,17 +155,34 @@ export class DropdownManager implements Destroyable {
   }
 
   /**
-   * Find a dropdown button by selector using hybrid approach:
-   * 1. Check cached buttons first (performance)
-   * 2. Fallback to DOM query for dynamic elements
+   * Find a dropdown button by selector using enhanced caching:
+   * 1. Check DOM cache first (fastest)
+   * 2. Check cached buttons array (fast)
+   * 3. Fallback to DOM query for dynamic elements (slower)
    */
   private findButton(selector: string): HTMLElement | null {
-    // Try cache first for performance
+    // Try DOM cache first (fastest)
+    const cached = this.getCachedElement(selector);
+    if (cached && this.dropdownButtons.includes(cached)) {
+      return cached;
+    }
+    
+    // Try cached buttons array
     const cachedButton = this.dropdownButtons.find(btn => btn.matches(selector));
-    if (cachedButton) return cachedButton;
+    if (cachedButton) {
+      // Add to cache for next time
+      this.cacheElement(selector, cachedButton);
+      return cachedButton;
+    }
     
     // Fallback to DOM search for dynamic elements
-    return document.querySelector<HTMLElement>(selector);
+    const element = document.querySelector<HTMLElement>(selector);
+    if (element && element.hasAttribute("data-dropdown")) {
+      this.cacheElement(selector, element);
+      return element;
+    }
+    
+    return null;
   }
 
   // Public API
@@ -152,9 +239,19 @@ export class DropdownManager implements Destroyable {
     this.eventCleanups.forEach(cleanup => cleanup());
     this.eventCleanups = [];
     
+    // Clear cache to force fresh DOM queries
+    this.domCache.clear();
+    this.lastCacheTime = Date.now();
+    
     // Re-scan for all dropdown buttons
-    const buttons = document.querySelectorAll<HTMLElement>("[data-dropdown]");
+    const buttons = this.getCachedElements("[data-dropdown]");
     this.dropdownButtons = Array.from(buttons);
+    
+    // Re-cache all buttons
+    this.dropdownButtons.forEach((btn, index) => {
+      const selector = `[data-dropdown]:nth-of-type(${index + 1})`;
+      this.cacheElement(selector, btn);
+    });
     
     // Re-bind event listeners
     this.bindEventListeners();
@@ -170,6 +267,10 @@ export class DropdownManager implements Destroyable {
     // Close all dropdowns and clear references
     this.closeAllDropdowns();
     this.dropdownButtons = [];
+    
+    // Clear caches to free memory
+    this.domCache.clear();
+    // WeakMap will auto-cleanup when elements are garbage collected
   }
 }
 

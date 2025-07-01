@@ -55,14 +55,67 @@ export class HeaderClient implements Destroyable {
 
   private basicInitialization(): void {
     try {
-      // Initialize critical managers on startup
+      // Only initialize the most critical manager on startup - Theme Manager
+      // This ensures the correct theme is applied immediately to prevent flash
       this.managers.theme = initThemeManager();
-      this.managers.mobileMenu = initMobileMenuManager();
-      this.managers.scrollEffects = initScrollEffectsManager(20, true); // Enable Intersection Observer
 
+      // Other managers will be initialized on-demand via lazy loading getters
+      // This improves initial page load performance
+      
       this.initialized = true;
+      
+      // Set up preloading for likely user interactions
+      this.setupPreloading();
     } catch (error) {
       console.error("Failed to initialize header client:", error);
+    }
+  }
+
+  /**
+   * Set up intelligent preloading of managers based on user behavior
+   */
+  private setupPreloading(): void {
+    // Preload mobile menu manager on mobile devices
+    if (window.matchMedia("(max-width: 768px)").matches) {
+      // Use requestIdleCallback for non-blocking initialization
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(() => {
+          if (!this.managers.mobileMenu) {
+            this.getMobileMenuManager();
+          }
+        });
+      } else {
+        // Fallback for browsers without requestIdleCallback
+        setTimeout(() => {
+          if (!this.managers.mobileMenu) {
+            this.getMobileMenuManager();
+          }
+        }, 100);
+      }
+    }
+    
+    // Preload scroll effects after a short delay
+    setTimeout(() => {
+      if (!this.managers.scrollEffects) {
+        this.getScrollEffectsManager();
+      }
+    }, 500);
+    
+    // Preload dropdown manager on hover over header
+    const header = document.querySelector('header');
+    if (header) {
+      let preloadTimer: NodeJS.Timeout | null = null;
+      const preloadHandler = () => {
+        if (!this.managers.dropdown && !preloadTimer) {
+          preloadTimer = setTimeout(() => {
+            this.getDropdownManager();
+          }, 150);
+        }
+      };
+      
+      header.addEventListener('mouseenter', preloadHandler, { once: true });
+      // Also preload on focus for keyboard users
+      header.addEventListener('focusin', preloadHandler, { once: true });
     }
   }
 

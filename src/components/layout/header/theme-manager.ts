@@ -11,6 +11,10 @@ export class ThemeManager implements Destroyable {
   private readonly darkTheme = "dark-blue";
   private eventCleanups: EventCleanup[] = [];
   private currentTheme: string | null = null;
+  
+  // DOM cache for improved performance
+  private domCache = new Map<string, NodeListOf<HTMLElement>>();
+  private themeButtonsCache: HTMLElement[] | null = null;
 
   constructor() {
     this.init();
@@ -57,9 +61,7 @@ export class ThemeManager implements Destroyable {
   }
 
   private updateThemeIcons(theme: string): void {
-    const themeButtons = document.querySelectorAll<HTMLElement>(
-      "[data-theme-toggle]",
-    );
+    const themeButtons = this.getCachedThemeButtons();
 
     themeButtons.forEach((btn) => {
       const lightIcon = btn.querySelector<HTMLElement>(".theme-light");
@@ -73,6 +75,25 @@ export class ThemeManager implements Destroyable {
     });
   }
 
+  /**
+   * Get cached theme buttons for improved performance
+   */
+  private getCachedThemeButtons(): HTMLElement[] {
+    // Return cached buttons if available
+    if (this.themeButtonsCache && this.themeButtonsCache.length > 0) {
+      // Verify all cached buttons are still in DOM
+      const allValid = this.themeButtonsCache.every(btn => document.contains(btn));
+      if (allValid) {
+        return this.themeButtonsCache;
+      }
+    }
+    
+    // Query DOM and cache results
+    const buttons = document.querySelectorAll<HTMLElement>("[data-theme-toggle]");
+    this.themeButtonsCache = Array.from(buttons);
+    return this.themeButtonsCache;
+  }
+
   private toggleTheme(): void {
     const current = this.currentTheme || this.getTheme();
     const newTheme =
@@ -81,7 +102,7 @@ export class ThemeManager implements Destroyable {
   }
 
   private bindEventListeners(): void {
-    const themeButtons = document.querySelectorAll("[data-theme-toggle]");
+    const themeButtons = this.getCachedThemeButtons();
     themeButtons.forEach((btn) => {
       const handler = () => this.toggleTheme();
       btn.addEventListener("click", handler);
@@ -109,6 +130,10 @@ export class ThemeManager implements Destroyable {
     this.eventCleanups.forEach(cleanup => cleanup());
     this.eventCleanups = [];
     this.currentTheme = null;
+    
+    // Clear cache
+    this.domCache.clear();
+    this.themeButtonsCache = null;
   }
 }
 
