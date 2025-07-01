@@ -3,10 +3,14 @@
  * Handles light/dark theme switching functionality
  */
 
-export class ThemeManager {
+import type { Destroyable, EventCleanup } from "./types";
+
+export class ThemeManager implements Destroyable {
   private readonly storageKey = "theme";
   private readonly lightTheme = "light-blue";
   private readonly darkTheme = "dark-blue";
+  private eventCleanups: EventCleanup[] = [];
+  private currentTheme: string | null = null;
 
   constructor() {
     this.init();
@@ -18,19 +22,37 @@ export class ThemeManager {
   }
 
   private getTheme(): string {
-    const saved = localStorage.getItem(this.storageKey);
-    if (saved === this.lightTheme || saved === this.darkTheme) {
-      return saved;
+    // Use cached theme if available
+    if (this.currentTheme) return this.currentTheme;
+
+    try {
+      const saved = localStorage.getItem(this.storageKey);
+      if (saved === this.lightTheme || saved === this.darkTheme) {
+        this.currentTheme = saved;
+        return saved;
+      }
+    } catch (e) {
+      console.warn('LocalStorage not available:', e);
     }
 
-    return window.matchMedia("(prefers-color-scheme: light)").matches
+    const preferredTheme = window.matchMedia("(prefers-color-scheme: light)").matches
       ? this.lightTheme
       : this.darkTheme;
+
+    this.currentTheme = preferredTheme;
+    return preferredTheme;
   }
 
   private setTheme(theme: string): void {
+    this.currentTheme = theme;
     document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem(this.storageKey, theme);
+    
+    try {
+      localStorage.setItem(this.storageKey, theme);
+    } catch (e) {
+      console.warn('Failed to save theme to localStorage:', e);
+    }
+    
     this.updateThemeIcons(theme);
   }
 
@@ -52,7 +74,7 @@ export class ThemeManager {
   }
 
   private toggleTheme(): void {
-    const current = document.documentElement.getAttribute("data-theme");
+    const current = this.currentTheme || this.getTheme();
     const newTheme =
       current === this.lightTheme ? this.darkTheme : this.lightTheme;
     this.setTheme(newTheme);
@@ -61,21 +83,32 @@ export class ThemeManager {
   private bindEventListeners(): void {
     const themeButtons = document.querySelectorAll("[data-theme-toggle]");
     themeButtons.forEach((btn) => {
-      btn.addEventListener("click", () => this.toggleTheme());
+      const handler = () => this.toggleTheme();
+      btn.addEventListener("click", handler);
+      
+      // Store cleanup function
+      this.eventCleanups.push(() => btn.removeEventListener("click", handler));
     });
   }
 
   // Public API
   public getCurrentTheme(): string {
-    return (
-      document.documentElement.getAttribute("data-theme") || this.getTheme()
-    );
+    return this.currentTheme || this.getTheme();
   }
 
   public setCurrentTheme(theme: string): void {
     if (theme === this.lightTheme || theme === this.darkTheme) {
       this.setTheme(theme);
     }
+  }
+
+  /**
+   * Clean up all event listeners and resources
+   */
+  public destroy(): void {
+    this.eventCleanups.forEach(cleanup => cleanup());
+    this.eventCleanups = [];
+    this.currentTheme = null;
   }
 }
 
@@ -87,4 +120,11 @@ export function initThemeManager(): ThemeManager {
     themeManager = new ThemeManager();
   }
   return themeManager;
+}
+
+export function destroyThemeManager(): void {
+  if (themeManager) {
+    themeManager.destroy();
+    themeManager = null;
+  }
 }

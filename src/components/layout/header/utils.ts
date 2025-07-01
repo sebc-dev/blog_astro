@@ -56,7 +56,7 @@ export async function prepareHeaderData(
   const languageContext = await analyzeLanguageContext(currentUrl);
 
   // Utiliser la langue détectée ou fallback vers getLangFromUrl qui ne peut jamais échouer
-  const lang = languageContext.detectedLang || getLangFromUrl(currentUrl);
+  const lang = languageContext.detectedLang ?? getLangFromUrl(currentUrl);
 
   // Log pour debugging si on utilise le fallback
   if (!languageContext.detectedLang) {

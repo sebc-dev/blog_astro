@@ -121,3 +121,15 @@ export interface HeaderData {
   readonly hreflangLinks: HreflangLink[];
   readonly usingLanguageFallback: boolean;
 }
+
+/**
+ * Interface for components that need cleanup
+ */
+export interface Destroyable {
+  destroy(): void;
+}
+
+/**
+ * Event listener cleanup utility type
+ */
+export type EventCleanup = () => void;

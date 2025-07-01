@@ -3,15 +3,19 @@
  * Handles dropdown menu functionality
  */
 
-export class DropdownManager {
-  private dropdownButtons: NodeListOf<HTMLElement> | null = null;
+import type { Destroyable, EventCleanup } from "./types";
+
+export class DropdownManager implements Destroyable {
+  private dropdownButtons: HTMLElement[] = [];
+  private eventCleanups: EventCleanup[] = [];
 
   constructor() {
     this.init();
   }
 
   private init(): void {
-    this.dropdownButtons = document.querySelectorAll("[data-dropdown]");
+    const buttons = document.querySelectorAll<HTMLElement>("[data-dropdown]");
+    this.dropdownButtons = Array.from(buttons);
 
     if (!this.dropdownButtons.length) {
       console.warn("No dropdown buttons found");
@@ -22,30 +26,34 @@ export class DropdownManager {
   }
 
   private bindEventListeners(): void {
-    if (!this.dropdownButtons) return;
-
     // Dropdown button clicks
     this.dropdownButtons.forEach((btn) => {
-      btn.addEventListener("click", (e: Event) => {
+      const clickHandler = (e: Event) => {
         e.preventDefault();
         this.toggleDropdown(btn);
-      });
+      };
+      btn.addEventListener("click", clickHandler);
+      this.eventCleanups.push(() => btn.removeEventListener("click", clickHandler));
     });
 
     // Close dropdowns on outside click
-    document.addEventListener("click", (e: Event) => {
+    const outsideClickHandler = (e: Event) => {
       const target = e.target as HTMLElement;
       if (!target.closest?.(".dropdown")) {
         this.closeAllDropdowns();
       }
-    });
+    };
+    document.addEventListener("click", outsideClickHandler);
+    this.eventCleanups.push(() => document.removeEventListener("click", outsideClickHandler));
 
     // Close dropdowns on Escape key
-    document.addEventListener("keydown", (e: KeyboardEvent) => {
+    const escapeHandler = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         this.closeAllDropdowns();
       }
-    });
+    };
+    document.addEventListener("keydown", escapeHandler);
+    this.eventCleanups.push(() => document.removeEventListener("keydown", escapeHandler));
   }
 
   private toggleDropdown(button: HTMLElement): void {
@@ -61,8 +69,6 @@ export class DropdownManager {
   }
 
   private closeAllDropdowns(): void {
-    if (!this.dropdownButtons) return;
-
     this.dropdownButtons.forEach((btn) => {
       btn.setAttribute("aria-expanded", "false");
     });
@@ -84,24 +90,36 @@ export class DropdownManager {
   }
 
   public close(selector: string): void {
-    const button = document.querySelector<HTMLElement>(selector);
+    const button = this.dropdownButtons.find(btn => btn.matches(selector));
     if (button) {
       this.closeDropdown(button);
     }
   }
 
   public open(selector: string): void {
-    const button = document.querySelector<HTMLElement>(selector);
+    const button = this.dropdownButtons.find(btn => btn.matches(selector));
     if (button) {
       this.openDropdown(button);
     }
   }
 
   public toggle(selector: string): void {
-    const button = document.querySelector<HTMLElement>(selector);
+    const button = this.dropdownButtons.find(btn => btn.matches(selector));
     if (button) {
       this.toggleDropdown(button);
     }
+  }
+
+  /**
+   * Clean up all event listeners and resources
+   */
+  public destroy(): void {
+    this.eventCleanups.forEach(cleanup => cleanup());
+    this.eventCleanups = [];
+    
+    // Close all dropdowns and clear references
+    this.closeAllDropdowns();
+    this.dropdownButtons = [];
   }
 }
 
@@ -113,4 +131,11 @@ export function initDropdownManager(): DropdownManager {
     dropdownManager = new DropdownManager();
   }
   return dropdownManager;
+}
+
+export function destroyDropdownManager(): void {
+  if (dropdownManager) {
+    dropdownManager.destroy();
+    dropdownManager = null;
+  }
 }
