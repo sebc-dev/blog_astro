@@ -397,9 +397,14 @@ const criticalCSS = generateCriticalCSS();
   .menu-icon {
     transform-origin: center;
   }
-  .mobile-menu-closed {
+  /* Mobile menu states - optimized for performance */
+  #mobile-menu {
     transform: translateX(100%);
     transition: transform 0.3s ease;
+  }
+
+  #mobile-menu:not(.mobile-menu-closed) {
+    transform: translateX(0);
   }
 
   .hamburger {

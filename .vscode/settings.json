@@ -1,0 +1,6 @@
+{
+    "sonarlint.connectedMode.project": {
+        "connectionId": "sebc-dev",
+        "projectKey": "sebc-dev_blog_astro"
+    }
+}
