@@ -84,30 +84,77 @@ export class DropdownManager implements Destroyable {
     button.setAttribute("aria-expanded", "true");
   }
 
+  /**
+   * Find a dropdown button by selector using hybrid approach:
+   * 1. Check cached buttons first (performance)
+   * 2. Fallback to DOM query for dynamic elements
+   */
+  private findButton(selector: string): HTMLElement | null {
+    // Try cache first for performance
+    const cachedButton = this.dropdownButtons.find(btn => btn.matches(selector));
+    if (cachedButton) return cachedButton;
+    
+    // Fallback to DOM search for dynamic elements
+    return document.querySelector<HTMLElement>(selector);
+  }
+
   // Public API
   public closeAll(): void {
     this.closeAllDropdowns();
   }
 
   public close(selector: string): void {
-    const button = this.dropdownButtons.find(btn => btn.matches(selector));
+    const button = this.findButton(selector);
     if (button) {
       this.closeDropdown(button);
     }
   }
 
   public open(selector: string): void {
-    const button = this.dropdownButtons.find(btn => btn.matches(selector));
+    const button = this.findButton(selector);
     if (button) {
       this.openDropdown(button);
     }
   }
 
   public toggle(selector: string): void {
-    const button = this.dropdownButtons.find(btn => btn.matches(selector));
+    const button = this.findButton(selector);
     if (button) {
       this.toggleDropdown(button);
     }
+  }
+
+  /**
+   * Add a dynamic dropdown button that was added after initialization
+   * @param element - The dropdown button element to add
+   */
+  public addDynamicDropdown(element: HTMLElement): void {
+    if (!this.dropdownButtons.includes(element)) {
+      this.dropdownButtons.push(element);
+      // Bind click event for the new element
+      const clickHandler = (e: Event) => {
+        e.preventDefault();
+        this.toggleDropdown(element);
+      };
+      element.addEventListener("click", clickHandler);
+      this.eventCleanups.push(() => element.removeEventListener("click", clickHandler));
+    }
+  }
+
+  /**
+   * Refresh the dropdown buttons list to include any newly added elements
+   */
+  public refreshDropdowns(): void {
+    // Clean up existing listeners
+    this.eventCleanups.forEach(cleanup => cleanup());
+    this.eventCleanups = [];
+    
+    // Re-scan for all dropdown buttons
+    const buttons = document.querySelectorAll<HTMLElement>("[data-dropdown]");
+    this.dropdownButtons = Array.from(buttons);
+    
+    // Re-bind event listeners
+    this.bindEventListeners();
   }
 
   /**

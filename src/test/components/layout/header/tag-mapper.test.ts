@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { TagMapper } from "@/components/layout/header/page-mappers/tag-mapper";
 import type { TagPageInfo, PageInfo } from "@/components/layout/header/page-detectors/types";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type { TagTranslations } from "@/lib/article/tag-utils";
 
 // Mock the tag-translations module

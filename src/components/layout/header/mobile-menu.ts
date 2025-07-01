@@ -9,7 +9,7 @@ export class MobileMenuManager implements Destroyable {
   private menu: HTMLElement | null = null;
   private toggleButton: HTMLElement | null = null;
   private overlay: HTMLElement | null = null;
-  private isOpen: boolean = false;
+  private isOpen = false;
   private eventCleanups: EventCleanup[] = [];
 
   constructor() {
@@ -35,13 +35,13 @@ export class MobileMenuManager implements Destroyable {
     // Toggle button click
     const toggleHandler = () => this.toggleMenu();
     this.toggleButton.addEventListener("click", toggleHandler);
-    this.eventCleanups.push(() => this.toggleButton!.removeEventListener("click", toggleHandler));
+    this.eventCleanups.push(() => this.toggleButton?.removeEventListener("click", toggleHandler));
 
     // Overlay click to close
     if (this.overlay) {
       const overlayHandler = () => this.closeMenu();
       this.overlay.addEventListener("click", overlayHandler);
-      this.eventCleanups.push(() => this.overlay!.removeEventListener("click", overlayHandler));
+      this.eventCleanups.push(() => this.overlay?.removeEventListener("click", overlayHandler));
     }
 
     // Escape key to close

@@ -95,7 +95,10 @@ export class HeaderClient implements Destroyable {
     return this.managers.scrollEffects;
   }
 
-  // Legacy method for backward compatibility
+  /**
+   * Legacy method for backward compatibility
+   * @deprecated Use individual getters instead (getThemeManager(), getMobileMenuManager(), etc.)
+   */
   public getManagers(): HeaderManagers | null {
     // Ensure all managers are initialized
     return {

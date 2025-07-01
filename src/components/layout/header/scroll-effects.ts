@@ -7,11 +7,12 @@ import type { Destroyable, EventCleanup } from "./types";
 
 export class ScrollEffectsManager implements Destroyable {
   private headers: HTMLElement[] = [];
-  private scrollThreshold: number = 20;
-  private ticking: boolean = false;
+  private scrollThreshold = 20;
+  private ticking = false;
   private eventCleanups: EventCleanup[] = [];
   private observer: IntersectionObserver | null = null;
-  private useIntersectionObserver: boolean = false;
+  private sentinel: HTMLElement | null = null;
+  private useIntersectionObserver = false;
 
   constructor(threshold: number = 20, useIntersectionObserver: boolean = false) {
     this.scrollThreshold = threshold;
@@ -40,13 +41,13 @@ export class ScrollEffectsManager implements Destroyable {
 
   private initWithIntersectionObserver(): void {
     // Create a sentinel element at the top of the page
-    const sentinel = document.createElement('div');
-    sentinel.style.position = 'absolute';
-    sentinel.style.top = '0';
-    sentinel.style.height = `${this.scrollThreshold}px`;
-    sentinel.style.width = '1px';
-    sentinel.style.visibility = 'hidden';
-    document.body.prepend(sentinel);
+    this.sentinel = document.createElement('div');
+    this.sentinel.style.position = 'absolute';
+    this.sentinel.style.top = '0';
+    this.sentinel.style.height = `${this.scrollThreshold}px`;
+    this.sentinel.style.width = '1px';
+    this.sentinel.style.visibility = 'hidden';
+    document.body.prepend(this.sentinel);
 
     this.observer = new IntersectionObserver(
       (entries) => {
@@ -63,7 +64,7 @@ export class ScrollEffectsManager implements Destroyable {
       }
     );
 
-    this.observer.observe(sentinel);
+    this.observer.observe(this.sentinel);
   }
 
   private bindEventListeners(): void {
@@ -150,6 +151,12 @@ export class ScrollEffectsManager implements Destroyable {
     if (this.observer) {
       this.observer.disconnect();
       this.observer = null;
+    }
+    
+    // Clean up sentinel element to prevent memory leak
+    if (this.sentinel && this.sentinel.parentNode) {
+      this.sentinel.parentNode.removeChild(this.sentinel);
+      this.sentinel = null;
     }
     
     // Remove scrolled class from all headers
