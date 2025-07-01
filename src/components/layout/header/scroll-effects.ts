@@ -14,7 +14,7 @@ export class ScrollEffectsManager implements Destroyable {
   private sentinel: HTMLElement | null = null;
   private useIntersectionObserver = false;
 
-  constructor(threshold: number = 20, useIntersectionObserver: boolean = false) {
+  constructor(threshold: number = 20, useIntersectionObserver = false) {
     this.scrollThreshold = threshold;
     this.useIntersectionObserver = useIntersectionObserver;
     this.init();
