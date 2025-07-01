@@ -142,7 +142,10 @@ export class DropdownManager implements Destroyable {
   }
 
   /**
-   * Refresh the dropdown buttons list to include any newly added elements
+   * Refresh the dropdown buttons list to include any newly added elements.
+   * ⚠️ WARNING: Use sparingly as this method has performance impact.
+   * Only call after significant DOM changes that affect dropdown buttons.
+   * For single dynamic additions, prefer addDynamicDropdown() instead.
    */
   public refreshDropdowns(): void {
     // Clean up existing listeners

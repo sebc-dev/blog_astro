@@ -154,8 +154,8 @@ export class ScrollEffectsManager implements Destroyable {
     }
     
     // Clean up sentinel element to prevent memory leak
-    if (this.sentinel && this.sentinel.parentNode) {
-      this.sentinel.parentNode.removeChild(this.sentinel);
+    if (this.sentinel) {
+      this.sentinel.remove();
       this.sentinel = null;
     }
     

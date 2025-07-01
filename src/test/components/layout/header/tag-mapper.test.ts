@@ -91,14 +91,14 @@ describe("TagMapper", () => {
 
   describe("createUrlMapping with asymmetric translations (bug fix validation)", () => {
     it("should handle case where key exists only in French translations", () => {
-      mockGetTagTranslations.mockImplementation((lang: "en" | "fr") => {
+      mockGetTagTranslations.mockImplementation((lang: "en" | "fr"): TagTranslations => {
         if (lang === "en") {
           return {
             guide: "Guide",
             optimization: "Optimization",
             bestPractices: "Best Practices",
             // comparison missing in English
-          } as Record<string, string>;
+          } as TagTranslations;
         } else {
           return {
             guide: "Guide",
@@ -106,7 +106,7 @@ describe("TagMapper", () => {
             bestPractices: "Bonnes Pratiques",
             comparison: "Comparaison",
             onlyInFrench: "Seulement en Français", // Key only in French
-          } as Record<string, string>;
+          } as TagTranslations;
         }
       });
 
